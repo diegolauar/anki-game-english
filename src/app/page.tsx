@@ -1,7 +1,11 @@
-export default function Home() {
-  return (
-    <main className="flex flex-1 items-center justify-center p-8">
-      <h1 className="text-2xl font-semibold">English Quest</h1>
-    </main>
-  );
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+
+export default async function Home() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  redirect(user ? "/dashboard" : "/login");
 }
