@@ -16,4 +16,5 @@ export interface LearningPointRepository {
   create(input: CreateLearningPointInput): Promise<LearningPoint>;
   incrementOccurrence(id: string): Promise<LearningPoint>;
   listRuleKeysByUser(userId: string): Promise<string[]>;
+  listTopByUser(userId: string, limit: number): Promise<LearningPoint[]>;
 }

@@ -53,4 +53,18 @@ export class SupabaseReviewLogRepository implements ReviewLogRepository {
     if (error) throw error;
     return toReviewLog(data);
   }
+
+  async countTodayByUser(userId: string, now: Date): Promise<number> {
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const { count, error } = await this.client
+      .from("review_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("reviewed_at", startOfDay.toISOString());
+
+    if (error) throw error;
+    return count ?? 0;
+  }
 }

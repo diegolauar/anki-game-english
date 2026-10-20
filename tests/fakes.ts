@@ -45,7 +45,11 @@ import type {
 } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
-import type { CreateXpEventInput, XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type {
+  CreateXpEventInput,
+  DailyXpTotal,
+  XpEventRepository,
+} from "@/domain/ports/xp-event-repository";
 import type { DailyUsage, DailyUsageRepository } from "@/domain/ports/daily-usage-repository";
 import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
 import type { Rating } from "@/domain/value-objects/rating";
@@ -86,6 +90,13 @@ export class FakeConversationRepository implements ConversationRepository {
       status: "finished",
       endedAt: new Date().toISOString(),
     });
+  }
+
+  async listRecentByUser(userId: string, limit: number): Promise<Conversation[]> {
+    return [...this.conversations.values()]
+      .filter((conversation) => conversation.userId === userId)
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .slice(0, limit);
   }
 
   seed(conversation: Conversation) {
@@ -135,6 +146,10 @@ export class FakeMessageRepository implements MessageRepository {
     };
     this.messages.push(message);
     return message;
+  }
+
+  async countByConversation(conversationId: string): Promise<number> {
+    return this.messages.filter((message) => message.conversationId === conversationId).length;
   }
 
   seed(message: Message) {
@@ -200,6 +215,17 @@ export class FakeXpEventRepository implements XpEventRepository {
         .map((event) => event.createdAt.slice(0, 10)),
     );
     return [...dateKeys];
+  }
+
+  async listDailyTotalsByUser(userId: string, since: Date): Promise<DailyXpTotal[]> {
+    const totals = new Map<string, number>();
+    for (const event of this.events) {
+      if (event.userId !== userId) continue;
+      if (new Date(event.createdAt).getTime() < since.getTime()) continue;
+      const dateKey = event.createdAt.slice(0, 10);
+      totals.set(dateKey, (totals.get(dateKey) ?? 0) + event.amount);
+    }
+    return [...totals.entries()].map(([dateKey, amount]) => ({ dateKey, amount }));
   }
 }
 
@@ -368,6 +394,13 @@ export class FakeLearningPointRepository implements LearningPointRepository {
       .filter((learningPoint) => learningPoint.userId === userId)
       .map((learningPoint) => learningPoint.ruleKey);
   }
+
+  async listTopByUser(userId: string, limit: number): Promise<LearningPoint[]> {
+    return this.learningPoints
+      .filter((learningPoint) => learningPoint.userId === userId)
+      .sort((a, b) => b.occurrenceCount - a.occurrenceCount)
+      .slice(0, limit);
+  }
 }
 
 export class FakeFlashcardRepository implements FlashcardRepository {
@@ -511,6 +544,16 @@ export class FakeReviewLogRepository implements ReviewLogRepository {
     };
     this.logs.push(log);
     return log;
+  }
+
+  async countTodayByUser(userId: string, now: Date): Promise<number> {
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    return this.logs.filter(
+      (log) =>
+        log.userId === userId && new Date(log.reviewedAt).getTime() >= startOfDay.getTime(),
+    ).length;
   }
 }
 

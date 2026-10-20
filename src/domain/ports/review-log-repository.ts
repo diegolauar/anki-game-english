@@ -13,4 +13,5 @@ export interface CreateReviewLogInput {
 
 export interface ReviewLogRepository {
   create(input: CreateReviewLogInput): Promise<ReviewLog>;
+  countTodayByUser(userId: string, now: Date): Promise<number>;
 }

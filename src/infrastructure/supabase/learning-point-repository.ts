@@ -105,4 +105,17 @@ export class SupabaseLearningPointRepository implements LearningPointRepository 
     if (error) throw error;
     return data.map((row) => row.rule_key);
   }
+
+  async listTopByUser(userId: string, limit: number): Promise<LearningPoint[]> {
+    const { data, error } = await this.client
+      .from("learning_points")
+      .select(LEARNING_POINT_COLUMNS)
+      .eq("user_id", userId)
+      .order("occurrence_count", { ascending: false })
+      .order("last_seen_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data.map(toLearningPoint);
+  }
 }

@@ -14,4 +14,5 @@ export interface MessageRepository {
   listByConversation(conversationId: string): Promise<Message[]>;
   findByClientMessageId(conversationId: string, clientMessageId: string): Promise<Message | null>;
   create(input: CreateMessageInput): Promise<Message>;
+  countByConversation(conversationId: string): Promise<number>;
 }

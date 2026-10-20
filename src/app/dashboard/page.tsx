@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { TopicIcon } from "@/components/topic-icon";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
+import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
+import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
+import { SupabaseMessageRepository } from "@/infrastructure/supabase/message-repository";
+import { SupabaseReviewLogRepository } from "@/infrastructure/supabase/review-log-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
@@ -23,10 +28,23 @@ export default async function DashboardPage() {
     new SupabaseTopicRepository(supabase),
     new SupabaseCardScheduleRepository(supabase),
     new SupabaseXpEventRepository(supabase),
+    new SupabaseConversationRepository(supabase),
+    new SupabaseMessageRepository(supabase),
+    new SupabaseAnalysisRepository(supabase),
+    new SupabaseLearningPointRepository(supabase),
+    new SupabaseReviewLogRepository(supabase),
   );
-  const { profile, topics, pendingReviewCount, totalXp, streak } = await getDashboard.execute(
-    user.id,
-  );
+  const {
+    profile,
+    topics,
+    pendingReviewCount,
+    reviewedTodayCount,
+    totalXp,
+    streak,
+    weeklyXp,
+    topLearningPoints,
+    recentConversations,
+  } = await getDashboard.execute(user.id);
 
   return (
     <main className="mx-auto max-w-3xl flex-1 p-6 sm:p-8">

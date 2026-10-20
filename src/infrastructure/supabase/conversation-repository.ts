@@ -67,4 +67,16 @@ export class SupabaseConversationRepository implements ConversationRepository {
 
     if (error) throw error;
   }
+
+  async listRecentByUser(userId: string, limit: number): Promise<Conversation[]> {
+    const { data, error } = await this.client
+      .from("conversations")
+      .select(CONVERSATION_COLUMNS)
+      .eq("user_id", userId)
+      .order("started_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data.map(toConversation);
+  }
 }

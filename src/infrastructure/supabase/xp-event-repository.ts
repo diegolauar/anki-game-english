@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { XpEvent } from "@/domain/entities/xp-event";
-import type { CreateXpEventInput, XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type {
+  CreateXpEventInput,
+  DailyXpTotal,
+  XpEventRepository,
+} from "@/domain/ports/xp-event-repository";
 import type { XpSourceType } from "@/domain/value-objects/xp-source-type";
 import type { Database } from "@/infrastructure/supabase/database.types";
 
@@ -64,5 +68,22 @@ export class SupabaseXpEventRepository implements XpEventRepository {
 
     const dateKeys = new Set(data.map((row) => row.created_at.slice(0, 10)));
     return [...dateKeys];
+  }
+
+  async listDailyTotalsByUser(userId: string, since: Date): Promise<DailyXpTotal[]> {
+    const { data, error } = await this.client
+      .from("xp_events")
+      .select("created_at, amount")
+      .eq("user_id", userId)
+      .gte("created_at", since.toISOString());
+
+    if (error) throw error;
+
+    const totals = new Map<string, number>();
+    for (const row of data) {
+      const dateKey = row.created_at.slice(0, 10);
+      totals.set(dateKey, (totals.get(dateKey) ?? 0) + row.amount);
+    }
+    return [...totals.entries()].map(([dateKey, amount]) => ({ dateKey, amount }));
   }
 }

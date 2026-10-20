@@ -72,6 +72,16 @@ export class SupabaseMessageRepository implements MessageRepository {
     return toMessage(data);
   }
 
+  async countByConversation(conversationId: string): Promise<number> {
+    const { count, error } = await this.client
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("conversation_id", conversationId);
+
+    if (error) throw error;
+    return count ?? 0;
+  }
+
   private async nextSequence(conversationId: string): Promise<number> {
     const { data, error } = await this.client
       .from("messages")

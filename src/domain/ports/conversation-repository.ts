@@ -12,4 +12,5 @@ export interface ConversationRepository {
   create(input: CreateConversationInput): Promise<Conversation>;
   findById(id: string): Promise<Conversation | null>;
   finish(id: string): Promise<void>;
+  listRecentByUser(userId: string, limit: number): Promise<Conversation[]>;
 }
