@@ -4,7 +4,7 @@ import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
 import type { AnalysisWriter } from "@/domain/ports/analysis-writer";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
 import type { FindingWriter } from "@/domain/ports/finding-writer";
-import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
+import type { FlashcardSuggestionRepository } from "@/domain/ports/flashcard-suggestion-repository";
 import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
 import type { LearningPointWriter } from "@/domain/ports/learning-point-writer";
 import type { MessageRepository } from "@/domain/ports/message-repository";
@@ -18,7 +18,7 @@ export class AnalyzeConversation {
     private readonly learningPointRepository: LearningPointRepository,
     private readonly learningPointWriter: LearningPointWriter,
     private readonly findingWriter: FindingWriter,
-    private readonly flashcardRepository: FlashcardRepository,
+    private readonly flashcardSuggestionRepository: FlashcardSuggestionRepository,
     private readonly analysisAgent: AnalysisAgent,
   ) {}
 
@@ -101,11 +101,11 @@ export class AnalyzeConversation {
         });
 
         if (findingResult.flashcardSuggestion) {
-          const hasActiveFlashcard = await this.flashcardRepository.hasActiveForLearningPoint(
+          const hasActiveFlashcard = await this.flashcardSuggestionRepository.hasActiveForLearningPoint(
             learningPoint.id,
           );
           if (!hasActiveFlashcard) {
-            await this.flashcardRepository.createSuggested({
+            await this.flashcardSuggestionRepository.createSuggested({
               userId: conversation.userId,
               learningPointId: learningPoint.id,
               sourceFindingId: finding.id,

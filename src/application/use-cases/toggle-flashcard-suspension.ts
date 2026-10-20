@@ -1,4 +1,5 @@
 import type { Flashcard } from "@/domain/entities/flashcard";
+import type { FlashcardEditorRepository } from "@/domain/ports/flashcard-editor-repository";
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
 
 export interface ToggleFlashcardSuspensionInput {
@@ -7,7 +8,10 @@ export interface ToggleFlashcardSuspensionInput {
 }
 
 export class ToggleFlashcardSuspension {
-  constructor(private readonly flashcardRepository: FlashcardRepository) {}
+  constructor(
+    private readonly flashcardRepository: FlashcardRepository,
+    private readonly flashcardEditorRepository: FlashcardEditorRepository,
+  ) {}
 
   async execute(input: ToggleFlashcardSuspensionInput): Promise<Flashcard> {
     const flashcard = await this.flashcardRepository.findById(input.flashcardId);
@@ -19,6 +23,6 @@ export class ToggleFlashcardSuspension {
     }
 
     const nextStatus = flashcard.status === "active" ? "suspended" : "active";
-    return this.flashcardRepository.setStatus(input.flashcardId, nextStatus);
+    return this.flashcardEditorRepository.setStatus(input.flashcardId, nextStatus);
   }
 }

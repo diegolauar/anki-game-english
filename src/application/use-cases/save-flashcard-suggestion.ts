@@ -2,6 +2,7 @@ import { AwardXp } from "@/application/use-cases/award-xp";
 import type { Flashcard } from "@/domain/entities/flashcard";
 import type { CardScheduleRepository } from "@/domain/ports/card-schedule-repository";
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
+import type { FlashcardSuggestionRepository } from "@/domain/ports/flashcard-suggestion-repository";
 import type { ReviewScheduler } from "@/domain/ports/review-scheduler";
 import type { XpEventWriter } from "@/domain/ports/xp-event-writer";
 
@@ -16,6 +17,7 @@ export interface SaveFlashcardSuggestionInput {
 export class SaveFlashcardSuggestion {
   constructor(
     private readonly flashcardRepository: FlashcardRepository,
+    private readonly flashcardSuggestionRepository: FlashcardSuggestionRepository,
     private readonly cardScheduleRepository: CardScheduleRepository,
     private readonly reviewScheduler: ReviewScheduler,
     private readonly xpEventWriter: XpEventWriter,
@@ -30,7 +32,7 @@ export class SaveFlashcardSuggestion {
       throw new Error("Only suggested flashcards can be saved.");
     }
 
-    const activated = await this.flashcardRepository.activate(input.flashcardId, {
+    const activated = await this.flashcardSuggestionRepository.activate(input.flashcardId, {
       front: input.front,
       back: input.back,
       explanation: input.explanation,

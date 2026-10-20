@@ -1,4 +1,5 @@
 import type { Flashcard } from "@/domain/entities/flashcard";
+import type { FlashcardEditorRepository } from "@/domain/ports/flashcard-editor-repository";
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
 
 export interface EditFlashcardInput {
@@ -10,7 +11,10 @@ export interface EditFlashcardInput {
 }
 
 export class EditFlashcard {
-  constructor(private readonly flashcardRepository: FlashcardRepository) {}
+  constructor(
+    private readonly flashcardRepository: FlashcardRepository,
+    private readonly flashcardEditorRepository: FlashcardEditorRepository,
+  ) {}
 
   async execute(input: EditFlashcardInput): Promise<Flashcard> {
     const flashcard = await this.flashcardRepository.findById(input.flashcardId);
@@ -21,7 +25,7 @@ export class EditFlashcard {
       throw new Error("Discarded flashcards cannot be edited.");
     }
 
-    return this.flashcardRepository.updateContent(input.flashcardId, {
+    return this.flashcardEditorRepository.updateContent(input.flashcardId, {
       front: input.front,
       back: input.back,
       explanation: input.explanation,

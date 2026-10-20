@@ -33,6 +33,7 @@ function buildUseCase() {
   const xpEventRepository = new FakeXpEventRepository();
   const useCase = new SaveFlashcardSuggestion(
     flashcardRepository,
+    flashcardRepository,
     cardScheduleRepository,
     reviewScheduler,
     xpEventRepository,

@@ -47,8 +47,10 @@ export async function saveFlashcardSuggestionAction(formData: FormData) {
   });
 
   const { supabase, user } = await requireUser();
+  const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const useCase = new SaveFlashcardSuggestion(
-    new SupabaseFlashcardRepository(supabase),
+    flashcardRepository,
+    flashcardRepository,
     new SupabaseCardScheduleRepository(supabase),
     new TsFsrsReviewScheduler(),
     new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
@@ -77,8 +79,10 @@ export async function saveAllFlashcardSuggestionsAction(formData: FormData) {
   });
 
   const { supabase, user } = await requireUser();
+  const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const saveOne = new SaveFlashcardSuggestion(
-    new SupabaseFlashcardRepository(supabase),
+    flashcardRepository,
+    flashcardRepository,
     new SupabaseCardScheduleRepository(supabase),
     new TsFsrsReviewScheduler(),
     new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
@@ -102,7 +106,8 @@ export async function discardFlashcardSuggestionAction(formData: FormData) {
   });
 
   const { supabase, user } = await requireUser();
-  const useCase = new DiscardFlashcardSuggestion(new SupabaseFlashcardRepository(supabase));
+  const flashcardRepository = new SupabaseFlashcardRepository(supabase);
+  const useCase = new DiscardFlashcardSuggestion(flashcardRepository, flashcardRepository);
 
   await useCase.execute({ flashcardId: parsed.flashcardId, userId: user.id });
 
@@ -159,7 +164,8 @@ export async function editFlashcardAction(formData: FormData) {
   });
 
   const { supabase, user } = await requireUser();
-  const useCase = new EditFlashcard(new SupabaseFlashcardRepository(supabase));
+  const flashcardRepository = new SupabaseFlashcardRepository(supabase);
+  const useCase = new EditFlashcard(flashcardRepository, flashcardRepository);
 
   await useCase.execute({ userId: user.id, ...parsed });
 
@@ -172,7 +178,8 @@ export async function toggleFlashcardSuspensionAction(formData: FormData) {
   const parsed = toggleSuspensionSchema.parse({ flashcardId: formData.get("flashcardId") });
 
   const { supabase, user } = await requireUser();
-  const useCase = new ToggleFlashcardSuspension(new SupabaseFlashcardRepository(supabase));
+  const flashcardRepository = new SupabaseFlashcardRepository(supabase);
+  const useCase = new ToggleFlashcardSuspension(flashcardRepository, flashcardRepository);
 
   await useCase.execute({ flashcardId: parsed.flashcardId, userId: user.id });
 

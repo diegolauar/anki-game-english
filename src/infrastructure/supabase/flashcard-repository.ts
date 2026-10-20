@@ -1,11 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Flashcard } from "@/domain/entities/flashcard";
+import type { FlashcardContentUpdate, FlashcardRepository } from "@/domain/ports/flashcard-repository";
+import type { CreateManualFlashcardInput, FlashcardEditorRepository } from "@/domain/ports/flashcard-editor-repository";
 import type {
-  CreateManualFlashcardInput,
   CreateSuggestedFlashcardInput,
-  FlashcardContentUpdate,
-  FlashcardRepository,
-} from "@/domain/ports/flashcard-repository";
+  FlashcardSuggestionRepository,
+} from "@/domain/ports/flashcard-suggestion-repository";
 import type { CardType } from "@/domain/value-objects/card-type";
 import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
 import type { Database } from "@/infrastructure/supabase/database.types";
@@ -44,7 +44,9 @@ export function toFlashcard(row: FlashcardRow): Flashcard {
   };
 }
 
-export class SupabaseFlashcardRepository implements FlashcardRepository {
+export class SupabaseFlashcardRepository
+  implements FlashcardRepository, FlashcardSuggestionRepository, FlashcardEditorRepository
+{
   constructor(private readonly client: SupabaseClient<Database>) {}
 
   async hasActiveForLearningPoint(learningPointId: string): Promise<boolean> {

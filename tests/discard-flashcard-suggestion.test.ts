@@ -24,7 +24,7 @@ describe("DiscardFlashcardSuggestion", () => {
   it("throws when the flashcard belongs to another user", async () => {
     const flashcardRepository = new FakeFlashcardRepository();
     flashcardRepository.seed(buildSuggestedFlashcard());
-    const useCase = new DiscardFlashcardSuggestion(flashcardRepository);
+    const useCase = new DiscardFlashcardSuggestion(flashcardRepository, flashcardRepository);
 
     await expect(
       useCase.execute({ flashcardId: "flashcard-1", userId: "someone-else" }),
@@ -34,7 +34,7 @@ describe("DiscardFlashcardSuggestion", () => {
   it("throws when the flashcard is not suggested", async () => {
     const flashcardRepository = new FakeFlashcardRepository();
     flashcardRepository.seed(buildSuggestedFlashcard({ status: "active" }));
-    const useCase = new DiscardFlashcardSuggestion(flashcardRepository);
+    const useCase = new DiscardFlashcardSuggestion(flashcardRepository, flashcardRepository);
 
     await expect(
       useCase.execute({ flashcardId: "flashcard-1", userId: "user-1" }),
@@ -44,7 +44,7 @@ describe("DiscardFlashcardSuggestion", () => {
   it("marks the flashcard as discarded", async () => {
     const flashcardRepository = new FakeFlashcardRepository();
     flashcardRepository.seed(buildSuggestedFlashcard());
-    const useCase = new DiscardFlashcardSuggestion(flashcardRepository);
+    const useCase = new DiscardFlashcardSuggestion(flashcardRepository, flashcardRepository);
 
     await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1" });
 

@@ -1,4 +1,5 @@
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
+import type { FlashcardSuggestionRepository } from "@/domain/ports/flashcard-suggestion-repository";
 
 export interface DiscardFlashcardSuggestionInput {
   flashcardId: string;
@@ -6,7 +7,10 @@ export interface DiscardFlashcardSuggestionInput {
 }
 
 export class DiscardFlashcardSuggestion {
-  constructor(private readonly flashcardRepository: FlashcardRepository) {}
+  constructor(
+    private readonly flashcardRepository: FlashcardRepository,
+    private readonly flashcardSuggestionRepository: FlashcardSuggestionRepository,
+  ) {}
 
   async execute(input: DiscardFlashcardSuggestionInput): Promise<void> {
     const flashcard = await this.flashcardRepository.findById(input.flashcardId);
@@ -17,6 +21,6 @@ export class DiscardFlashcardSuggestion {
       throw new Error("Only suggested flashcards can be discarded.");
     }
 
-    await this.flashcardRepository.discard(input.flashcardId);
+    await this.flashcardSuggestionRepository.discard(input.flashcardId);
   }
 }

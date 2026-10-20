@@ -1,20 +1,16 @@
 import { AwardXp } from "@/application/use-cases/award-xp";
 import type { Flashcard } from "@/domain/entities/flashcard";
 import type { CardScheduleRepository } from "@/domain/ports/card-schedule-repository";
-import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
+import type {
+  CreateManualFlashcardInput,
+  FlashcardEditorRepository,
+} from "@/domain/ports/flashcard-editor-repository";
 import type { ReviewScheduler } from "@/domain/ports/review-scheduler";
 import type { XpEventWriter } from "@/domain/ports/xp-event-writer";
 
-export interface CreateManualFlashcardInput {
-  userId: string;
-  front: string;
-  back: string;
-  explanation: string | null;
-}
-
 export class CreateManualFlashcard {
   constructor(
-    private readonly flashcardRepository: FlashcardRepository,
+    private readonly flashcardEditorRepository: FlashcardEditorRepository,
     private readonly cardScheduleRepository: CardScheduleRepository,
     private readonly reviewScheduler: ReviewScheduler,
     private readonly xpEventWriter: XpEventWriter,
@@ -25,7 +21,7 @@ export class CreateManualFlashcard {
       throw new Error("Front and back are required.");
     }
 
-    const flashcard = await this.flashcardRepository.createManual(input);
+    const flashcard = await this.flashcardEditorRepository.createManual(input);
     await this.cardScheduleRepository.create(flashcard.id, this.reviewScheduler.initialState(new Date()));
 
     await new AwardXp(this.xpEventWriter).execute({

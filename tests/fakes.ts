@@ -25,12 +25,12 @@ import type {
 } from "@/domain/ports/conversation-repository";
 import type { FindingRepository } from "@/domain/ports/finding-repository";
 import type { CreateFindingInput, FindingWriter } from "@/domain/ports/finding-writer";
+import type { CreateManualFlashcardInput, FlashcardEditorRepository } from "@/domain/ports/flashcard-editor-repository";
+import type { FlashcardContentUpdate, FlashcardRepository } from "@/domain/ports/flashcard-repository";
 import type {
-  CreateManualFlashcardInput,
   CreateSuggestedFlashcardInput,
-  FlashcardContentUpdate,
-  FlashcardRepository,
-} from "@/domain/ports/flashcard-repository";
+  FlashcardSuggestionRepository,
+} from "@/domain/ports/flashcard-suggestion-repository";
 import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
 import type {
   CreateLearningPointInput,
@@ -413,7 +413,9 @@ export class FakeLearningPointRepository implements LearningPointRepository, Lea
   }
 }
 
-export class FakeFlashcardRepository implements FlashcardRepository {
+export class FakeFlashcardRepository
+  implements FlashcardRepository, FlashcardSuggestionRepository, FlashcardEditorRepository
+{
   flashcards: Flashcard[] = [];
 
   async hasActiveForLearningPoint(learningPointId: string): Promise<boolean> {

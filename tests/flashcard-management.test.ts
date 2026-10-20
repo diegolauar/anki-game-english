@@ -25,7 +25,7 @@ describe("EditFlashcard", () => {
   it("throws when the flashcard belongs to another user", async () => {
     const repository = new FakeFlashcardRepository();
     repository.seed(buildFlashcard());
-    const useCase = new EditFlashcard(repository);
+    const useCase = new EditFlashcard(repository, repository);
 
     await expect(
       useCase.execute({ flashcardId: "flashcard-1", userId: "someone-else", front: "x" }),
@@ -35,7 +35,7 @@ describe("EditFlashcard", () => {
   it("throws when the flashcard is discarded", async () => {
     const repository = new FakeFlashcardRepository();
     repository.seed(buildFlashcard({ status: "discarded" }));
-    const useCase = new EditFlashcard(repository);
+    const useCase = new EditFlashcard(repository, repository);
 
     await expect(
       useCase.execute({ flashcardId: "flashcard-1", userId: "user-1", front: "x" }),
@@ -45,7 +45,7 @@ describe("EditFlashcard", () => {
   it("updates the flashcard content", async () => {
     const repository = new FakeFlashcardRepository();
     repository.seed(buildFlashcard());
-    const useCase = new EditFlashcard(repository);
+    const useCase = new EditFlashcard(repository, repository);
 
     const result = await useCase.execute({
       flashcardId: "flashcard-1",
@@ -63,7 +63,7 @@ describe("ToggleFlashcardSuspension", () => {
   it("suspends an active flashcard", async () => {
     const repository = new FakeFlashcardRepository();
     repository.seed(buildFlashcard({ status: "active" }));
-    const useCase = new ToggleFlashcardSuspension(repository);
+    const useCase = new ToggleFlashcardSuspension(repository, repository);
 
     const result = await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1" });
 
@@ -73,7 +73,7 @@ describe("ToggleFlashcardSuspension", () => {
   it("reactivates a suspended flashcard", async () => {
     const repository = new FakeFlashcardRepository();
     repository.seed(buildFlashcard({ status: "suspended" }));
-    const useCase = new ToggleFlashcardSuspension(repository);
+    const useCase = new ToggleFlashcardSuspension(repository, repository);
 
     const result = await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1" });
 
@@ -83,7 +83,7 @@ describe("ToggleFlashcardSuspension", () => {
   it("throws when the flashcard is suggested or discarded", async () => {
     const repository = new FakeFlashcardRepository();
     repository.seed(buildFlashcard({ status: "suggested" }));
-    const useCase = new ToggleFlashcardSuspension(repository);
+    const useCase = new ToggleFlashcardSuspension(repository, repository);
 
     await expect(
       useCase.execute({ flashcardId: "flashcard-1", userId: "user-1" }),
