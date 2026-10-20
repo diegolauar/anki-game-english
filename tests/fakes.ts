@@ -1,9 +1,11 @@
 import type { Analysis } from "@/domain/entities/analysis";
+import type { CardSchedule, ScheduleSnapshot } from "@/domain/entities/card-schedule";
 import type { Conversation } from "@/domain/entities/conversation";
 import type { Finding } from "@/domain/entities/finding";
 import type { Flashcard } from "@/domain/entities/flashcard";
 import type { LearningPoint } from "@/domain/entities/learning-point";
 import type { Message } from "@/domain/entities/message";
+import type { ReviewLog } from "@/domain/entities/review-log";
 import type { Topic } from "@/domain/entities/topic";
 import type {
   AnalysisAgent,
@@ -14,6 +16,7 @@ import type {
   AnalysisRepository,
   MarkAnalysisCompletedInput,
 } from "@/domain/ports/analysis-repository";
+import type { CardScheduleRepository, DueFlashcard } from "@/domain/ports/card-schedule-repository";
 import type { ConversationAgent, ConversationReplyInput } from "@/domain/ports/conversation-agent";
 import type {
   ConversationRepository,
@@ -21,7 +24,9 @@ import type {
 } from "@/domain/ports/conversation-repository";
 import type { CreateFindingInput, FindingRepository } from "@/domain/ports/finding-repository";
 import type {
+  CreateManualFlashcardInput,
   CreateSuggestedFlashcardInput,
+  FlashcardContentUpdate,
   FlashcardRepository,
 } from "@/domain/ports/flashcard-repository";
 import type {
@@ -29,7 +34,11 @@ import type {
   LearningPointRepository,
 } from "@/domain/ports/learning-point-repository";
 import type { CreateMessageInput, MessageRepository } from "@/domain/ports/message-repository";
+import type { CreateReviewLogInput, ReviewLogRepository } from "@/domain/ports/review-log-repository";
+import type { ReviewOutcome, ReviewScheduler } from "@/domain/ports/review-scheduler";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
+import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
+import type { Rating } from "@/domain/value-objects/rating";
 
 let idCounter = 0;
 function nextId(prefix: string): string {
@@ -304,8 +313,156 @@ export class FakeFlashcardRepository implements FlashcardRepository {
     return flashcard;
   }
 
+  async createManual(input: CreateManualFlashcardInput): Promise<Flashcard> {
+    const flashcard: Flashcard = {
+      id: nextId("flashcard"),
+      userId: input.userId,
+      learningPointId: null,
+      sourceFindingId: null,
+      cardType: "manual",
+      front: input.front,
+      back: input.back,
+      explanation: input.explanation,
+      status: "active",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.flashcards.push(flashcard);
+    return flashcard;
+  }
+
+  async findById(id: string): Promise<Flashcard | null> {
+    return this.flashcards.find((flashcard) => flashcard.id === id) ?? null;
+  }
+
+  async listBySourceFindingIds(findingIds: string[]): Promise<Flashcard[]> {
+    return this.flashcards.filter(
+      (flashcard) =>
+        flashcard.sourceFindingId !== null && findingIds.includes(flashcard.sourceFindingId),
+    );
+  }
+
+  async listByUser(userId: string, status?: FlashcardStatus): Promise<Flashcard[]> {
+    return this.flashcards.filter(
+      (flashcard) => flashcard.userId === userId && (!status || flashcard.status === status),
+    );
+  }
+
+  private updateFlashcard(id: string, patch: Partial<Flashcard>): Flashcard {
+    const index = this.flashcards.findIndex((flashcard) => flashcard.id === id);
+    if (index === -1) throw new Error("Flashcard not found.");
+    this.flashcards[index] = {
+      ...this.flashcards[index],
+      ...patch,
+      updatedAt: new Date().toISOString(),
+    };
+    return this.flashcards[index];
+  }
+
+  async activate(id: string, overrides: FlashcardContentUpdate): Promise<Flashcard> {
+    return this.updateFlashcard(id, { status: "active", ...overrides });
+  }
+
+  async discard(id: string): Promise<Flashcard> {
+    return this.updateFlashcard(id, { status: "discarded" });
+  }
+
+  async updateContent(id: string, update: FlashcardContentUpdate): Promise<Flashcard> {
+    return this.updateFlashcard(id, update);
+  }
+
+  async setStatus(id: string, status: "active" | "suspended"): Promise<Flashcard> {
+    return this.updateFlashcard(id, { status });
+  }
+
   seed(flashcard: Flashcard) {
     this.flashcards.push(flashcard);
+  }
+}
+
+export class FakeCardScheduleRepository implements CardScheduleRepository {
+  schedules = new Map<string, CardSchedule>();
+
+  async create(flashcardId: string, schedule: ScheduleSnapshot): Promise<void> {
+    this.schedules.set(flashcardId, { ...schedule, flashcardId });
+  }
+
+  async findByFlashcardId(flashcardId: string): Promise<CardSchedule | null> {
+    return this.schedules.get(flashcardId) ?? null;
+  }
+
+  async update(flashcardId: string, schedule: ScheduleSnapshot): Promise<void> {
+    this.schedules.set(flashcardId, { ...schedule, flashcardId });
+  }
+
+  async listDueForUser(userId: string, now: Date): Promise<DueFlashcard[]> {
+    const due: DueFlashcard[] = [];
+    for (const schedule of this.schedules.values()) {
+      if (new Date(schedule.dueAt).getTime() > now.getTime()) continue;
+      due.push({ flashcard: {} as Flashcard, schedule });
+    }
+    return due;
+  }
+
+  async listByFlashcardIds(flashcardIds: string[]): Promise<CardSchedule[]> {
+    return flashcardIds
+      .map((id) => this.schedules.get(id))
+      .filter((schedule): schedule is CardSchedule => schedule !== undefined);
+  }
+}
+
+export class FakeReviewLogRepository implements ReviewLogRepository {
+  logs: ReviewLog[] = [];
+
+  async create(input: CreateReviewLogInput): Promise<ReviewLog> {
+    const log: ReviewLog = {
+      id: nextId("review-log"),
+      flashcardId: input.flashcardId,
+      userId: input.userId,
+      rating: input.rating,
+      stateBefore: input.stateBefore,
+      elapsedDays: input.elapsedDays,
+      scheduledDays: input.scheduledDays,
+      reviewedAt: new Date().toISOString(),
+    };
+    this.logs.push(log);
+    return log;
+  }
+}
+
+export class FakeReviewScheduler implements ReviewScheduler {
+  calls: { current: ScheduleSnapshot; rating: Rating }[] = [];
+
+  initialState(now: Date): ScheduleSnapshot {
+    return {
+      dueAt: now.toISOString(),
+      stability: 0,
+      difficulty: 0,
+      reps: 0,
+      lapses: 0,
+      state: "new",
+      lastReviewedAt: null,
+    };
+  }
+
+  review(current: ScheduleSnapshot, rating: Rating, now: Date): ReviewOutcome {
+    this.calls.push({ current, rating });
+    const dueInDays = rating === "again" ? 0 : rating === "hard" ? 1 : rating === "good" ? 3 : 7;
+    const dueAt = new Date(now.getTime() + dueInDays * 24 * 60 * 60 * 1000);
+
+    return {
+      schedule: {
+        dueAt: dueAt.toISOString(),
+        stability: current.stability + 1,
+        difficulty: current.difficulty,
+        reps: current.reps + 1,
+        lapses: rating === "again" ? current.lapses + 1 : current.lapses,
+        state: "review",
+        lastReviewedAt: now.toISOString(),
+      },
+      elapsedDays: 0,
+      scheduledDays: dueInDays,
+    };
   }
 }
 

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 
@@ -17,8 +18,9 @@ export default async function DashboardPage() {
   const getDashboard = new GetDashboard(
     new SupabaseUserProfileRepository(supabase),
     new SupabaseTopicRepository(supabase),
+    new SupabaseCardScheduleRepository(supabase),
   );
-  const { profile, topics } = await getDashboard.execute(user.id);
+  const { profile, topics, pendingReviewCount } = await getDashboard.execute(user.id);
 
   return (
     <main className="mx-auto max-w-3xl flex-1 p-8">
@@ -28,6 +30,10 @@ export default async function DashboardPage() {
         </h1>
         <div className="flex gap-2">
           <Button render={<Link href="/conversations/new">Nova conversa</Link>} />
+          <Button
+            render={<Link href="/review">Revisar flashcards ({pendingReviewCount})</Link>}
+            variant="outline"
+          />
           <form action="/auth/sign-out" method="post">
             <Button type="submit" variant="outline">
               Sair

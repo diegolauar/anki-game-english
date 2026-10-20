@@ -30,7 +30,9 @@ export async function proxy(request: NextRequest) {
 
   const isProtectedRoute =
     request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/conversations");
+    request.nextUrl.pathname.startsWith("/conversations") ||
+    request.nextUrl.pathname.startsWith("/flashcards") ||
+    request.nextUrl.pathname.startsWith("/review");
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
@@ -42,5 +44,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/conversations/:path*"],
+  matcher: ["/dashboard/:path*", "/conversations/:path*", "/flashcards/:path*", "/review/:path*"],
 };

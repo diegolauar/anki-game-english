@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import { retryAnalysisAction } from "@/app/conversations/actions";
 import { Button } from "@/components/ui/button";
+import { FlashcardSuggestionsPanel } from "@/components/flashcard-suggestions-panel";
 import { TranscriptView, type TranscriptMessage } from "@/components/transcript-view";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
 import { SupabaseFindingRepository } from "@/infrastructure/supabase/finding-repository";
+import { SupabaseFlashcardRepository } from "@/infrastructure/supabase/flashcard-repository";
 import { SupabaseMessageRepository } from "@/infrastructure/supabase/message-repository";
 
 export default async function ConversationResultsPage({
@@ -52,6 +54,11 @@ export default async function ConversationResultsPage({
 
   const messages = await new SupabaseMessageRepository(supabase).listByConversation(id);
   const findings = await new SupabaseFindingRepository(supabase).listByAnalysisId(analysis.id);
+  const suggestedFlashcards = (
+    await new SupabaseFlashcardRepository(supabase).listBySourceFindingIds(
+      findings.map((finding) => finding.id),
+    )
+  ).filter((flashcard) => flashcard.status === "suggested");
 
   const findingsByMessageId = new Map<string, typeof findings>();
   for (const finding of findings) {
@@ -108,6 +115,11 @@ export default async function ConversationResultsPage({
         </p>
         <TranscriptView messages={transcriptMessages} />
       </section>
+
+      <FlashcardSuggestionsPanel
+        flashcards={suggestedFlashcards}
+        resultsPath={`/conversations/${id}/results`}
+      />
     </main>
   );
 }
