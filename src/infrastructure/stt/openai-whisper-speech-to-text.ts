@@ -24,8 +24,12 @@ export class OpenAiWhisperSpeechToText implements SpeechToText {
   private readonly client: OpenAI;
 
   constructor() {
-    const apiKey = process.env.STT_API_KEY;
-    if (!apiKey) throw new Error("STT_API_KEY is not set.");
+    // STT_API_KEY é opcional: por padrão usa a mesma chave OpenAI do LLM_API_KEY
+    // (hoje os dois provedores são a OpenAI), já que exigir uma cópia manual da
+    // mesma chave em duas variáveis é só uma forma a mais de elas divergirem.
+    // Defina STT_API_KEY explicitamente só se o STT for migrado para outra conta/provedor.
+    const apiKey = process.env.STT_API_KEY || process.env.LLM_API_KEY;
+    if (!apiKey) throw new Error("STT_API_KEY (ou LLM_API_KEY) is not set.");
 
     this.client = new OpenAI({ apiKey });
   }
