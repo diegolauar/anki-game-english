@@ -1,8 +1,10 @@
+import { AwardXp } from "@/application/use-cases/award-xp";
 import type { ScheduleSnapshot } from "@/domain/entities/card-schedule";
 import type { CardScheduleRepository } from "@/domain/ports/card-schedule-repository";
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
 import type { ReviewLogRepository } from "@/domain/ports/review-log-repository";
 import type { ReviewScheduler } from "@/domain/ports/review-scheduler";
+import type { XpEventRepository } from "@/domain/ports/xp-event-repository";
 import type { Rating } from "@/domain/value-objects/rating";
 
 export interface ReviewFlashcardInput {
@@ -11,12 +13,17 @@ export interface ReviewFlashcardInput {
   rating: Rating;
 }
 
+function todayDateKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export class ReviewFlashcard {
   constructor(
     private readonly flashcardRepository: FlashcardRepository,
     private readonly cardScheduleRepository: CardScheduleRepository,
     private readonly reviewLogRepository: ReviewLogRepository,
     private readonly reviewScheduler: ReviewScheduler,
+    private readonly xpEventRepository: XpEventRepository,
   ) {}
 
   async execute(input: ReviewFlashcardInput): Promise<ScheduleSnapshot> {
@@ -37,7 +44,7 @@ export class ReviewFlashcard {
     const outcome = this.reviewScheduler.review(currentSchedule, input.rating, now);
 
     await this.cardScheduleRepository.update(input.flashcardId, outcome.schedule);
-    await this.reviewLogRepository.create({
+    const reviewLog = await this.reviewLogRepository.create({
       flashcardId: input.flashcardId,
       userId: input.userId,
       rating: input.rating,
@@ -45,6 +52,22 @@ export class ReviewFlashcard {
       elapsedDays: outcome.elapsedDays,
       scheduledDays: outcome.scheduledDays,
     });
+
+    const awardXp = new AwardXp(this.xpEventRepository);
+    await awardXp.execute({
+      userId: input.userId,
+      sourceType: "flashcard_reviewed",
+      sourceId: reviewLog.id,
+    });
+
+    const remainingDue = await this.cardScheduleRepository.listDueForUser(input.userId, now);
+    if (remainingDue.length === 0) {
+      await awardXp.execute({
+        userId: input.userId,
+        sourceType: "daily_reviews_completed",
+        sourceId: todayDateKey(),
+      });
+    }
 
     return outcome.schedule;
   }

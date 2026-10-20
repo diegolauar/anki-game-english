@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/infrastructure/supabase/server-cli
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
+import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
@@ -19,15 +20,23 @@ export default async function DashboardPage() {
     new SupabaseUserProfileRepository(supabase),
     new SupabaseTopicRepository(supabase),
     new SupabaseCardScheduleRepository(supabase),
+    new SupabaseXpEventRepository(supabase),
   );
-  const { profile, topics, pendingReviewCount } = await getDashboard.execute(user.id);
+  const { profile, topics, pendingReviewCount, totalXp, streak } = await getDashboard.execute(
+    user.id,
+  );
 
   return (
     <main className="mx-auto max-w-3xl flex-1 p-8">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">
-          Olá, {profile?.displayName ?? user.email}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Olá, {profile?.displayName ?? user.email}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {totalXp} XP · {streak} {streak === 1 ? "dia" : "dias"} de sequência
+          </p>
+        </div>
         <div className="flex gap-2">
           <Button render={<Link href="/conversations/new">Nova conversa</Link>} />
           <Button

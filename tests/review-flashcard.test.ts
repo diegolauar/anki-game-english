@@ -7,6 +7,7 @@ import {
   FakeFlashcardRepository,
   FakeReviewLogRepository,
   FakeReviewScheduler,
+  FakeXpEventRepository,
 } from "./fakes";
 
 function buildActiveFlashcard(overrides: Partial<Flashcard> = {}): Flashcard {
@@ -44,13 +45,22 @@ function buildUseCase() {
   const cardScheduleRepository = new FakeCardScheduleRepository();
   const reviewLogRepository = new FakeReviewLogRepository();
   const reviewScheduler = new FakeReviewScheduler();
+  const xpEventRepository = new FakeXpEventRepository();
   const useCase = new ReviewFlashcard(
     flashcardRepository,
     cardScheduleRepository,
     reviewLogRepository,
     reviewScheduler,
+    xpEventRepository,
   );
-  return { useCase, flashcardRepository, cardScheduleRepository, reviewLogRepository, reviewScheduler };
+  return {
+    useCase,
+    flashcardRepository,
+    cardScheduleRepository,
+    reviewLogRepository,
+    reviewScheduler,
+    xpEventRepository,
+  };
 }
 
 describe("ReviewFlashcard", () => {
@@ -121,5 +131,68 @@ describe("ReviewFlashcard", () => {
     });
 
     expect(result.lapses).toBe(2);
+  });
+
+  it("awards flashcard_reviewed XP for every review", async () => {
+    const { useCase, flashcardRepository, cardScheduleRepository, xpEventRepository } =
+      buildUseCase();
+    flashcardRepository.seed(buildActiveFlashcard());
+    await cardScheduleRepository.create("flashcard-1", buildSchedule());
+
+    await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1", rating: "good" });
+
+    const reviewEvents = xpEventRepository.events.filter(
+      (event) => event.sourceType === "flashcard_reviewed",
+    );
+    expect(reviewEvents).toHaveLength(1);
+    expect(reviewEvents[0].amount).toBe(1);
+  });
+
+  it("awards the daily_reviews_completed bonus once the due queue is empty", async () => {
+    const { useCase, flashcardRepository, cardScheduleRepository, xpEventRepository } =
+      buildUseCase();
+    flashcardRepository.seed(buildActiveFlashcard());
+    await cardScheduleRepository.create("flashcard-1", buildSchedule());
+
+    await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1", rating: "good" });
+
+    const dailyBonusEvents = xpEventRepository.events.filter(
+      (event) => event.sourceType === "daily_reviews_completed",
+    );
+    expect(dailyBonusEvents).toHaveLength(1);
+    expect(dailyBonusEvents[0].amount).toBe(10);
+  });
+
+  it("does not award the daily bonus twice when reviewing more than one card the same day", async () => {
+    const { useCase, flashcardRepository, cardScheduleRepository, xpEventRepository } =
+      buildUseCase();
+    flashcardRepository.seed(buildActiveFlashcard({ id: "flashcard-1" }));
+    flashcardRepository.seed(buildActiveFlashcard({ id: "flashcard-2" }));
+    await cardScheduleRepository.create("flashcard-1", buildSchedule());
+    await cardScheduleRepository.create("flashcard-2", buildSchedule());
+
+    await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1", rating: "good" });
+    await useCase.execute({ flashcardId: "flashcard-2", userId: "user-1", rating: "good" });
+
+    const dailyBonusEvents = xpEventRepository.events.filter(
+      (event) => event.sourceType === "daily_reviews_completed",
+    );
+    expect(dailyBonusEvents).toHaveLength(1);
+  });
+
+  it("does not award the daily bonus while other cards are still due", async () => {
+    const { useCase, flashcardRepository, cardScheduleRepository, xpEventRepository } =
+      buildUseCase();
+    flashcardRepository.seed(buildActiveFlashcard({ id: "flashcard-1" }));
+    flashcardRepository.seed(buildActiveFlashcard({ id: "flashcard-2" }));
+    await cardScheduleRepository.create("flashcard-1", buildSchedule());
+    await cardScheduleRepository.create("flashcard-2", buildSchedule());
+
+    await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1", rating: "good" });
+
+    const dailyBonusEvents = xpEventRepository.events.filter(
+      (event) => event.sourceType === "daily_reviews_completed",
+    );
+    expect(dailyBonusEvents).toHaveLength(0);
   });
 });

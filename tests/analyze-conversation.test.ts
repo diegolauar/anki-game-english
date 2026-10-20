@@ -300,4 +300,28 @@ describe("AnalyzeConversation", () => {
 
     expect(context.analysisAgent.calls).toHaveLength(0);
   });
+
+  it("stores a 'suggestion' finding as-is, never coercing it into an 'error'", async () => {
+    const context = buildUseCase();
+    context.conversationRepository.seed(buildConversation());
+    context.messageRepository.seed(buildUserMessage());
+    const analysis = await context.analysisRepository.create("conversation-1");
+    context.analysisAgent.nextResult = {
+      summary: { mainPoints: [], recommendedExpressions: [] },
+      findings: [
+        buildFindingResult({
+          kind: "suggestion",
+          severity: "low",
+          category: "naturalness.unnatural_expression",
+          ruleKey: "more_natural_phrasing",
+        }),
+      ],
+    };
+
+    await context.useCase.execute(analysis.id);
+
+    expect(context.findingRepository.findings).toHaveLength(1);
+    expect(context.findingRepository.findings[0].kind).toBe("suggestion");
+    expect(context.learningPointRepository.learningPoints[0].kind).toBe("suggestion");
+  });
 });

@@ -4,9 +4,11 @@ import type { Conversation } from "@/domain/entities/conversation";
 import {
   FakeConversationAgent,
   FakeConversationRepository,
+  FakeDailyUsageRepository,
   FakeMessageRepository,
   FakeSpeechTranscriptionRepository,
   FakeTopicRepository,
+  FakeUserProfileRepository,
 } from "./fakes";
 
 function buildConversation(overrides: Partial<Conversation> = {}): Conversation {
@@ -29,12 +31,16 @@ function buildUseCase() {
   const topicRepository = new FakeTopicRepository();
   const conversationAgent = new FakeConversationAgent();
   const speechTranscriptionRepository = new FakeSpeechTranscriptionRepository();
+  const userProfileRepository = new FakeUserProfileRepository();
+  const dailyUsageRepository = new FakeDailyUsageRepository();
   const useCase = new SendMessage(
     conversationRepository,
     messageRepository,
     topicRepository,
     conversationAgent,
     speechTranscriptionRepository,
+    userProfileRepository,
+    dailyUsageRepository,
   );
   return {
     useCase,
@@ -43,6 +49,8 @@ function buildUseCase() {
     topicRepository,
     conversationAgent,
     speechTranscriptionRepository,
+    userProfileRepository,
+    dailyUsageRepository,
   };
 }
 
@@ -246,5 +254,85 @@ describe("SendMessage", () => {
     });
 
     expect(speechTranscriptionRepository.transcriptions).toHaveLength(1);
+  });
+
+  it("blocks a new message once the daily message limit is reached", async () => {
+    const { useCase, conversationRepository, dailyUsageRepository } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+    dailyUsageRepository.usage = { messageCount: 50, voiceMinutes: 0 };
+
+    await expect(
+      useCase.execute({
+        conversationId: "conversation-1",
+        userId: "user-1",
+        content: "One more message",
+        inputMode: "text",
+        clientMessageId: "client-1",
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("does not block a retried message even if the daily limit was already reached", async () => {
+    const { useCase, conversationRepository, messageRepository, dailyUsageRepository } =
+      buildUseCase();
+    conversationRepository.seed(buildConversation());
+    await messageRepository.create({
+      conversationId: "conversation-1",
+      role: "user",
+      content: "Already sent",
+      inputMode: "text",
+      clientMessageId: "client-1",
+    });
+    dailyUsageRepository.usage = { messageCount: 50, voiceMinutes: 0 };
+
+    const result = await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "Already sent",
+      inputMode: "text",
+      clientMessageId: "client-1",
+    });
+
+    expect(result.userMessage.content).toBe("Already sent");
+  });
+
+  it("blocks a new voice message once the daily voice minutes limit is reached", async () => {
+    const { useCase, conversationRepository, dailyUsageRepository } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+    dailyUsageRepository.usage = { messageCount: 1, voiceMinutes: 15 };
+
+    await expect(
+      useCase.execute({
+        conversationId: "conversation-1",
+        userId: "user-1",
+        content: "One more voice message",
+        inputMode: "voice",
+        clientMessageId: "client-1",
+        voiceTranscription: { rawText: "one more", provider: "openai-whisper", audioDurationMs: 3000 },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("respects a custom daily message limit from the user's preferences", async () => {
+    const { useCase, conversationRepository, userProfileRepository, dailyUsageRepository } =
+      buildUseCase();
+    conversationRepository.seed(buildConversation());
+    userProfileRepository.seed({
+      id: "user-1",
+      displayName: null,
+      targetLevel: "beginner",
+      preferences: { dailyMessageLimit: 2 },
+    });
+    dailyUsageRepository.usage = { messageCount: 2, voiceMinutes: 0 };
+
+    await expect(
+      useCase.execute({
+        conversationId: "conversation-1",
+        userId: "user-1",
+        content: "Over the custom limit",
+        inputMode: "text",
+        clientMessageId: "client-1",
+      }),
+    ).rejects.toThrow();
   });
 });

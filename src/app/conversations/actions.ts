@@ -19,6 +19,9 @@ import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learn
 import { SupabaseMessageRepository } from "@/infrastructure/supabase/message-repository";
 import { SupabaseSpeechTranscriptionRepository } from "@/infrastructure/supabase/speech-transcription-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
+import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
+import { SupabaseDailyUsageRepository } from "@/infrastructure/supabase/daily-usage-repository";
+import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
 import { OpenAiConversationAgent } from "@/infrastructure/llm/openai-conversation-agent";
 import { OpenAiAnalysisAgent } from "@/infrastructure/llm/openai-analysis-agent";
 import type { Database } from "@/infrastructure/supabase/database.types";
@@ -107,6 +110,8 @@ export async function sendMessageAction(input: {
     new SupabaseTopicRepository(supabase),
     new OpenAiConversationAgent(),
     new SupabaseSpeechTranscriptionRepository(supabase),
+    new SupabaseUserProfileRepository(supabase),
+    new SupabaseDailyUsageRepository(supabase),
   );
 
   const result = await useCase.execute({
@@ -140,6 +145,8 @@ export async function finishConversationAction(formData: FormData) {
   const finishConversation = new FinishConversation(
     new SupabaseConversationRepository(supabase),
     new SupabaseAnalysisRepository(supabase),
+    new SupabaseMessageRepository(supabase),
+    new SupabaseXpEventRepository(supabase),
   );
   const { analysisId } = await finishConversation.execute({
     conversationId: parsed.conversationId,

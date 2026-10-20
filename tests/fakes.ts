@@ -8,6 +8,8 @@ import type { Message } from "@/domain/entities/message";
 import type { ReviewLog } from "@/domain/entities/review-log";
 import type { SpeechTranscription } from "@/domain/entities/speech-transcription";
 import type { Topic } from "@/domain/entities/topic";
+import type { UserProfile } from "@/domain/entities/user-profile";
+import type { XpEvent } from "@/domain/entities/xp-event";
 import type {
   AnalysisAgent,
   AnalysisAgentInput,
@@ -42,6 +44,9 @@ import type {
   SpeechTranscriptionRepository,
 } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
+import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
+import type { CreateXpEventInput, XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type { DailyUsage, DailyUsageRepository } from "@/domain/ports/daily-usage-repository";
 import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
 import type { Rating } from "@/domain/value-objects/rating";
 
@@ -146,6 +151,63 @@ export class FakeTopicRepository implements TopicRepository {
 
   async findById(id: string): Promise<Topic | null> {
     return this.topics.find((topic) => topic.id === id) ?? null;
+  }
+}
+
+export class FakeUserProfileRepository implements UserProfileRepository {
+  profiles = new Map<string, UserProfile>();
+
+  async getById(userId: string): Promise<UserProfile | null> {
+    return this.profiles.get(userId) ?? null;
+  }
+
+  seed(profile: UserProfile) {
+    this.profiles.set(profile.id, profile);
+  }
+}
+
+export class FakeXpEventRepository implements XpEventRepository {
+  events: XpEvent[] = [];
+
+  async create(input: CreateXpEventInput): Promise<XpEvent | null> {
+    const alreadyExists = this.events.some(
+      (event) => event.userId === input.userId && event.sourceType === input.sourceType && event.sourceId === input.sourceId,
+    );
+    if (alreadyExists) return null;
+
+    const event: XpEvent = {
+      id: nextId("xp-event"),
+      userId: input.userId,
+      sourceType: input.sourceType,
+      sourceId: input.sourceId,
+      amount: input.amount,
+      createdAt: new Date().toISOString(),
+    };
+    this.events.push(event);
+    return event;
+  }
+
+  async sumByUser(userId: string): Promise<number> {
+    return this.events
+      .filter((event) => event.userId === userId)
+      .reduce((sum, event) => sum + event.amount, 0);
+  }
+
+  async listActiveDateKeysByUser(userId: string): Promise<string[]> {
+    const dateKeys = new Set(
+      this.events
+        .filter((event) => event.userId === userId)
+        .map((event) => event.createdAt.slice(0, 10)),
+    );
+    return [...dateKeys];
+  }
+}
+
+export class FakeDailyUsageRepository implements DailyUsageRepository {
+  usage: DailyUsage = { messageCount: 0, voiceMinutes: 0 };
+
+  async getTodayUsage(): Promise<DailyUsage> {
+    return this.usage;
   }
 }
 

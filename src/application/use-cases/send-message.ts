@@ -1,9 +1,12 @@
 import type { Message } from "@/domain/entities/message";
 import type { ConversationAgent } from "@/domain/ports/conversation-agent";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
+import type { DailyUsageRepository } from "@/domain/ports/daily-usage-repository";
 import type { MessageRepository } from "@/domain/ports/message-repository";
 import type { SpeechTranscriptionRepository } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
+import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
+import { getDailyMessageLimit, getDailyVoiceMinutesLimit } from "@/domain/rules/daily-limits";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 
 export interface VoiceTranscriptionInput {
@@ -37,6 +40,8 @@ export class SendMessage {
     private readonly topicRepository: TopicRepository,
     private readonly conversationAgent: ConversationAgent,
     private readonly speechTranscriptionRepository: SpeechTranscriptionRepository,
+    private readonly userProfileRepository: UserProfileRepository,
+    private readonly dailyUsageRepository: DailyUsageRepository,
   ) {}
 
   async execute(input: SendMessageInput): Promise<SendMessageResult> {
@@ -53,6 +58,10 @@ export class SendMessage {
       input.conversationId,
       input.clientMessageId,
     );
+
+    if (!existingUserMessage) {
+      await this.assertWithinDailyLimits(input);
+    }
 
     const userMessage =
       existingUserMessage ??
@@ -101,6 +110,26 @@ export class SendMessage {
     });
 
     return { userMessage, assistantMessage };
+  }
+
+  private async assertWithinDailyLimits(input: SendMessageInput): Promise<void> {
+    const [profile, usage] = await Promise.all([
+      this.userProfileRepository.getById(input.userId),
+      this.dailyUsageRepository.getTodayUsage(input.userId),
+    ]);
+    const preferences = profile?.preferences ?? {};
+
+    const messageLimit = getDailyMessageLimit(preferences);
+    if (usage.messageCount >= messageLimit) {
+      throw new Error("Daily message limit reached. Try again tomorrow.");
+    }
+
+    if (input.inputMode === "voice") {
+      const voiceMinutesLimit = getDailyVoiceMinutesLimit(preferences);
+      if (usage.voiceMinutes >= voiceMinutesLimit) {
+        throw new Error("Daily voice limit reached. Try again tomorrow, or use text.");
+      }
+    }
   }
 
   private async resolveTopicTitle(topicId: string | null): Promise<string> {

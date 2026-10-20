@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { SaveFlashcardSuggestion } from "@/application/use-cases/save-flashcard-suggestion";
 import { SaveFlashcardSuggestions } from "@/application/use-cases/save-flashcard-suggestions";
 import type { Flashcard } from "@/domain/entities/flashcard";
-import { FakeCardScheduleRepository, FakeFlashcardRepository, FakeReviewScheduler } from "./fakes";
+import {
+  FakeCardScheduleRepository,
+  FakeFlashcardRepository,
+  FakeReviewScheduler,
+  FakeXpEventRepository,
+} from "./fakes";
 
 function buildSuggestedFlashcard(overrides: Partial<Flashcard> = {}): Flashcard {
   return {
@@ -25,12 +30,14 @@ function buildUseCase() {
   const flashcardRepository = new FakeFlashcardRepository();
   const cardScheduleRepository = new FakeCardScheduleRepository();
   const reviewScheduler = new FakeReviewScheduler();
+  const xpEventRepository = new FakeXpEventRepository();
   const useCase = new SaveFlashcardSuggestion(
     flashcardRepository,
     cardScheduleRepository,
     reviewScheduler,
+    xpEventRepository,
   );
-  return { useCase, flashcardRepository, cardScheduleRepository, reviewScheduler };
+  return { useCase, flashcardRepository, cardScheduleRepository, reviewScheduler, xpEventRepository };
 }
 
 describe("SaveFlashcardSuggestion", () => {
@@ -60,8 +67,9 @@ describe("SaveFlashcardSuggestion", () => {
     ).rejects.toThrow();
   });
 
-  it("activates the flashcard and creates its initial schedule", async () => {
-    const { useCase, flashcardRepository, cardScheduleRepository } = buildUseCase();
+  it("activates the flashcard, creates its initial schedule, and awards XP", async () => {
+    const { useCase, flashcardRepository, cardScheduleRepository, xpEventRepository } =
+      buildUseCase();
     flashcardRepository.seed(buildSuggestedFlashcard());
 
     const result = await useCase.execute({ flashcardId: "flashcard-1", userId: "user-1" });
@@ -70,6 +78,14 @@ describe("SaveFlashcardSuggestion", () => {
     const schedule = await cardScheduleRepository.findByFlashcardId("flashcard-1");
     expect(schedule).not.toBeNull();
     expect(schedule?.state).toBe("new");
+
+    expect(xpEventRepository.events).toHaveLength(1);
+    expect(xpEventRepository.events[0]).toMatchObject({
+      userId: "user-1",
+      sourceType: "flashcard_saved",
+      sourceId: "flashcard-1",
+      amount: 2,
+    });
   });
 
   it("applies edits to front/back/explanation before activating", async () => {
