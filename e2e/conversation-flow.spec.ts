@@ -14,7 +14,7 @@ test("start a conversation, chat with the real AI, finish it, and see results", 
 }) => {
   await signInViaMagicLink(page, TEST_EMAIL);
 
-  await page.getByRole("link", { name: "Nova conversa" }).click();
+  await page.getByRole("button", { name: "Nova conversa" }).click();
   await page.waitForURL("**/conversations/new");
 
   await page.getByRole("button", { name: "Iniciar conversa" }).click();

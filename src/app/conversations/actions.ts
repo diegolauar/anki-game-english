@@ -23,6 +23,7 @@ import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-reposit
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 import { SupabaseDailyUsageRepository } from "@/infrastructure/supabase/daily-usage-repository";
 import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
+import { SupabaseLlmUsageRepository } from "@/infrastructure/supabase/llm-usage-repository";
 import { OpenAiConversationAgent } from "@/infrastructure/llm/openai-conversation-agent";
 import { OpenAiAnalysisAgent } from "@/infrastructure/llm/openai-analysis-agent";
 import type { Database } from "@/infrastructure/supabase/database.types";
@@ -36,6 +37,7 @@ import type { Database } from "@/infrastructure/supabase/database.types";
  */
 function buildAnalyzeConversation(
   serviceRoleClient: SupabaseClient<Database>,
+  userId: string,
 ): AnalyzeConversation {
   return new AnalyzeConversation(
     new SupabaseAnalysisRepository(serviceRoleClient),
@@ -44,7 +46,10 @@ function buildAnalyzeConversation(
     new SupabaseLearningPointRepository(serviceRoleClient),
     new SupabaseFindingRepository(serviceRoleClient),
     new SupabaseFlashcardRepository(serviceRoleClient),
-    new OpenAiAnalysisAgent(),
+    new OpenAiAnalysisAgent({
+      userId,
+      usageRepository: new SupabaseLlmUsageRepository(serviceRoleClient),
+    }),
   );
 }
 
@@ -118,7 +123,10 @@ export async function sendMessageAction(input: {
     new SupabaseConversationRepository(supabase),
     new SupabaseMessageRepository(supabase),
     new SupabaseTopicRepository(supabase),
-    new OpenAiConversationAgent(),
+    new OpenAiConversationAgent({
+      userId: user.id,
+      usageRepository: new SupabaseLlmUsageRepository(createSupabaseServiceRoleClient()),
+    }),
     new SupabaseSpeechTranscriptionRepository(supabase),
     new SupabaseUserProfileRepository(supabase),
     new SupabaseDailyUsageRepository(supabase),
@@ -165,7 +173,7 @@ export async function finishConversationAction(formData: FormData) {
   });
 
   try {
-    await buildAnalyzeConversation(serviceRoleClient).execute(analysisId);
+    await buildAnalyzeConversation(serviceRoleClient, user.id).execute(analysisId);
   } catch {
     // Já registrado como failed pelo use case; a tela de resultados mostra o estado de erro.
   }
@@ -196,7 +204,9 @@ export async function retryAnalysisAction(formData: FormData) {
   if (!conversation || conversation.userId !== user.id) throw new Error("Not authorized.");
 
   try {
-    await buildAnalyzeConversation(createSupabaseServiceRoleClient()).execute(parsed.analysisId);
+    await buildAnalyzeConversation(createSupabaseServiceRoleClient(), user.id).execute(
+      parsed.analysisId,
+    );
   } catch {
     // Já registrado como failed pelo use case; a tela de resultados mostra o estado de erro.
   }

@@ -327,6 +327,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      llm_usage_logs: {
+        Row: {
+          completion_tokens: number;
+          created_at: string;
+          id: string;
+          model: string;
+          prompt_tokens: number;
+          source: string;
+          total_tokens: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          completion_tokens?: number;
+          created_at?: string;
+          id?: string;
+          model: string;
+          prompt_tokens?: number;
+          source: string;
+          total_tokens?: number;
+          user_id: string;
+        };
+        Update: {
+          completion_tokens?: number;
+          created_at?: string;
+          id?: string;
+          model?: string;
+          prompt_tokens?: number;
+          source?: string;
+          total_tokens?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       messages: {
         Row: {
           client_message_id: string;
