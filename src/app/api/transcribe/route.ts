@@ -33,7 +33,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(result);
-  } catch {
+  } catch (error) {
+    console.error("Speech-to-text transcription failed:", error);
     return NextResponse.json({ error: "Transcription failed." }, { status: 502 });
   }
 }

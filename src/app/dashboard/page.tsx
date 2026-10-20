@@ -38,9 +38,10 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button render={<Link href="/conversations/new">Nova conversa</Link>} />
+          <Button render={<Link href="/conversations/new">Nova conversa</Link>} nativeButton={false} />
           <Button
             render={<Link href="/review">Revisar flashcards ({pendingReviewCount})</Link>}
+            nativeButton={false}
             variant="outline"
           />
           <form action="/auth/sign-out" method="post">

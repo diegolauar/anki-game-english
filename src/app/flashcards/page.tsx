@@ -77,7 +77,7 @@ export default async function FlashcardsPage({
     <main className="mx-auto max-w-2xl flex-1 p-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Flashcards</h1>
-        <Button render={<Link href="/flashcards/new">Criar manual</Link>} />
+        <Button render={<Link href="/flashcards/new">Criar manual</Link>} nativeButton={false} />
       </header>
 
       <nav className="mt-4 flex gap-2 text-sm">
@@ -105,6 +105,7 @@ export default async function FlashcardsPage({
             <div className="mt-3 flex gap-2">
               <Button
                 render={<Link href={`/flashcards/${flashcard.id}/edit`}>Editar</Link>}
+                nativeButton={false}
                 variant="outline"
                 size="sm"
               />

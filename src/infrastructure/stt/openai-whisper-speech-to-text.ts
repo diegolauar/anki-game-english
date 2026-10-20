@@ -7,6 +7,19 @@ import type {
 
 const PROVIDER_NAME = "openai-whisper";
 
+const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
+  "audio/webm": "webm",
+  "audio/ogg": "ogg",
+  "audio/wav": "wav",
+  "audio/mp4": "mp4",
+  "audio/mpeg": "mp3",
+};
+
+function guessExtension(mimeType: string): string {
+  const base = mimeType.split(";")[0].trim();
+  return EXTENSION_BY_MIME_TYPE[base] ?? "webm";
+}
+
 export class OpenAiWhisperSpeechToText implements SpeechToText {
   private readonly client: OpenAI;
 
@@ -18,7 +31,10 @@ export class OpenAiWhisperSpeechToText implements SpeechToText {
   }
 
   async transcribe(input: TranscribeAudioInput): Promise<TranscribeAudioResult> {
-    const file = await toFile(input.audio, "audio", { type: input.mimeType });
+    // O nome do arquivo precisa ter uma extensão reconhecível — a API do
+    // Whisper identifica o formato pelo nome, não só pelo header `type`.
+    const filename = `audio.${guessExtension(input.mimeType)}`;
+    const file = await toFile(input.audio, filename, { type: input.mimeType });
 
     // Sem `prompt`: whisper-1 tende a ser mais literal que os modelos de
     // transcrição mais novos baseados em chat, e um prompt de estilo poderia
