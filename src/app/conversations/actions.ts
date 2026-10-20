@@ -11,6 +11,7 @@ import { AnalyzeConversation } from "@/application/use-cases/analyze-conversatio
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
 import { INPUT_MODES } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
 import { SupabaseFindingRepository } from "@/infrastructure/supabase/finding-repository";
@@ -26,14 +27,23 @@ import { OpenAiConversationAgent } from "@/infrastructure/llm/openai-conversatio
 import { OpenAiAnalysisAgent } from "@/infrastructure/llm/openai-analysis-agent";
 import type { Database } from "@/infrastructure/supabase/database.types";
 
-function buildAnalyzeConversation(supabase: SupabaseClient<Database>): AnalyzeConversation {
+/**
+ * analyses, findings e learning_points só têm policy de RLS para SELECT — a
+ * escrita é feita pelo service role (ver migração inicial). Por isso esta
+ * função sempre recebe o cliente de service role: quando ela é chamada, o
+ * analysisId já foi validado contra o dono pela camada que a invoca (usando
+ * o cliente da sessão do usuário).
+ */
+function buildAnalyzeConversation(
+  serviceRoleClient: SupabaseClient<Database>,
+): AnalyzeConversation {
   return new AnalyzeConversation(
-    new SupabaseAnalysisRepository(supabase),
-    new SupabaseConversationRepository(supabase),
-    new SupabaseMessageRepository(supabase),
-    new SupabaseLearningPointRepository(supabase),
-    new SupabaseFindingRepository(supabase),
-    new SupabaseFlashcardRepository(supabase),
+    new SupabaseAnalysisRepository(serviceRoleClient),
+    new SupabaseConversationRepository(serviceRoleClient),
+    new SupabaseMessageRepository(serviceRoleClient),
+    new SupabaseLearningPointRepository(serviceRoleClient),
+    new SupabaseFindingRepository(serviceRoleClient),
+    new SupabaseFlashcardRepository(serviceRoleClient),
     new OpenAiAnalysisAgent(),
   );
 }
@@ -142,11 +152,12 @@ export async function finishConversationAction(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const serviceRoleClient = createSupabaseServiceRoleClient();
   const finishConversation = new FinishConversation(
     new SupabaseConversationRepository(supabase),
-    new SupabaseAnalysisRepository(supabase),
+    new SupabaseAnalysisRepository(serviceRoleClient),
     new SupabaseMessageRepository(supabase),
-    new SupabaseXpEventRepository(supabase),
+    new SupabaseXpEventRepository(serviceRoleClient),
   );
   const { analysisId } = await finishConversation.execute({
     conversationId: parsed.conversationId,
@@ -154,7 +165,7 @@ export async function finishConversationAction(formData: FormData) {
   });
 
   try {
-    await buildAnalyzeConversation(supabase).execute(analysisId);
+    await buildAnalyzeConversation(serviceRoleClient).execute(analysisId);
   } catch {
     // Já registrado como failed pelo use case; a tela de resultados mostra o estado de erro.
   }
@@ -185,7 +196,7 @@ export async function retryAnalysisAction(formData: FormData) {
   if (!conversation || conversation.userId !== user.id) throw new Error("Not authorized.");
 
   try {
-    await buildAnalyzeConversation(supabase).execute(parsed.analysisId);
+    await buildAnalyzeConversation(createSupabaseServiceRoleClient()).execute(parsed.analysisId);
   } catch {
     // Já registrado como failed pelo use case; a tela de resultados mostra o estado de erro.
   }
