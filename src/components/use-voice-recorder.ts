@@ -126,14 +126,19 @@ export function useVoiceRecorder({ onSubmit }: UseVoiceRecorderOptions) {
 
   async function send() {
     if (!transcript.trim()) return;
-    await onSubmit({
+
+    const result = {
       text: transcript.trim(),
       rawText: rawTranscript,
       provider,
       audioDurationMs: durationMs,
-    });
+    };
+    // Limpa o campo antes de esperar a resposta da IA, igual ao modo texto —
+    // senão a transcrição fica parada na tela até a resposta inteira voltar,
+    // dando a impressão de que a mensagem não foi enviada.
     setState("idle");
     setTranscript("");
+    await onSubmit(result);
   }
 
   return {
