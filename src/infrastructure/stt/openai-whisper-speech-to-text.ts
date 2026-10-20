@@ -43,10 +43,19 @@ export class OpenAiWhisperSpeechToText implements SpeechToText {
     // Sem `prompt`: whisper-1 tende a ser mais literal que os modelos de
     // transcrição mais novos baseados em chat, e um prompt de estilo poderia
     // enviesá-lo a "corrigir" o erro gramatical que a Fase 3 precisa detectar.
+    //
+    // `language: "en"` é obrigatório aqui: a conversa é sempre em inglês (seção
+    // 1 do CLAUDE.md), e sem essa pista o Whisper detecta o idioma sozinho a
+    // partir do áudio — com sotaque brasileiro ou áudio curto/ruidoso, ele
+    // pode errar a detecção e devolver a transcrição em português em vez de
+    // inglês (bug relatado pelo usuário em 2026-10-20). Fixar o idioma evita
+    // a detecção errada sem arriscar "traduzir": o endpoint de transcriptions
+    // nunca traduz, só transcreve no idioma indicado.
     const transcription = await this.client.audio.transcriptions.create({
       file,
       model: "whisper-1",
       response_format: "json",
+      language: "en",
     });
 
     return { text: transcription.text, provider: PROVIDER_NAME };

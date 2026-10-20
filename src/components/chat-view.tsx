@@ -43,6 +43,7 @@ export function ChatView({
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const composerFieldRef = useRef<HTMLTextAreaElement>(null);
 
   const userMessageCount = useMemo(
     () => messages.filter((message) => message.role === "user").length,
@@ -120,6 +121,17 @@ export function ChatView({
       }),
   });
 
+  const composerValue = voice.state === "review" ? voice.transcript : input;
+
+  // Cresce a altura do campo com o conteúdo (reseta pra 1 linha antes de medir,
+  // senão scrollHeight nunca encolhe quando o texto diminui).
+  useEffect(() => {
+    const field = composerFieldRef.current;
+    if (!field) return;
+    field.style.height = "auto";
+    field.style.height = `${field.scrollHeight}px`;
+  }, [composerValue]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (voice.state === "review") {
@@ -132,8 +144,9 @@ export function ChatView({
     await sendMessage({ content, inputMode: "text" });
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       event.currentTarget.form?.requestSubmit();
     }
   }
@@ -308,9 +321,10 @@ export function ChatView({
                 <span className="text-sm text-muted-foreground">Transcrevendo…</span>
               </div>
             ) : (
-              <div className="flex h-[60px] items-center gap-2 rounded-full border border-line bg-bg px-2.5 pl-5 focus-within:border-acc">
-                <input
-                  value={voice.state === "review" ? voice.transcript : input}
+              <div className="flex min-h-[60px] items-end gap-2 rounded-[28px] border border-line bg-bg px-2.5 py-2 pl-5 focus-within:border-acc">
+                <textarea
+                  ref={composerFieldRef}
+                  value={composerValue}
                   onChange={(event) =>
                     voice.state === "review"
                       ? voice.setTranscript(event.target.value)
@@ -319,7 +333,8 @@ export function ChatView({
                   onKeyDown={handleKeyDown}
                   placeholder="Escreva em inglês…"
                   disabled={isSending}
-                  className="h-full flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
+                  rows={1}
+                  className="max-h-40 flex-1 resize-none self-center overflow-y-auto bg-transparent py-1.5 text-[16px] leading-6 outline-none placeholder:text-muted-foreground"
                 />
                 <button
                   type="button"
