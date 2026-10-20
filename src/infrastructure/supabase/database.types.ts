@@ -33,6 +33,7 @@ export type Database = {
           id: string;
           model: string | null;
           status: string;
+          summary: Json | null;
         };
         ComputedFields: never;
         Insert: {
@@ -44,6 +45,7 @@ export type Database = {
           id?: string;
           model?: string | null;
           status?: string;
+          summary?: Json | null;
         };
         Update: {
           attempts?: number;
@@ -54,6 +56,7 @@ export type Database = {
           id?: string;
           model?: string | null;
           status?: string;
+          summary?: Json | null;
         };
         Relationships: [
           {

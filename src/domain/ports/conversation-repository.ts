@@ -11,4 +11,5 @@ export interface CreateConversationInput {
 export interface ConversationRepository {
   create(input: CreateConversationInput): Promise<Conversation>;
   findById(id: string): Promise<Conversation | null>;
+  finish(id: string): Promise<void>;
 }

@@ -58,4 +58,13 @@ export class SupabaseConversationRepository implements ConversationRepository {
     if (error) throw error;
     return data ? toConversation(data) : null;
   }
+
+  async finish(id: string): Promise<void> {
+    const { error } = await this.client
+      .from("conversations")
+      .update({ status: "finished", ended_at: new Date().toISOString() })
+      .eq("id", id);
+
+    if (error) throw error;
+  }
 }
