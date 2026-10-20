@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { StartConversation } from "@/application/use-cases/start-conversation";
 import { SendMessage, type SendMessageResult } from "@/application/use-cases/send-message";
@@ -183,14 +184,21 @@ export async function finishConversationAction(formData: FormData) {
     userId: user.id,
   });
 
-  try {
-    await buildAnalyzeConversation(serviceRoleClient, user.id).execute(analysisId);
-  } catch (error) {
-    // O use case já marcou a analysis como failed; a tela de resultados mostra
-    // esse estado e oferece "tentar novamente". Registramos aqui só para
-    // observabilidade (hoje isso não gerava log nenhum).
-    logError("analyze_conversation_failed", { analysisId, userId: user.id }, error);
-  }
+  // A análise (chamada de LLM, 6-8s) roda depois da resposta HTTP ser enviada
+  // — o usuário não espera por ela, e o request não arrisca estourar o tempo
+  // limite de uma function serverless (seção 11 do CLAUDE.md: a conversa nunca
+  // pode ser perdida por falha de análise). A tela de Resultados faz polling
+  // enquanto o status for pending/processing e tem "tentar novamente" se falhar.
+  after(async () => {
+    try {
+      await buildAnalyzeConversation(serviceRoleClient, user.id).execute(analysisId);
+    } catch (error) {
+      // O use case já marcou a analysis como failed; a tela de resultados mostra
+      // esse estado e oferece "tentar novamente". Registramos aqui só para
+      // observabilidade (hoje isso não gerava log nenhum).
+      logError("analyze_conversation_failed", { analysisId, userId: user.id }, error);
+    }
+  });
 
   redirect(`/conversations/${parsed.conversationId}/results`);
 }
@@ -217,17 +225,18 @@ export async function retryAnalysisAction(formData: FormData) {
   );
   if (!conversation || conversation.userId !== user.id) throw new Error("Not authorized.");
 
-  try {
-    await buildAnalyzeConversation(createSupabaseServiceRoleClient(), user.id).execute(
-      parsed.analysisId,
-    );
-  } catch (error) {
-    logError(
-      "analyze_conversation_failed",
-      { analysisId: parsed.analysisId, userId: user.id, retry: true },
-      error,
-    );
-  }
+  const serviceRoleClient = createSupabaseServiceRoleClient();
+  after(async () => {
+    try {
+      await buildAnalyzeConversation(serviceRoleClient, user.id).execute(parsed.analysisId);
+    } catch (error) {
+      logError(
+        "analyze_conversation_failed",
+        { analysisId: parsed.analysisId, userId: user.id, retry: true },
+        error,
+      );
+    }
+  });
 
   revalidatePath(`/conversations/${conversation.id}/results`);
 }

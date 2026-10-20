@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { retryAnalysisAction } from "@/app/conversations/actions";
 import { FlashcardSuggestionsPanel } from "@/components/flashcard-suggestions-panel";
+import { ResultsPolling } from "@/components/results-polling";
 import { TranscriptView, type TranscriptMessage } from "@/components/transcript-view";
 import { DIFFICULTY_LABELS } from "@/lib/difficulty-labels";
 import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP, XP_REWARDS } from "@/domain/rules/xp-rewards";
@@ -44,6 +45,12 @@ export default async function ConversationResultsPage({
   const analysis = await new SupabaseAnalysisRepository(supabase).findLatestByConversationId(id);
   if (!analysis) notFound();
 
+  const statusLabel =
+    analysis.status === "completed"
+      ? "Análise concluída"
+      : analysis.status === "failed"
+        ? "Falha na análise"
+        : "Analisando conversa";
   const resultsHeader = (
     <>
       <Link
@@ -54,7 +61,7 @@ export default async function ConversationResultsPage({
         Início
       </Link>
       <p className="mt-2 text-sm text-muted-foreground">
-        Análise concluída · {topicTitle} · {DIFFICULTY_LABELS[conversation.difficulty]}
+        {statusLabel} · {topicTitle} · {DIFFICULTY_LABELS[conversation.difficulty]}
       </p>
     </>
   );
@@ -87,6 +94,7 @@ export default async function ConversationResultsPage({
   if (analysis.status !== "completed") {
     return (
       <main className="mx-auto max-w-[1120px] flex-1 px-6 pt-10 pb-[60px] sm:px-10">
+        <ResultsPolling />
         {resultsHeader}
         <div className="mt-6 flex items-center gap-3 rounded-card border border-line bg-surface p-6">
           <span className="size-5 animate-spin rounded-full border-2 border-acc border-t-transparent" />

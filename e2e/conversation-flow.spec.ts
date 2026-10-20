@@ -33,7 +33,13 @@ test("start a conversation, chat with the real AI, finish it, and see results", 
   await page.getByRole("button", { name: "Finalizar conversa" }).click();
   await page.waitForURL(/\/conversations\/[0-9a-f-]+\/results$/, { timeout: 60_000 });
 
-  await expect(page.getByRole("heading", { name: /^Boa conversa,/ })).toBeVisible();
+  // A análise agora roda depois da resposta HTTP (next/server after(), ver
+  // conversations/actions.ts), então a página pode chegar mostrando "Analisando
+  // conversa" primeiro; o polling da própria página (ResultsPolling) atualiza
+  // sozinho até o status virar completed/failed — daí o timeout maior aqui.
+  await expect(page.getByRole("heading", { name: /^Boa conversa,/ })).toBeVisible({
+    timeout: 30_000,
+  });
   await expect(
     page.getByRole("heading", { name: "Não foi possível analisar esta conversa" }),
   ).toHaveCount(0);
