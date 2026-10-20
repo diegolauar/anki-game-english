@@ -5,6 +5,7 @@ import {
   FakeConversationAgent,
   FakeConversationRepository,
   FakeMessageRepository,
+  FakeSpeechTranscriptionRepository,
   FakeTopicRepository,
 } from "./fakes";
 
@@ -27,13 +28,22 @@ function buildUseCase() {
   const messageRepository = new FakeMessageRepository();
   const topicRepository = new FakeTopicRepository();
   const conversationAgent = new FakeConversationAgent();
+  const speechTranscriptionRepository = new FakeSpeechTranscriptionRepository();
   const useCase = new SendMessage(
     conversationRepository,
     messageRepository,
     topicRepository,
     conversationAgent,
+    speechTranscriptionRepository,
   );
-  return { useCase, conversationRepository, messageRepository, topicRepository, conversationAgent };
+  return {
+    useCase,
+    conversationRepository,
+    messageRepository,
+    topicRepository,
+    conversationAgent,
+    speechTranscriptionRepository,
+  };
 }
 
 describe("SendMessage", () => {
@@ -179,5 +189,62 @@ describe("SendMessage", () => {
     });
 
     expect(conversationAgent.calls[0].topic).toBe("Travel");
+  });
+
+  it("stores the raw voice transcription linked to the new user message", async () => {
+    const { useCase, conversationRepository, speechTranscriptionRepository } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+
+    const result = await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "I wake up at 7am.",
+      inputMode: "voice",
+      clientMessageId: "client-1",
+      voiceTranscription: {
+        rawText: "I wake up at seven am",
+        provider: "openai-whisper",
+        audioDurationMs: 4200,
+      },
+    });
+
+    expect(speechTranscriptionRepository.transcriptions).toHaveLength(1);
+    expect(speechTranscriptionRepository.transcriptions[0]).toMatchObject({
+      messageId: result.userMessage.id,
+      rawText: "I wake up at seven am",
+      provider: "openai-whisper",
+      audioDurationMs: 4200,
+    });
+  });
+
+  it("does not create a duplicate transcription on a retried voice message", async () => {
+    const { useCase, conversationRepository, speechTranscriptionRepository } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+
+    const voiceTranscription = {
+      rawText: "I wake up at seven am",
+      provider: "openai-whisper",
+      audioDurationMs: 4200,
+    };
+
+    await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "I wake up at 7am.",
+      inputMode: "voice",
+      clientMessageId: "client-1",
+      voiceTranscription,
+    });
+
+    await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "I wake up at 7am.",
+      inputMode: "voice",
+      clientMessageId: "client-1",
+      voiceTranscription,
+    });
+
+    expect(speechTranscriptionRepository.transcriptions).toHaveLength(1);
   });
 });

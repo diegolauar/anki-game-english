@@ -2,8 +2,15 @@ import type { Message } from "@/domain/entities/message";
 import type { ConversationAgent } from "@/domain/ports/conversation-agent";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
 import type { MessageRepository } from "@/domain/ports/message-repository";
+import type { SpeechTranscriptionRepository } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { InputMode } from "@/domain/value-objects/input-mode";
+
+export interface VoiceTranscriptionInput {
+  rawText: string;
+  provider: string;
+  audioDurationMs: number | null;
+}
 
 export interface SendMessageInput {
   conversationId: string;
@@ -11,6 +18,7 @@ export interface SendMessageInput {
   content: string;
   inputMode: InputMode;
   clientMessageId: string;
+  voiceTranscription?: VoiceTranscriptionInput;
 }
 
 export interface SendMessageResult {
@@ -28,6 +36,7 @@ export class SendMessage {
     private readonly messageRepository: MessageRepository,
     private readonly topicRepository: TopicRepository,
     private readonly conversationAgent: ConversationAgent,
+    private readonly speechTranscriptionRepository: SpeechTranscriptionRepository,
   ) {}
 
   async execute(input: SendMessageInput): Promise<SendMessageResult> {
@@ -40,11 +49,13 @@ export class SendMessage {
       throw new Error("This conversation is no longer active.");
     }
 
+    const existingUserMessage = await this.messageRepository.findByClientMessageId(
+      input.conversationId,
+      input.clientMessageId,
+    );
+
     const userMessage =
-      (await this.messageRepository.findByClientMessageId(
-        input.conversationId,
-        input.clientMessageId,
-      )) ??
+      existingUserMessage ??
       (await this.messageRepository.create({
         conversationId: input.conversationId,
         role: "user",
@@ -52,6 +63,15 @@ export class SendMessage {
         inputMode: input.inputMode,
         clientMessageId: input.clientMessageId,
       }));
+
+    if (!existingUserMessage && input.voiceTranscription) {
+      await this.speechTranscriptionRepository.create({
+        messageId: userMessage.id,
+        rawText: input.voiceTranscription.rawText,
+        provider: input.voiceTranscription.provider,
+        audioDurationMs: input.voiceTranscription.audioDurationMs,
+      });
+    }
 
     const assistantId = assistantClientMessageId(input.clientMessageId);
     const existingAssistantMessage = await this.messageRepository.findByClientMessageId(

@@ -6,6 +6,7 @@ import type { Flashcard } from "@/domain/entities/flashcard";
 import type { LearningPoint } from "@/domain/entities/learning-point";
 import type { Message } from "@/domain/entities/message";
 import type { ReviewLog } from "@/domain/entities/review-log";
+import type { SpeechTranscription } from "@/domain/entities/speech-transcription";
 import type { Topic } from "@/domain/entities/topic";
 import type {
   AnalysisAgent,
@@ -36,6 +37,10 @@ import type {
 import type { CreateMessageInput, MessageRepository } from "@/domain/ports/message-repository";
 import type { CreateReviewLogInput, ReviewLogRepository } from "@/domain/ports/review-log-repository";
 import type { ReviewOutcome, ReviewScheduler } from "@/domain/ports/review-scheduler";
+import type {
+  CreateSpeechTranscriptionInput,
+  SpeechTranscriptionRepository,
+} from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
 import type { Rating } from "@/domain/value-objects/rating";
@@ -141,6 +146,23 @@ export class FakeTopicRepository implements TopicRepository {
 
   async findById(id: string): Promise<Topic | null> {
     return this.topics.find((topic) => topic.id === id) ?? null;
+  }
+}
+
+export class FakeSpeechTranscriptionRepository implements SpeechTranscriptionRepository {
+  transcriptions: SpeechTranscription[] = [];
+
+  async create(input: CreateSpeechTranscriptionInput): Promise<SpeechTranscription> {
+    const transcription: SpeechTranscription = {
+      id: nextId("speech-transcription"),
+      messageId: input.messageId,
+      rawText: input.rawText,
+      provider: input.provider,
+      audioDurationMs: input.audioDurationMs,
+      createdAt: new Date().toISOString(),
+    };
+    this.transcriptions.push(transcription);
+    return transcription;
   }
 }
 

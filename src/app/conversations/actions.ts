@@ -9,6 +9,7 @@ import { SendMessage, type SendMessageResult } from "@/application/use-cases/sen
 import { FinishConversation } from "@/application/use-cases/finish-conversation";
 import { AnalyzeConversation } from "@/application/use-cases/analyze-conversation";
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
+import { INPUT_MODES } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
@@ -16,6 +17,7 @@ import { SupabaseFindingRepository } from "@/infrastructure/supabase/finding-rep
 import { SupabaseFlashcardRepository } from "@/infrastructure/supabase/flashcard-repository";
 import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
 import { SupabaseMessageRepository } from "@/infrastructure/supabase/message-repository";
+import { SupabaseSpeechTranscriptionRepository } from "@/infrastructure/supabase/speech-transcription-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { OpenAiConversationAgent } from "@/infrastructure/llm/openai-conversation-agent";
 import { OpenAiAnalysisAgent } from "@/infrastructure/llm/openai-analysis-agent";
@@ -70,16 +72,26 @@ export async function startConversationAction(formData: FormData) {
   redirect(`/conversations/${conversation.id}`);
 }
 
+const voiceTranscriptionSchema = z.object({
+  rawText: z.string().min(1),
+  provider: z.string().min(1),
+  audioDurationMs: z.number().int().positive().nullable(),
+});
+
 const sendMessageSchema = z.object({
   conversationId: z.string().uuid(),
   content: z.string().trim().min(1).max(2000),
   clientMessageId: z.string().min(1),
+  inputMode: z.enum(INPUT_MODES).default("text"),
+  voiceTranscription: voiceTranscriptionSchema.optional(),
 });
 
 export async function sendMessageAction(input: {
   conversationId: string;
   content: string;
   clientMessageId: string;
+  inputMode?: "text" | "voice";
+  voiceTranscription?: { rawText: string; provider: string; audioDurationMs: number | null };
 }): Promise<SendMessageResult> {
   const parsed = sendMessageSchema.parse(input);
 
@@ -94,14 +106,16 @@ export async function sendMessageAction(input: {
     new SupabaseMessageRepository(supabase),
     new SupabaseTopicRepository(supabase),
     new OpenAiConversationAgent(),
+    new SupabaseSpeechTranscriptionRepository(supabase),
   );
 
   const result = await useCase.execute({
     conversationId: parsed.conversationId,
     userId: user.id,
     content: parsed.content,
-    inputMode: "text",
+    inputMode: parsed.inputMode,
     clientMessageId: parsed.clientMessageId,
+    voiceTranscription: parsed.voiceTranscription,
   });
 
   revalidatePath(`/conversations/${parsed.conversationId}`);
