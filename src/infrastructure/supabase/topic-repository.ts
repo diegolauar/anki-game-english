@@ -4,6 +4,22 @@ import type { Difficulty } from "@/domain/value-objects/difficulty";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { Database } from "@/infrastructure/supabase/database.types";
 
+type TopicRow = Pick<
+  Database["public"]["Tables"]["topics"]["Row"],
+  "id" | "slug" | "title" | "description" | "category" | "difficulty"
+>;
+
+function toTopic(row: TopicRow): Topic {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    difficulty: row.difficulty as Difficulty,
+  };
+}
+
 export class SupabaseTopicRepository implements TopicRepository {
   constructor(private readonly client: SupabaseClient<Database>) {}
 
@@ -16,13 +32,17 @@ export class SupabaseTopicRepository implements TopicRepository {
 
     if (error) throw error;
 
-    return data.map((row) => ({
-      id: row.id,
-      slug: row.slug,
-      title: row.title,
-      description: row.description,
-      category: row.category,
-      difficulty: row.difficulty as Difficulty,
-    }));
+    return data.map(toTopic);
+  }
+
+  async findById(id: string): Promise<Topic | null> {
+    const { data, error } = await this.client
+      .from("topics")
+      .select("id, slug, title, description, category, difficulty")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data ? toTopic(data) : null;
   }
 }

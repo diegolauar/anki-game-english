@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
@@ -25,24 +26,32 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-semibold">
           Olá, {profile?.displayName ?? user.email}
         </h1>
-        <form action="/auth/sign-out" method="post">
-          <Button type="submit" variant="outline">
-            Sair
-          </Button>
-        </form>
+        <div className="flex gap-2">
+          <Button render={<Link href="/conversations/new">Nova conversa</Link>} />
+          <form action="/auth/sign-out" method="post">
+            <Button type="submit" variant="outline">
+              Sair
+            </Button>
+          </form>
+        </div>
       </header>
 
       <section className="mt-8">
         <h2 className="text-lg font-medium">Temas para conversar</h2>
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {topics.map((topic) => (
-            <li key={topic.id} className="rounded-lg border p-4">
-              <p className="font-medium">{topic.title}</p>
-              {topic.description && (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {topic.description}
-                </p>
-              )}
+            <li key={topic.id}>
+              <Link
+                href={`/conversations/new?topicId=${topic.id}`}
+                className="block rounded-lg border p-4 transition-colors hover:border-primary"
+              >
+                <p className="font-medium">{topic.title}</p>
+                {topic.description && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {topic.description}
+                  </p>
+                )}
+              </Link>
             </li>
           ))}
         </ul>

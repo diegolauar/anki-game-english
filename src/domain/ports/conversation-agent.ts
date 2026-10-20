@@ -1,0 +1,17 @@
+import type { Difficulty } from "@/domain/value-objects/difficulty";
+import type { MessageRole } from "@/domain/value-objects/message-role";
+
+export interface ConversationTurn {
+  role: MessageRole;
+  content: string;
+}
+
+export interface ConversationReplyInput {
+  topic: string;
+  difficulty: Difficulty;
+  history: ConversationTurn[];
+}
+
+export interface ConversationAgent {
+  reply(input: ConversationReplyInput): Promise<string>;
+}
