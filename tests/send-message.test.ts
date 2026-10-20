@@ -6,6 +6,7 @@ import {
   FakeConversationRepository,
   FakeDailyUsageRepository,
   FakeMessageRepository,
+  FakeRateLimitRepository,
   FakeSpeechTranscriptionRepository,
   FakeTopicRepository,
   FakeUserProfileRepository,
@@ -33,6 +34,7 @@ function buildUseCase() {
   const speechTranscriptionRepository = new FakeSpeechTranscriptionRepository();
   const userProfileRepository = new FakeUserProfileRepository();
   const dailyUsageRepository = new FakeDailyUsageRepository();
+  const rateLimitRepository = new FakeRateLimitRepository();
   const useCase = new SendMessage(
     conversationRepository,
     messageRepository,
@@ -41,6 +43,7 @@ function buildUseCase() {
     speechTranscriptionRepository,
     userProfileRepository,
     dailyUsageRepository,
+    rateLimitRepository,
   );
   return {
     useCase,
@@ -51,6 +54,7 @@ function buildUseCase() {
     speechTranscriptionRepository,
     userProfileRepository,
     dailyUsageRepository,
+    rateLimitRepository,
   };
 }
 
@@ -309,6 +313,69 @@ describe("SendMessage", () => {
         inputMode: "voice",
         clientMessageId: "client-1",
         voiceTranscription: { rawText: "one more", provider: "openai-whisper", audioDurationMs: 3000 },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("blocks a new message once the per-minute rate limit is reached", async () => {
+    const { useCase, conversationRepository, rateLimitRepository } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+    rateLimitRepository.recentCount = 8;
+
+    await expect(
+      useCase.execute({
+        conversationId: "conversation-1",
+        userId: "user-1",
+        content: "Too fast",
+        inputMode: "text",
+        clientMessageId: "client-1",
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("does not block a retried message even if the rate limit was already reached", async () => {
+    const { useCase, conversationRepository, messageRepository, rateLimitRepository } =
+      buildUseCase();
+    conversationRepository.seed(buildConversation());
+    await messageRepository.create({
+      conversationId: "conversation-1",
+      role: "user",
+      content: "Already sent",
+      inputMode: "text",
+      clientMessageId: "client-1",
+    });
+    rateLimitRepository.recentCount = 8;
+
+    const result = await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "Already sent",
+      inputMode: "text",
+      clientMessageId: "client-1",
+    });
+
+    expect(result.userMessage.content).toBe("Already sent");
+  });
+
+  it("respects a custom per-minute rate limit from the user's preferences", async () => {
+    const { useCase, conversationRepository, userProfileRepository, rateLimitRepository } =
+      buildUseCase();
+    conversationRepository.seed(buildConversation());
+    userProfileRepository.seed({
+      id: "user-1",
+      displayName: null,
+      targetLevel: "beginner",
+      preferences: { messagesPerMinuteLimit: 2 },
+    });
+    rateLimitRepository.recentCount = 2;
+
+    await expect(
+      useCase.execute({
+        conversationId: "conversation-1",
+        userId: "user-1",
+        content: "Over the custom rate limit",
+        inputMode: "text",
+        clientMessageId: "client-1",
       }),
     ).rejects.toThrow();
   });

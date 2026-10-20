@@ -37,6 +37,7 @@ import type {
   LearningPointWriter,
 } from "@/domain/ports/learning-point-writer";
 import type { CreateMessageInput, MessageRepository } from "@/domain/ports/message-repository";
+import type { RateLimitRepository } from "@/domain/ports/rate-limit-repository";
 import type { CreateReviewLogInput, ReviewLogRepository } from "@/domain/ports/review-log-repository";
 import type { ReviewOutcome, ReviewScheduler } from "@/domain/ports/review-scheduler";
 import type {
@@ -231,6 +232,14 @@ export class FakeDailyUsageRepository implements DailyUsageRepository {
 
   async getTodayUsage(): Promise<DailyUsage> {
     return this.usage;
+  }
+}
+
+export class FakeRateLimitRepository implements RateLimitRepository {
+  recentCount = 0;
+
+  async countRecentUserMessages(): Promise<number> {
+    return this.recentCount;
   }
 }
 

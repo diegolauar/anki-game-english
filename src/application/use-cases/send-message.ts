@@ -3,10 +3,15 @@ import type { ConversationAgent } from "@/domain/ports/conversation-agent";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
 import type { DailyUsageRepository } from "@/domain/ports/daily-usage-repository";
 import type { MessageRepository } from "@/domain/ports/message-repository";
+import type { RateLimitRepository } from "@/domain/ports/rate-limit-repository";
 import type { SpeechTranscriptionRepository } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
 import { getDailyMessageLimit, getDailyVoiceMinutesLimit } from "@/domain/rules/daily-limits";
+import {
+  getMessagesPerMinuteLimit,
+  RATE_LIMIT_WINDOW_SECONDS,
+} from "@/domain/rules/rate-limits";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 
 export interface VoiceTranscriptionInput {
@@ -42,6 +47,7 @@ export class SendMessage {
     private readonly speechTranscriptionRepository: SpeechTranscriptionRepository,
     private readonly userProfileRepository: UserProfileRepository,
     private readonly dailyUsageRepository: DailyUsageRepository,
+    private readonly rateLimitRepository: RateLimitRepository,
   ) {}
 
   async execute(input: SendMessageInput): Promise<SendMessageResult> {
@@ -60,7 +66,7 @@ export class SendMessage {
     );
 
     if (!existingUserMessage) {
-      await this.assertWithinDailyLimits(input);
+      await this.assertWithinLimits(input);
     }
 
     const userMessage =
@@ -112,12 +118,19 @@ export class SendMessage {
     return { userMessage, assistantMessage };
   }
 
-  private async assertWithinDailyLimits(input: SendMessageInput): Promise<void> {
-    const [profile, usage] = await Promise.all([
+  private async assertWithinLimits(input: SendMessageInput): Promise<void> {
+    const since = new Date(Date.now() - RATE_LIMIT_WINDOW_SECONDS * 1000);
+    const [profile, usage, recentMessageCount] = await Promise.all([
       this.userProfileRepository.getById(input.userId),
       this.dailyUsageRepository.getTodayUsage(input.userId),
+      this.rateLimitRepository.countRecentUserMessages(input.userId, since),
     ]);
     const preferences = profile?.preferences ?? {};
+
+    const rateLimit = getMessagesPerMinuteLimit(preferences);
+    if (recentMessageCount >= rateLimit) {
+      throw new Error("Rate limit reached. Please slow down and try again in a moment.");
+    }
 
     const messageLimit = getDailyMessageLimit(preferences);
     if (usage.messageCount >= messageLimit) {

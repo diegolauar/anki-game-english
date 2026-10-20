@@ -24,6 +24,7 @@ import { SupabaseSpeechTranscriptionRepository } from "@/infrastructure/supabase
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 import { SupabaseDailyUsageRepository } from "@/infrastructure/supabase/daily-usage-repository";
+import { SupabaseRateLimitRepository } from "@/infrastructure/supabase/rate-limit-repository";
 import { SupabaseXpEventWriter } from "@/infrastructure/supabase/xp-event-writer";
 import { SupabaseLlmUsageRepository } from "@/infrastructure/supabase/llm-usage-repository";
 import { OpenAiConversationAgent } from "@/infrastructure/llm/openai-conversation-agent";
@@ -138,6 +139,7 @@ export async function sendMessageAction(input: {
     new SupabaseSpeechTranscriptionRepository(supabase),
     new SupabaseUserProfileRepository(supabase),
     new SupabaseDailyUsageRepository(supabase),
+    new SupabaseRateLimitRepository(supabase),
   );
 
   const result = await useCase.execute({
