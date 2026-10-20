@@ -1,9 +1,44 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Flashcard } from "@/domain/entities/flashcard";
 import type { CardSchedule, ScheduleSnapshot } from "@/domain/entities/card-schedule";
 import type { CardScheduleRepository, DueFlashcard } from "@/domain/ports/card-schedule-repository";
+import type { CardType } from "@/domain/value-objects/card-type";
 import type { CardState } from "@/domain/value-objects/card-state";
+import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
 import type { Database } from "@/infrastructure/supabase/database.types";
-import { FLASHCARD_COLUMNS, toFlashcard } from "@/infrastructure/supabase/flashcard-repository";
+
+const FLASHCARD_WITH_SCHEDULE_COLUMNS =
+  "id, user_id, learning_point_id, source_finding_id, card_type, front, back, explanation, status, created_at, updated_at, due_at, stability, difficulty, reps, lapses, state, last_reviewed_at";
+
+type FlashcardWithScheduleRow =
+  Database["public"]["Views"]["flashcards_with_schedule"]["Row"];
+
+function toDueFlashcard(row: FlashcardWithScheduleRow): DueFlashcard {
+  const flashcard: Flashcard = {
+    id: row.id!,
+    userId: row.user_id!,
+    learningPointId: row.learning_point_id,
+    sourceFindingId: row.source_finding_id,
+    cardType: row.card_type as CardType,
+    front: row.front!,
+    back: row.back!,
+    explanation: row.explanation,
+    status: row.status as FlashcardStatus,
+    createdAt: row.created_at!,
+    updatedAt: row.updated_at!,
+  };
+  const schedule: CardSchedule = {
+    flashcardId: row.id!,
+    dueAt: row.due_at!,
+    stability: row.stability!,
+    difficulty: row.difficulty!,
+    reps: row.reps!,
+    lapses: row.lapses!,
+    state: row.state as CardState,
+    lastReviewedAt: row.last_reviewed_at,
+  };
+  return { flashcard, schedule };
+}
 
 type ScheduleRow = Pick<
   Database["public"]["Tables"]["card_schedules"]["Row"],
@@ -80,35 +115,18 @@ export class SupabaseCardScheduleRepository implements CardScheduleRepository {
   }
 
   async listDueForUser(userId: string, now: Date): Promise<DueFlashcard[]> {
-    const { data: flashcardRows, error: flashcardError } = await this.client
-      .from("flashcards")
-      .select(FLASHCARD_COLUMNS)
+    // `flashcards_with_schedule` (ver migração 20261020180000) já junta as
+    // duas tabelas — uma consulta em vez de buscar os flashcards do usuário e
+    // depois os schedules correspondentes para juntar em memória.
+    const { data, error } = await this.client
+      .from("flashcards_with_schedule")
+      .select(FLASHCARD_WITH_SCHEDULE_COLUMNS)
       .eq("user_id", userId)
-      .eq("status", "active");
-
-    if (flashcardError) throw flashcardError;
-    if (flashcardRows.length === 0) return [];
-
-    const { data: scheduleRows, error: scheduleError } = await this.client
-      .from("card_schedules")
-      .select(SCHEDULE_COLUMNS)
-      .in(
-        "flashcard_id",
-        flashcardRows.map((row) => row.id),
-      )
+      .eq("status", "active")
       .lte("due_at", now.toISOString());
 
-    if (scheduleError) throw scheduleError;
-
-    const scheduleByFlashcardId = new Map(scheduleRows.map((row) => [row.flashcard_id, row]));
-
-    const due: DueFlashcard[] = [];
-    for (const flashcardRow of flashcardRows) {
-      const scheduleRow = scheduleByFlashcardId.get(flashcardRow.id);
-      if (!scheduleRow) continue;
-      due.push({ flashcard: toFlashcard(flashcardRow), schedule: toCardSchedule(scheduleRow) });
-    }
-    return due;
+    if (error) throw error;
+    return data.map(toDueFlashcard);
   }
 
   async listByFlashcardIds(flashcardIds: string[]): Promise<CardSchedule[]> {

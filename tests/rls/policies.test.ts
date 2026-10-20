@@ -204,6 +204,66 @@ describe("analyses, findings, learning_points (service-role-only writes)", () =>
   });
 });
 
+describe("views (security_invoker — still enforce the underlying RLS)", () => {
+  it("user_messages hides another user's messages", async () => {
+    const { data: conversation } = await userB.client
+      .from("conversations")
+      .insert({ user_id: userB.id, custom_topic: "View RLS test", difficulty: "beginner" })
+      .select()
+      .single();
+    await userB.client.from("messages").insert({
+      conversation_id: conversation!.id,
+      role: "user",
+      content: "User B's message",
+      input_mode: "text",
+      sequence: 1,
+      client_message_id: randomUUID(),
+    });
+
+    const ownerRead = await userB.client
+      .from("user_messages")
+      .select("id")
+      .eq("conversation_id", conversation!.id);
+    expect(ownerRead.data).toHaveLength(1);
+
+    const otherRead = await userA.client
+      .from("user_messages")
+      .select("id")
+      .eq("conversation_id", conversation!.id);
+    expect(otherRead.data).toEqual([]);
+  });
+
+  it("flashcards_with_schedule hides another user's flashcards", async () => {
+    const service = createServiceRoleTestClient();
+    const { data: flashcard } = await userB.client
+      .from("flashcards")
+      .insert({ user_id: userB.id, card_type: "manual", front: "front", back: "back", status: "active" })
+      .select()
+      .single();
+    await service.from("card_schedules").insert({
+      flashcard_id: flashcard!.id,
+      due_at: new Date().toISOString(),
+      stability: 0,
+      difficulty: 0,
+      reps: 0,
+      lapses: 0,
+      state: "new",
+    });
+
+    const ownerRead = await userB.client
+      .from("flashcards_with_schedule")
+      .select("id")
+      .eq("id", flashcard!.id);
+    expect(ownerRead.data).toHaveLength(1);
+
+    const otherRead = await userA.client
+      .from("flashcards_with_schedule")
+      .select("id")
+      .eq("id", flashcard!.id);
+    expect(otherRead.data).toEqual([]);
+  });
+});
+
 describe("xp_events (append-only, idempotent via unique constraint)", () => {
   it("blocks a regular user from awarding themselves XP directly", async () => {
     const { error } = await userA.client.from("xp_events").insert({

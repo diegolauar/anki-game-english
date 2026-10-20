@@ -6,20 +6,13 @@ export class SupabaseRateLimitRepository implements RateLimitRepository {
   constructor(private readonly client: SupabaseClient<Database>) {}
 
   async countRecentUserMessages(userId: string, since: Date): Promise<number> {
-    const { data: conversationRows, error: conversationError } = await this.client
-      .from("conversations")
-      .select("id")
-      .eq("user_id", userId);
-    if (conversationError) throw conversationError;
-
-    const conversationIds = conversationRows.map((row) => row.id);
-    if (conversationIds.length === 0) return 0;
-
+    // `user_messages` (ver migração 20261020180000) já traz o user_id da
+    // conversa — uma consulta em vez de buscar as conversas do usuário primeiro.
     const { count, error } = await this.client
-      .from("messages")
+      .from("user_messages")
       .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
       .eq("role", "user")
-      .in("conversation_id", conversationIds)
       .gte("created_at", since.toISOString());
     if (error) throw error;
 
