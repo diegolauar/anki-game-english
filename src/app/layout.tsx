@@ -40,6 +40,21 @@ async function getPendingReviewCount(): Promise<number> {
   return dueFlashcards.length;
 }
 
+// Roda antes da hidratação, direto no HTML, pra aplicar o tema (escolha salva
+// ou preferência do sistema) antes da primeira pintura — sem isso, a página
+// sempre abriria clara por um instante mesmo com o tema escuro escolhido.
+// A chave "theme" é a mesma de THEME_STORAGE_KEY em lib/theme.ts (não dá pra
+// importar o módulo aqui, então mantenha as duas em sincronia manualmente).
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var stored = localStorage.getItem("theme");
+    var isDark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (isDark) document.documentElement.classList.add("dark");
+  } catch (e) {}
+})();
+`;
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const pendingReviewCount = await getPendingReviewCount();
 
@@ -48,6 +63,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className={`${bricolage.variable} ${figtree.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col bg-bg text-ink">
         <AppChrome pendingReviewCount={pendingReviewCount}>{children}</AppChrome>
       </body>

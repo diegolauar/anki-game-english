@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, House, Layers, LogOut, MessagesSquare } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
@@ -62,6 +63,7 @@ export function BottomNav({ pendingReviewCount }: BottomNavProps) {
           </Link>
         );
       })}
+      <ThemeToggle />
       <form action="/auth/sign-out" method="post">
         <button
           type="submit"
