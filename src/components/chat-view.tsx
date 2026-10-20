@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Bot, Mic, Send } from "lucide-react";
 import { sendMessageAction } from "@/app/conversations/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,13 +97,22 @@ export function ChatView({ conversationId, initialMessages }: ChatViewProps) {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
-              message.role === "user"
-                ? "ml-auto bg-primary text-primary-foreground"
-                : "bg-muted"
-            }`}
+            className={`flex items-end gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            {message.content}
+            {message.role === "assistant" && (
+              <span className="mb-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Bot className="size-3.5" />
+              </span>
+            )}
+            <div
+              className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap ${
+                message.role === "user"
+                  ? "rounded-br-sm bg-primary text-primary-foreground"
+                  : "rounded-bl-sm bg-muted"
+              }`}
+            >
+              {message.content}
+            </div>
           </div>
         ))}
         <div ref={bottomRef} />
@@ -127,13 +137,22 @@ export function ChatView({ conversationId, initialMessages }: ChatViewProps) {
           <Button
             type="button"
             variant="outline"
+            size="icon"
             disabled={isSending}
             onClick={() => setIsRecording(true)}
+            aria-label="Gravar áudio"
           >
-            Gravar
+            <Mic />
           </Button>
           <Button type="submit" disabled={isSending || input.trim().length === 0}>
-            {isSending ? "..." : "Enviar"}
+            {isSending ? (
+              "..."
+            ) : (
+              <>
+                <Send />
+                Enviar
+              </>
+            )}
           </Button>
         </form>
       )}

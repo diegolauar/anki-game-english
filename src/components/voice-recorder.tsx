@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Mic, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const MAX_DURATION_MS = 60_000;
@@ -143,6 +144,7 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
         </p>
         <div className="flex gap-2">
           <Button type="button" onClick={startRecording}>
+            <Mic />
             Iniciar gravação
           </Button>
           <Button type="button" variant="ghost" onClick={onCancel}>
@@ -156,7 +158,10 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
   if (state === "recording") {
     return (
       <div className="flex items-center justify-between gap-2 border-t pt-3">
-        <p className="text-sm text-muted-foreground">Gravando... {elapsedSeconds}s / 60s</p>
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span className="size-2 rounded-full bg-destructive" aria-hidden />
+          Gravando... {elapsedSeconds}s / 60s
+        </p>
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={stopRecording}>
             Parar
@@ -194,6 +199,7 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
         />
         <div className="flex gap-2">
           <Button type="button" disabled={disabled} onClick={handleSend}>
+            <Send />
             Enviar
           </Button>
           <Button type="button" variant="outline" onClick={startRecording}>
@@ -212,6 +218,7 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
       {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={startRecording}>
+          <Mic />
           Tentar gravar novamente
         </Button>
         <Button type="button" variant="ghost" onClick={onCancel}>

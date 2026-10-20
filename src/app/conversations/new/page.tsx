@@ -1,7 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowLeft, MessageCirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TopicIcon } from "@/components/topic-icon";
 import { startConversationAction } from "@/app/conversations/actions";
 import { DIFFICULTIES, type Difficulty } from "@/domain/value-objects/difficulty";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
@@ -33,8 +36,15 @@ export default async function NewConversationPage({
   ]);
 
   return (
-    <main className="mx-auto max-w-xl flex-1 p-8">
-      <h1 className="text-2xl font-semibold">Nova conversa</h1>
+    <main className="mx-auto max-w-xl flex-1 p-6 sm:p-8">
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Voltar
+      </Link>
+      <h1 className="mt-2 text-2xl font-semibold">Nova conversa</h1>
 
       <form action={startConversationAction} className="mt-6 flex flex-col gap-6">
         <fieldset className="flex flex-col gap-2">
@@ -43,7 +53,7 @@ export default async function NewConversationPage({
             {topics.map((topic, index) => (
               <label
                 key={topic.id}
-                className="flex items-start gap-2 rounded-lg border p-3 text-sm has-[:checked]:border-primary"
+                className="flex items-start gap-2 rounded-xl border bg-card p-3 text-sm transition-colors has-checked:border-primary has-checked:bg-accent"
               >
                 <input
                   type="radio"
@@ -52,12 +62,15 @@ export default async function NewConversationPage({
                   defaultChecked={
                     preselectedTopicId ? topic.id === preselectedTopicId : index === 0
                   }
-                  className="mt-1"
+                  className="sr-only"
                 />
+                <TopicIcon category={topic.category} />
                 <span>
-                  <span className="font-medium">{topic.title}</span>
+                  <span className="block font-medium">{topic.title}</span>
                   {topic.description && (
-                    <span className="block text-muted-foreground">{topic.description}</span>
+                    <span className="mt-0.5 block text-muted-foreground">
+                      {topic.description}
+                    </span>
                   )}
                 </span>
               </label>
@@ -93,7 +106,10 @@ export default async function NewConversationPage({
           </select>
         </div>
 
-        <Button type="submit">Iniciar conversa</Button>
+        <Button type="submit">
+          <MessageCirclePlus />
+          Iniciar conversa
+        </Button>
       </form>
     </main>
   );
