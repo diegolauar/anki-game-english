@@ -118,4 +118,16 @@ export class SupabaseLearningPointRepository implements LearningPointRepository 
     if (error) throw error;
     return data.map(toLearningPoint);
   }
+
+  async listByIds(ids: string[]): Promise<LearningPoint[]> {
+    if (ids.length === 0) return [];
+
+    const { data, error } = await this.client
+      .from("learning_points")
+      .select(LEARNING_POINT_COLUMNS)
+      .in("id", ids);
+
+    if (error) throw error;
+    return data.map(toLearningPoint);
+  }
 }

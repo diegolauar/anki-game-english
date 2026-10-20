@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Figtree, Geist_Mono } from "next/font/google";
+import { AppChrome } from "@/components/app-chrome";
+import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -23,14 +26,30 @@ export const metadata: Metadata = {
   description: "Aprenda inglês conversando com uma IA.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+async function getPendingReviewCount(): Promise<number> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const dueFlashcards = await new SupabaseCardScheduleRepository(supabase).listDueForUser(
+    user.id,
+    new Date(),
+  );
+  return dueFlashcards.length;
+}
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const pendingReviewCount = await getPendingReviewCount();
+
   return (
     <html
       lang="pt-BR"
       className={`${bricolage.variable} ${figtree.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-ink">
-        {children}
+        <AppChrome pendingReviewCount={pendingReviewCount}>{children}</AppChrome>
       </body>
     </html>
   );

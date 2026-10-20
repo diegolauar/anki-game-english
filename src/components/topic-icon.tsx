@@ -1,24 +1,51 @@
-import { Briefcase, Clapperboard, Coffee, Newspaper, Sparkles, Users, type LucideIcon } from "lucide-react";
+import {
+  Clapperboard,
+  Clock,
+  Flag,
+  Gamepad2,
+  Hand,
+  IdCard,
+  Newspaper,
+  Plane,
+  Sparkles,
+  Terminal,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 
-const CATEGORY_STYLES: Record<string, { icon: LucideIcon; className: string }> = {
-  career: { icon: Briefcase, className: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-  lifestyle: { icon: Coffee, className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
-  social: { icon: Users, className: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
-  current_events: { icon: Newspaper, className: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
-  entertainment: { icon: Clapperboard, className: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+const SLUG_STYLES: Record<string, { icon: LucideIcon; hue: number }> = {
+  "daily-routine": { icon: Clock, hue: 180 },
+  travel: { icon: Plane, hue: 200 },
+  food: { icon: UtensilsCrossed, hue: 40 },
+  hobbies: { icon: Gamepad2, hue: 155 },
+  "job-interview": { icon: IdCard, hue: 250 },
+  "tech-career": { icon: Terminal, hue: 292 },
+  "small-talk": { icon: Hand, hue: 80 },
+  "opinions-news": { icon: Newspaper, hue: 330 },
+  "movies-series": { icon: Clapperboard, hue: 15 },
+  "future-plans": { icon: Flag, hue: 120 },
 };
 
-const FALLBACK_STYLE = {
-  icon: Sparkles,
-  className: "bg-muted text-muted-foreground",
-};
+const FALLBACK_HUE = 292;
 
-export function TopicIcon({ category }: { category: string | null }) {
-  const { icon: Icon, className } = (category && CATEGORY_STYLES[category]) || FALLBACK_STYLE;
+export function TopicIcon({
+  slug,
+  size = "sm",
+}: {
+  slug: string | null;
+  size?: "sm" | "md";
+}) {
+  const style = (slug && SLUG_STYLES[slug]) || { icon: Sparkles, hue: FALLBACK_HUE };
+  const Icon = style.icon;
+  const dimension = size === "md" ? "size-11" : "size-9";
+  const iconSize = size === "md" ? "size-[22px]" : "size-4";
 
   return (
-    <span className={`flex size-9 shrink-0 items-center justify-center rounded-full ${className}`}>
-      <Icon className="size-4" />
+    <span
+      className={`flex ${dimension} shrink-0 items-center justify-center rounded-control bg-[oklch(0.94_0.05_var(--tile-h))] text-[oklch(0.48_0.15_var(--tile-h))] dark:bg-[oklch(0.32_0.07_var(--tile-h))] dark:text-[oklch(0.85_0.12_var(--tile-h))]`}
+      style={{ "--tile-h": style.hue } as React.CSSProperties}
+    >
+      <Icon className={iconSize} />
     </span>
   );
 }

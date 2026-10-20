@@ -84,10 +84,13 @@ export async function startConversationAction(formData: FormData) {
     difficulty: formData.get("difficulty"),
   });
 
+  const rawMode = formData.get("mode");
+  const mode = rawMode === "voice" ? "voice" : "text";
+
   const useCase = new StartConversation(new SupabaseConversationRepository(supabase));
   const conversation = await useCase.execute({ userId: user.id, ...input });
 
-  redirect(`/conversations/${conversation.id}`);
+  redirect(`/conversations/${conversation.id}?mode=${mode}`);
 }
 
 const voiceTranscriptionSchema = z.object({

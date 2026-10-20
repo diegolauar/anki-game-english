@@ -44,7 +44,7 @@ export async function signInViaMagicLink(page: Page, email: string): Promise<voi
   await page.goto("/login");
   await page.getByLabel("E-mail").fill(email);
   await page.getByRole("button", { name: "Enviar link de acesso" }).click();
-  await page.getByText("Link enviado!").waitFor();
+  await page.getByText("Link enviado para").waitFor();
 
   const magicLink = await waitForMagicLink(email);
   await page.goto(magicLink);

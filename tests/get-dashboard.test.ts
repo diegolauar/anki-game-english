@@ -4,6 +4,7 @@ import {
   FakeAnalysisRepository,
   FakeCardScheduleRepository,
   FakeConversationRepository,
+  FakeFindingRepository,
   FakeLearningPointRepository,
   FakeMessageRepository,
   FakeReviewLogRepository,
@@ -22,6 +23,7 @@ function buildDashboard() {
   const analysisRepository = new FakeAnalysisRepository();
   const learningPointRepository = new FakeLearningPointRepository();
   const reviewLogRepository = new FakeReviewLogRepository();
+  const findingRepository = new FakeFindingRepository();
 
   const getDashboard = new GetDashboard(
     userProfileRepository,
@@ -33,6 +35,7 @@ function buildDashboard() {
     analysisRepository,
     learningPointRepository,
     reviewLogRepository,
+    findingRepository,
   );
 
   return {
@@ -44,6 +47,7 @@ function buildDashboard() {
     analysisRepository,
     learningPointRepository,
     reviewLogRepository,
+    findingRepository,
   };
 }
 

@@ -4,6 +4,7 @@ import type { UserProfile } from "@/domain/entities/user-profile";
 import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
 import type { CardScheduleRepository } from "@/domain/ports/card-schedule-repository";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
+import type { FindingRepository } from "@/domain/ports/finding-repository";
 import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
 import type { MessageRepository } from "@/domain/ports/message-repository";
 import type { ReviewLogRepository } from "@/domain/ports/review-log-repository";
@@ -27,6 +28,7 @@ export interface DashboardConversationSummary {
   endedAt: string | null;
   messageCount: number;
   analysisStatus: AnalysisStatus | "none";
+  errorCount: number;
 }
 
 export interface GetDashboardResult {
@@ -52,6 +54,7 @@ export class GetDashboard {
     private readonly analysisRepository: AnalysisRepository,
     private readonly learningPointRepository: LearningPointRepository,
     private readonly reviewLogRepository: ReviewLogRepository,
+    private readonly findingRepository: FindingRepository,
   ) {}
 
   async execute(userId: string): Promise<GetDashboardResult> {
@@ -118,6 +121,11 @@ export class GetDashboard {
 
     const topic = conversation.topicId ? topicById.get(conversation.topicId) : undefined;
 
+    const findings =
+      analysis?.status === "completed"
+        ? await this.findingRepository.listByAnalysisId(analysis.id)
+        : [];
+
     return {
       id: conversation.id,
       title: conversation.customTopic ?? topic?.title ?? "Conversa",
@@ -127,6 +135,7 @@ export class GetDashboard {
       endedAt: conversation.endedAt,
       messageCount,
       analysisStatus: analysis?.status ?? "none",
+      errorCount: findings.filter((finding) => finding.kind === "error").length,
     };
   }
 }

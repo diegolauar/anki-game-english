@@ -401,6 +401,10 @@ export class FakeLearningPointRepository implements LearningPointRepository {
       .sort((a, b) => b.occurrenceCount - a.occurrenceCount)
       .slice(0, limit);
   }
+
+  async listByIds(ids: string[]): Promise<LearningPoint[]> {
+    return this.learningPoints.filter((learningPoint) => ids.includes(learningPoint.id));
+  }
 }
 
 export class FakeFlashcardRepository implements FlashcardRepository {

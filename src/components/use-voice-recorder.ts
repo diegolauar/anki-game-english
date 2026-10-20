@@ -1,12 +1,8 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
-import { Mic, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const MAX_DURATION_MS = 60_000;
 
-type RecorderState = "idle" | "recording" | "processing" | "review" | "error";
+export type RecorderState = "idle" | "recording" | "processing" | "review" | "error" | "denied";
 
 export interface VoiceRecorderResult {
   text: string;
@@ -15,13 +11,11 @@ export interface VoiceRecorderResult {
   audioDurationMs: number;
 }
 
-interface VoiceRecorderProps {
-  disabled?: boolean;
-  onCancel: () => void;
+interface UseVoiceRecorderOptions {
   onSubmit: (result: VoiceRecorderResult) => Promise<void>;
 }
 
-export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderProps) {
+export function useVoiceRecorder({ onSubmit }: UseVoiceRecorderOptions) {
   const [state, setState] = useState<RecorderState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
@@ -105,10 +99,7 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
 
       timeoutRef.current = setTimeout(stopRecording, MAX_DURATION_MS);
     } catch {
-      setErrorMessage(
-        "Não foi possível acessar o microfone. Verifique a permissão do navegador ou use o texto.",
-      );
-      setState("error");
+      setState("denied");
     }
   }
 
@@ -119,14 +110,21 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
     };
   }, []);
 
-  function startRecording() {
+  function start() {
     setState("recording");
     setErrorMessage(null);
     setElapsedSeconds(0);
     void beginRecording();
   }
 
-  async function handleSend() {
+  function cancel() {
+    clearTimers();
+    stopStream();
+    setTranscript("");
+    setState("idle");
+  }
+
+  async function send() {
     if (!transcript.trim()) return;
     await onSubmit({
       text: transcript.trim(),
@@ -134,97 +132,20 @@ export function VoiceRecorder({ disabled, onCancel, onSubmit }: VoiceRecorderPro
       provider,
       audioDurationMs: durationMs,
     });
+    setState("idle");
+    setTranscript("");
   }
 
-  if (state === "idle") {
-    return (
-      <div className="flex items-center justify-between gap-2 border-t pt-3">
-        <p className="text-sm text-muted-foreground">
-          Toque para gravar (seu navegador vai pedir permissão do microfone).
-        </p>
-        <div className="flex gap-2">
-          <Button type="button" onClick={startRecording}>
-            <Mic />
-            Iniciar gravação
-          </Button>
-          <Button type="button" variant="ghost" onClick={onCancel}>
-            Cancelar
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (state === "recording") {
-    return (
-      <div className="flex items-center justify-between gap-2 border-t pt-3">
-        <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="size-2 rounded-full bg-destructive" aria-hidden />
-          Gravando... {elapsedSeconds}s / 60s
-        </p>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={stopRecording}>
-            Parar
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => {
-              stopRecording();
-              onCancel();
-            }}
-          >
-            Cancelar
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (state === "processing") {
-    return (
-      <div className="border-t pt-3">
-        <p className="text-sm text-muted-foreground">Processando áudio...</p>
-      </div>
-    );
-  }
-
-  if (state === "review") {
-    return (
-      <div className="flex flex-col gap-2 border-t pt-3">
-        <textarea
-          value={transcript}
-          onChange={(event) => setTranscript(event.target.value)}
-          className="min-h-20 w-full rounded-md border bg-transparent px-3 py-2 text-sm"
-        />
-        <div className="flex gap-2">
-          <Button type="button" disabled={disabled} onClick={handleSend}>
-            <Send />
-            Enviar
-          </Button>
-          <Button type="button" variant="outline" onClick={startRecording}>
-            Regravar
-          </Button>
-          <Button type="button" variant="ghost" onClick={onCancel}>
-            Cancelar
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-2 border-t pt-3">
-      {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
-      <div className="flex gap-2">
-        <Button type="button" variant="outline" onClick={startRecording}>
-          <Mic />
-          Tentar gravar novamente
-        </Button>
-        <Button type="button" variant="ghost" onClick={onCancel}>
-          Usar texto
-        </Button>
-      </div>
-    </div>
-  );
+  return {
+    state,
+    errorMessage,
+    transcript,
+    setTranscript,
+    elapsedSeconds,
+    maxDurationSeconds: MAX_DURATION_MS / 1000,
+    start,
+    stopRecording,
+    cancel,
+    send,
+  };
 }

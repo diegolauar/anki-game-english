@@ -74,12 +74,12 @@ test("review a due flashcard end to end and see XP update on the dashboard", asy
   await page.goto("/review");
   await expect(page.getByText(front)).toBeVisible();
 
-  await page.getByRole("button", { name: "Revelar" }).click();
+  await page.getByRole("button", { name: "Mostrar resposta" }).click();
   await expect(page.getByText(back)).toBeVisible();
 
-  await page.getByRole("button", { name: "Good" }).click();
-  await expect(page.getByText("Nenhum cartão pendente por agora.")).toBeVisible();
+  await page.getByRole("button", { name: "Bom" }).click();
+  await expect(page.getByText("Revisão do dia concluída!")).toBeVisible();
 
   await page.goto("/dashboard");
-  await expect(page.getByText(/\d+ XP/)).toBeVisible();
+  await expect(page.getByText(/\d+ XP/).first()).toBeVisible();
 });
