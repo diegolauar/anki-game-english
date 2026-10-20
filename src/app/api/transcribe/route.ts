@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { OpenAiWhisperSpeechToText } from "@/infrastructure/stt/openai-whisper-speech-to-text";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { logError } from "@/lib/logger";
 
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Speech-to-text transcription failed:", error);
+    logError("speech_to_text_failed", { userId: user.id }, error);
     return NextResponse.json({ error: "Transcription failed." }, { status: 502 });
   }
 }

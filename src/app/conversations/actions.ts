@@ -8,6 +8,7 @@ import { SendMessage, type SendMessageResult } from "@/application/use-cases/sen
 import { FinishConversation } from "@/application/use-cases/finish-conversation";
 import { AnalyzeConversation } from "@/application/use-cases/analyze-conversation";
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
+import { logError } from "@/lib/logger";
 import { INPUT_MODES } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
@@ -184,8 +185,11 @@ export async function finishConversationAction(formData: FormData) {
 
   try {
     await buildAnalyzeConversation(serviceRoleClient, user.id).execute(analysisId);
-  } catch {
-    // Já registrado como failed pelo use case; a tela de resultados mostra o estado de erro.
+  } catch (error) {
+    // O use case já marcou a analysis como failed; a tela de resultados mostra
+    // esse estado e oferece "tentar novamente". Registramos aqui só para
+    // observabilidade (hoje isso não gerava log nenhum).
+    logError("analyze_conversation_failed", { analysisId, userId: user.id }, error);
   }
 
   redirect(`/conversations/${parsed.conversationId}/results`);
@@ -217,8 +221,12 @@ export async function retryAnalysisAction(formData: FormData) {
     await buildAnalyzeConversation(createSupabaseServiceRoleClient(), user.id).execute(
       parsed.analysisId,
     );
-  } catch {
-    // Já registrado como failed pelo use case; a tela de resultados mostra o estado de erro.
+  } catch (error) {
+    logError(
+      "analyze_conversation_failed",
+      { analysisId: parsed.analysisId, userId: user.id, retry: true },
+      error,
+    );
   }
 
   revalidatePath(`/conversations/${conversation.id}/results`);
