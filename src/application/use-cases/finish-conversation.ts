@@ -1,8 +1,8 @@
 import { AwardXp } from "@/application/use-cases/award-xp";
-import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
+import type { AnalysisWriter } from "@/domain/ports/analysis-writer";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
 import type { MessageRepository } from "@/domain/ports/message-repository";
-import type { XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type { XpEventWriter } from "@/domain/ports/xp-event-writer";
 import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP } from "@/domain/rules/xp-rewards";
 
 export interface FinishConversationInput {
@@ -17,9 +17,9 @@ export interface FinishConversationResult {
 export class FinishConversation {
   constructor(
     private readonly conversationRepository: ConversationRepository,
-    private readonly analysisRepository: AnalysisRepository,
+    private readonly analysisWriter: AnalysisWriter,
     private readonly messageRepository: MessageRepository,
-    private readonly xpEventRepository: XpEventRepository,
+    private readonly xpEventWriter: XpEventWriter,
   ) {}
 
   async execute(input: FinishConversationInput): Promise<FinishConversationResult> {
@@ -33,13 +33,13 @@ export class FinishConversation {
     }
 
     await this.conversationRepository.finish(input.conversationId);
-    const analysis = await this.analysisRepository.create(input.conversationId);
+    const analysis = await this.analysisWriter.create(input.conversationId);
 
     const messages = await this.messageRepository.listByConversation(input.conversationId);
     const userMessageCount = messages.filter((message) => message.role === "user").length;
 
     if (userMessageCount >= MIN_USER_MESSAGES_FOR_CONVERSATION_XP) {
-      await new AwardXp(this.xpEventRepository).execute({
+      await new AwardXp(this.xpEventWriter).execute({
         userId: input.userId,
         sourceType: "conversation_finished",
         sourceId: input.conversationId,

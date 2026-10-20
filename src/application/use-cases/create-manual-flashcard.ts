@@ -3,7 +3,7 @@ import type { Flashcard } from "@/domain/entities/flashcard";
 import type { CardScheduleRepository } from "@/domain/ports/card-schedule-repository";
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
 import type { ReviewScheduler } from "@/domain/ports/review-scheduler";
-import type { XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type { XpEventWriter } from "@/domain/ports/xp-event-writer";
 
 export interface CreateManualFlashcardInput {
   userId: string;
@@ -17,7 +17,7 @@ export class CreateManualFlashcard {
     private readonly flashcardRepository: FlashcardRepository,
     private readonly cardScheduleRepository: CardScheduleRepository,
     private readonly reviewScheduler: ReviewScheduler,
-    private readonly xpEventRepository: XpEventRepository,
+    private readonly xpEventWriter: XpEventWriter,
   ) {}
 
   async execute(input: CreateManualFlashcardInput): Promise<Flashcard> {
@@ -28,7 +28,7 @@ export class CreateManualFlashcard {
     const flashcard = await this.flashcardRepository.createManual(input);
     await this.cardScheduleRepository.create(flashcard.id, this.reviewScheduler.initialState(new Date()));
 
-    await new AwardXp(this.xpEventRepository).execute({
+    await new AwardXp(this.xpEventWriter).execute({
       userId: input.userId,
       sourceType: "flashcard_saved",
       sourceId: flashcard.id,

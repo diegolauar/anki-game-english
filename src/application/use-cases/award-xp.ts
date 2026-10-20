@@ -1,5 +1,5 @@
 import type { XpEvent } from "@/domain/entities/xp-event";
-import type { XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type { XpEventWriter } from "@/domain/ports/xp-event-writer";
 import { XP_REWARDS } from "@/domain/rules/xp-rewards";
 import type { XpSourceType } from "@/domain/value-objects/xp-source-type";
 
@@ -10,11 +10,11 @@ export interface AwardXpInput {
 }
 
 export class AwardXp {
-  constructor(private readonly xpEventRepository: XpEventRepository) {}
+  constructor(private readonly xpEventWriter: XpEventWriter) {}
 
   /** Retorna null quando o evento já tinha sido recompensado antes (idempotente). */
   async execute(input: AwardXpInput): Promise<XpEvent | null> {
-    return this.xpEventRepository.create({
+    return this.xpEventWriter.create({
       userId: input.userId,
       sourceType: input.sourceType,
       sourceId: input.sourceId,

@@ -1,21 +1,18 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Analysis, AnalysisSummary } from "@/domain/entities/analysis";
-import type {
-  AnalysisRepository,
-  MarkAnalysisCompletedInput,
-} from "@/domain/ports/analysis-repository";
+import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
 import type { AnalysisStatus } from "@/domain/value-objects/analysis-status";
-import type { Database, Json } from "@/infrastructure/supabase/database.types";
+import type { Database } from "@/infrastructure/supabase/database.types";
 
-type AnalysisRow = Pick<
+export type AnalysisRow = Pick<
   Database["public"]["Tables"]["analyses"]["Row"],
   "id" | "conversation_id" | "status" | "attempts" | "model" | "error_message" | "summary" | "created_at" | "completed_at"
 >;
 
-const ANALYSIS_COLUMNS =
+export const ANALYSIS_COLUMNS =
   "id, conversation_id, status, attempts, model, error_message, summary, created_at, completed_at";
 
-function toAnalysis(row: AnalysisRow): Analysis {
+export function toAnalysis(row: AnalysisRow): Analysis {
   return {
     id: row.id,
     conversationId: row.conversation_id,
@@ -31,17 +28,6 @@ function toAnalysis(row: AnalysisRow): Analysis {
 
 export class SupabaseAnalysisRepository implements AnalysisRepository {
   constructor(private readonly client: SupabaseClient<Database>) {}
-
-  async create(conversationId: string): Promise<Analysis> {
-    const { data, error } = await this.client
-      .from("analyses")
-      .insert({ conversation_id: conversationId })
-      .select(ANALYSIS_COLUMNS)
-      .single();
-
-    if (error) throw error;
-    return toAnalysis(data);
-  }
 
   async findById(id: string): Promise<Analysis | null> {
     const { data, error } = await this.client
@@ -65,39 +51,5 @@ export class SupabaseAnalysisRepository implements AnalysisRepository {
 
     if (error) throw error;
     return data ? toAnalysis(data) : null;
-  }
-
-  async markProcessing(id: string): Promise<void> {
-    const current = await this.findById(id);
-    const { error } = await this.client
-      .from("analyses")
-      .update({ status: "processing", attempts: (current?.attempts ?? 0) + 1 })
-      .eq("id", id);
-
-    if (error) throw error;
-  }
-
-  async markCompleted(id: string, input: MarkAnalysisCompletedInput): Promise<void> {
-    const { error } = await this.client
-      .from("analyses")
-      .update({
-        status: "completed",
-        model: input.model,
-        summary: input.summary as unknown as Json,
-        error_message: null,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", id);
-
-    if (error) throw error;
-  }
-
-  async markFailed(id: string, errorMessage: string): Promise<void> {
-    const { error } = await this.client
-      .from("analyses")
-      .update({ status: "failed", error_message: errorMessage })
-      .eq("id", id);
-
-    if (error) throw error;
   }
 }

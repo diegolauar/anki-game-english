@@ -1,0 +1,22 @@
+import type { LearningPoint } from "@/domain/entities/learning-point";
+import type { FindingCategory } from "@/domain/value-objects/finding-category";
+import type { FindingKind } from "@/domain/value-objects/finding-kind";
+
+export interface CreateLearningPointInput {
+  userId: string;
+  kind: FindingKind;
+  category: FindingCategory;
+  ruleKey: string;
+  canonicalCorrection: string | null;
+  explanation: string | null;
+}
+
+/**
+ * Escrita privilegiada — `learning_points` só tem policy de RLS para SELECT, então os
+ * adaptadores de infraestrutura que implementam esta porta exigem a service_role
+ * (ver `ServiceRoleSupabaseClient`).
+ */
+export interface LearningPointWriter {
+  create(input: CreateLearningPointInput): Promise<LearningPoint>;
+  incrementOccurrence(id: string): Promise<LearningPoint>;
+}

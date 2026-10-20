@@ -15,27 +15,27 @@ import type {
   AnalysisAgentInput,
   AnalysisAgentResult,
 } from "@/domain/ports/analysis-agent";
-import type {
-  AnalysisRepository,
-  MarkAnalysisCompletedInput,
-} from "@/domain/ports/analysis-repository";
+import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
+import type { AnalysisWriter, MarkAnalysisCompletedInput } from "@/domain/ports/analysis-writer";
 import type { CardScheduleRepository, DueFlashcard } from "@/domain/ports/card-schedule-repository";
 import type { ConversationAgent, ConversationReplyInput } from "@/domain/ports/conversation-agent";
 import type {
   ConversationRepository,
   CreateConversationInput,
 } from "@/domain/ports/conversation-repository";
-import type { CreateFindingInput, FindingRepository } from "@/domain/ports/finding-repository";
+import type { FindingRepository } from "@/domain/ports/finding-repository";
+import type { CreateFindingInput, FindingWriter } from "@/domain/ports/finding-writer";
 import type {
   CreateManualFlashcardInput,
   CreateSuggestedFlashcardInput,
   FlashcardContentUpdate,
   FlashcardRepository,
 } from "@/domain/ports/flashcard-repository";
+import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
 import type {
   CreateLearningPointInput,
-  LearningPointRepository,
-} from "@/domain/ports/learning-point-repository";
+  LearningPointWriter,
+} from "@/domain/ports/learning-point-writer";
 import type { CreateMessageInput, MessageRepository } from "@/domain/ports/message-repository";
 import type { CreateReviewLogInput, ReviewLogRepository } from "@/domain/ports/review-log-repository";
 import type { ReviewOutcome, ReviewScheduler } from "@/domain/ports/review-scheduler";
@@ -45,11 +45,8 @@ import type {
 } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
-import type {
-  CreateXpEventInput,
-  DailyXpTotal,
-  XpEventRepository,
-} from "@/domain/ports/xp-event-repository";
+import type { DailyXpTotal, XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type { CreateXpEventInput, XpEventWriter } from "@/domain/ports/xp-event-writer";
 import type { DailyUsage, DailyUsageRepository } from "@/domain/ports/daily-usage-repository";
 import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
 import type { Rating } from "@/domain/value-objects/rating";
@@ -181,7 +178,7 @@ export class FakeUserProfileRepository implements UserProfileRepository {
   }
 }
 
-export class FakeXpEventRepository implements XpEventRepository {
+export class FakeXpEventRepository implements XpEventRepository, XpEventWriter {
   events: XpEvent[] = [];
 
   async create(input: CreateXpEventInput): Promise<XpEvent | null> {
@@ -264,7 +261,7 @@ export class FakeConversationAgent implements ConversationAgent {
   }
 }
 
-export class FakeAnalysisRepository implements AnalysisRepository {
+export class FakeAnalysisRepository implements AnalysisRepository, AnalysisWriter {
   analyses = new Map<string, Analysis>();
 
   async create(conversationId: string): Promise<Analysis> {
@@ -324,7 +321,7 @@ export class FakeAnalysisRepository implements AnalysisRepository {
   }
 }
 
-export class FakeFindingRepository implements FindingRepository {
+export class FakeFindingRepository implements FindingRepository, FindingWriter {
   findings: Finding[] = [];
 
   async create(input: CreateFindingInput): Promise<Finding> {
@@ -353,7 +350,7 @@ export class FakeFindingRepository implements FindingRepository {
   }
 }
 
-export class FakeLearningPointRepository implements LearningPointRepository {
+export class FakeLearningPointRepository implements LearningPointRepository, LearningPointWriter {
   learningPoints: LearningPoint[] = [];
 
   async findByUserAndRuleKey(userId: string, ruleKey: string): Promise<LearningPoint | null> {

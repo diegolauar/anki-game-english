@@ -1,14 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LearningPoint } from "@/domain/entities/learning-point";
-import type {
-  CreateLearningPointInput,
-  LearningPointRepository,
-} from "@/domain/ports/learning-point-repository";
+import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
 import type { FindingCategory } from "@/domain/value-objects/finding-category";
 import type { FindingKind } from "@/domain/value-objects/finding-kind";
 import type { Database } from "@/infrastructure/supabase/database.types";
 
-type LearningPointRow = Pick<
+export type LearningPointRow = Pick<
   Database["public"]["Tables"]["learning_points"]["Row"],
   | "id"
   | "user_id"
@@ -22,10 +19,10 @@ type LearningPointRow = Pick<
   | "last_seen_at"
 >;
 
-const LEARNING_POINT_COLUMNS =
+export const LEARNING_POINT_COLUMNS =
   "id, user_id, kind, category, rule_key, canonical_correction, explanation, occurrence_count, first_seen_at, last_seen_at";
 
-function toLearningPoint(row: LearningPointRow): LearningPoint {
+export function toLearningPoint(row: LearningPointRow): LearningPoint {
   return {
     id: row.id,
     userId: row.user_id,
@@ -53,47 +50,6 @@ export class SupabaseLearningPointRepository implements LearningPointRepository 
 
     if (error) throw error;
     return data ? toLearningPoint(data) : null;
-  }
-
-  async create(input: CreateLearningPointInput): Promise<LearningPoint> {
-    const { data, error } = await this.client
-      .from("learning_points")
-      .insert({
-        user_id: input.userId,
-        kind: input.kind,
-        category: input.category,
-        rule_key: input.ruleKey,
-        canonical_correction: input.canonicalCorrection,
-        explanation: input.explanation,
-      })
-      .select(LEARNING_POINT_COLUMNS)
-      .single();
-
-    if (error) throw error;
-    return toLearningPoint(data);
-  }
-
-  async incrementOccurrence(id: string): Promise<LearningPoint> {
-    const { data: current, error: fetchError } = await this.client
-      .from("learning_points")
-      .select(LEARNING_POINT_COLUMNS)
-      .eq("id", id)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    const { data, error } = await this.client
-      .from("learning_points")
-      .update({
-        occurrence_count: current.occurrence_count + 1,
-        last_seen_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select(LEARNING_POINT_COLUMNS)
-      .single();
-
-    if (error) throw error;
-    return toLearningPoint(data);
   }
 
   async listRuleKeysByUser(userId: string): Promise<string[]> {

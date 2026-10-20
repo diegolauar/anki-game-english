@@ -72,8 +72,10 @@ function buildUseCase() {
 
   const useCase = new AnalyzeConversation(
     analysisRepository,
+    analysisRepository,
     conversationRepository,
     messageRepository,
+    learningPointRepository,
     learningPointRepository,
     findingRepository,
     flashcardRepository,

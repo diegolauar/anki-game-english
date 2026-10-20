@@ -4,7 +4,7 @@ import type { CardScheduleRepository } from "@/domain/ports/card-schedule-reposi
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
 import type { ReviewLogRepository } from "@/domain/ports/review-log-repository";
 import type { ReviewScheduler } from "@/domain/ports/review-scheduler";
-import type { XpEventRepository } from "@/domain/ports/xp-event-repository";
+import type { XpEventWriter } from "@/domain/ports/xp-event-writer";
 import type { Rating } from "@/domain/value-objects/rating";
 
 export interface ReviewFlashcardInput {
@@ -23,7 +23,7 @@ export class ReviewFlashcard {
     private readonly cardScheduleRepository: CardScheduleRepository,
     private readonly reviewLogRepository: ReviewLogRepository,
     private readonly reviewScheduler: ReviewScheduler,
-    private readonly xpEventRepository: XpEventRepository,
+    private readonly xpEventWriter: XpEventWriter,
   ) {}
 
   async execute(input: ReviewFlashcardInput): Promise<ScheduleSnapshot> {
@@ -53,7 +53,7 @@ export class ReviewFlashcard {
       scheduledDays: outcome.scheduledDays,
     });
 
-    const awardXp = new AwardXp(this.xpEventRepository);
+    const awardXp = new AwardXp(this.xpEventWriter);
     await awardXp.execute({
       userId: input.userId,
       sourceType: "flashcard_reviewed",

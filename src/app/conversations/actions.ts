@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { StartConversation } from "@/application/use-cases/start-conversation";
 import { SendMessage, type SendMessageResult } from "@/application/use-cases/send-message";
 import { FinishConversation } from "@/application/use-cases/finish-conversation";
@@ -12,39 +11,45 @@ import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
 import { INPUT_MODES } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
+import type { ServiceRoleSupabaseClient } from "@/infrastructure/supabase/client-types";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
+import { SupabaseAnalysisWriter } from "@/infrastructure/supabase/analysis-writer";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
-import { SupabaseFindingRepository } from "@/infrastructure/supabase/finding-repository";
+import { SupabaseFindingWriter } from "@/infrastructure/supabase/finding-writer";
 import { SupabaseFlashcardRepository } from "@/infrastructure/supabase/flashcard-repository";
 import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
+import { SupabaseLearningPointWriter } from "@/infrastructure/supabase/learning-point-writer";
 import { SupabaseMessageRepository } from "@/infrastructure/supabase/message-repository";
 import { SupabaseSpeechTranscriptionRepository } from "@/infrastructure/supabase/speech-transcription-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 import { SupabaseDailyUsageRepository } from "@/infrastructure/supabase/daily-usage-repository";
-import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
+import { SupabaseXpEventWriter } from "@/infrastructure/supabase/xp-event-writer";
 import { SupabaseLlmUsageRepository } from "@/infrastructure/supabase/llm-usage-repository";
 import { OpenAiConversationAgent } from "@/infrastructure/llm/openai-conversation-agent";
 import { OpenAiAnalysisAgent } from "@/infrastructure/llm/openai-analysis-agent";
-import type { Database } from "@/infrastructure/supabase/database.types";
 
 /**
  * analyses, findings e learning_points só têm policy de RLS para SELECT — a
- * escrita é feita pelo service role (ver migração inicial). Por isso esta
- * função sempre recebe o cliente de service role: quando ela é chamada, o
+ * escrita é feita pelo service role (ver migração inicial). O tipo
+ * `ServiceRoleSupabaseClient` garante isso em tempo de compilação: os
+ * escritores (`*Writer`) só aceitam esse cliente, então não dá para chamar
+ * esta função com o cliente de sessão por engano. Quando ela é chamada, o
  * analysisId já foi validado contra o dono pela camada que a invoca (usando
  * o cliente da sessão do usuário).
  */
 function buildAnalyzeConversation(
-  serviceRoleClient: SupabaseClient<Database>,
+  serviceRoleClient: ServiceRoleSupabaseClient,
   userId: string,
 ): AnalyzeConversation {
   return new AnalyzeConversation(
     new SupabaseAnalysisRepository(serviceRoleClient),
+    new SupabaseAnalysisWriter(serviceRoleClient),
     new SupabaseConversationRepository(serviceRoleClient),
     new SupabaseMessageRepository(serviceRoleClient),
     new SupabaseLearningPointRepository(serviceRoleClient),
-    new SupabaseFindingRepository(serviceRoleClient),
+    new SupabaseLearningPointWriter(serviceRoleClient),
+    new SupabaseFindingWriter(serviceRoleClient),
     new SupabaseFlashcardRepository(serviceRoleClient),
     new OpenAiAnalysisAgent({
       userId,
@@ -166,9 +171,9 @@ export async function finishConversationAction(formData: FormData) {
   const serviceRoleClient = createSupabaseServiceRoleClient();
   const finishConversation = new FinishConversation(
     new SupabaseConversationRepository(supabase),
-    new SupabaseAnalysisRepository(serviceRoleClient),
+    new SupabaseAnalysisWriter(serviceRoleClient),
     new SupabaseMessageRepository(supabase),
-    new SupabaseXpEventRepository(serviceRoleClient),
+    new SupabaseXpEventWriter(serviceRoleClient),
   );
   const { analysisId } = await finishConversation.execute({
     conversationId: parsed.conversationId,

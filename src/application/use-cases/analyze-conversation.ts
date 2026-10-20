@@ -1,19 +1,23 @@
 import { validateFindingOffset } from "@/domain/rules/validate-finding-offset";
 import type { AnalysisAgent } from "@/domain/ports/analysis-agent";
 import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
+import type { AnalysisWriter } from "@/domain/ports/analysis-writer";
 import type { ConversationRepository } from "@/domain/ports/conversation-repository";
-import type { FindingRepository } from "@/domain/ports/finding-repository";
+import type { FindingWriter } from "@/domain/ports/finding-writer";
 import type { FlashcardRepository } from "@/domain/ports/flashcard-repository";
 import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
+import type { LearningPointWriter } from "@/domain/ports/learning-point-writer";
 import type { MessageRepository } from "@/domain/ports/message-repository";
 
 export class AnalyzeConversation {
   constructor(
     private readonly analysisRepository: AnalysisRepository,
+    private readonly analysisWriter: AnalysisWriter,
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,
     private readonly learningPointRepository: LearningPointRepository,
-    private readonly findingRepository: FindingRepository,
+    private readonly learningPointWriter: LearningPointWriter,
+    private readonly findingWriter: FindingWriter,
     private readonly flashcardRepository: FlashcardRepository,
     private readonly analysisAgent: AnalysisAgent,
   ) {}
@@ -26,7 +30,7 @@ export class AnalyzeConversation {
     const conversation = await this.conversationRepository.findById(analysis.conversationId);
     if (!conversation) throw new Error("Conversation not found.");
 
-    await this.analysisRepository.markProcessing(analysisId);
+    await this.analysisWriter.markProcessing(analysisId);
 
     try {
       const messages = await this.messageRepository.listByConversation(conversation.id);
@@ -71,8 +75,8 @@ export class AnalyzeConversation {
           findingResult.ruleKey,
         );
         const learningPoint = existingLearningPoint
-          ? await this.learningPointRepository.incrementOccurrence(existingLearningPoint.id)
-          : await this.learningPointRepository.create({
+          ? await this.learningPointWriter.incrementOccurrence(existingLearningPoint.id)
+          : await this.learningPointWriter.create({
               userId: conversation.userId,
               kind: findingResult.kind,
               category: findingResult.category,
@@ -81,7 +85,7 @@ export class AnalyzeConversation {
               explanation: findingResult.explanation,
             });
 
-        const finding = await this.findingRepository.create({
+        const finding = await this.findingWriter.create({
           analysisId,
           messageId: message.id,
           learningPointId: learningPoint.id,
@@ -114,13 +118,13 @@ export class AnalyzeConversation {
         }
       }
 
-      await this.analysisRepository.markCompleted(analysisId, {
+      await this.analysisWriter.markCompleted(analysisId, {
         model: this.analysisAgent.modelId,
         summary: result.summary,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error.";
-      await this.analysisRepository.markFailed(analysisId, message);
+      await this.analysisWriter.markFailed(analysisId, message);
       throw error;
     }
   }

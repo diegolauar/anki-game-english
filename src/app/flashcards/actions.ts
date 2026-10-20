@@ -16,7 +16,7 @@ import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/servi
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseFlashcardRepository } from "@/infrastructure/supabase/flashcard-repository";
 import { SupabaseReviewLogRepository } from "@/infrastructure/supabase/review-log-repository";
-import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
+import { SupabaseXpEventWriter } from "@/infrastructure/supabase/xp-event-writer";
 import { TsFsrsReviewScheduler } from "@/infrastructure/scheduler/ts-fsrs-review-scheduler";
 
 async function requireUser() {
@@ -51,7 +51,7 @@ export async function saveFlashcardSuggestionAction(formData: FormData) {
     new SupabaseFlashcardRepository(supabase),
     new SupabaseCardScheduleRepository(supabase),
     new TsFsrsReviewScheduler(),
-    new SupabaseXpEventRepository(createSupabaseServiceRoleClient()),
+    new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
   );
 
   await useCase.execute({
@@ -81,7 +81,7 @@ export async function saveAllFlashcardSuggestionsAction(formData: FormData) {
     new SupabaseFlashcardRepository(supabase),
     new SupabaseCardScheduleRepository(supabase),
     new TsFsrsReviewScheduler(),
-    new SupabaseXpEventRepository(createSupabaseServiceRoleClient()),
+    new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
   );
   const useCase = new SaveFlashcardSuggestions(saveOne);
 
@@ -131,7 +131,7 @@ export async function createManualFlashcardAction(formData: FormData) {
     new SupabaseFlashcardRepository(supabase),
     new SupabaseCardScheduleRepository(supabase),
     new TsFsrsReviewScheduler(),
-    new SupabaseXpEventRepository(createSupabaseServiceRoleClient()),
+    new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
   );
 
   await useCase.execute({ userId: user.id, ...parsed });
@@ -193,7 +193,7 @@ export async function reviewFlashcardAction(input: { flashcardId: string; rating
     new SupabaseCardScheduleRepository(supabase),
     new SupabaseReviewLogRepository(supabase),
     new TsFsrsReviewScheduler(),
-    new SupabaseXpEventRepository(createSupabaseServiceRoleClient()),
+    new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
   );
 
   await useCase.execute({ flashcardId: parsed.flashcardId, userId: user.id, rating: parsed.rating });
