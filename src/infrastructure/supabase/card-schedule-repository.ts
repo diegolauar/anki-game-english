@@ -1,7 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Flashcard } from "@/domain/entities/flashcard";
 import type { CardSchedule, ScheduleSnapshot } from "@/domain/entities/card-schedule";
-import type { CardScheduleRepository, DueFlashcard } from "@/domain/ports/card-schedule-repository";
+import type {
+  CardScheduleRepository,
+  DueFlashcard,
+  FlashcardFilterCounts,
+  FlashcardsPage,
+  ListFlashcardsPageInput,
+} from "@/domain/ports/card-schedule-repository";
+import { FLASHCARD_LIST_FILTERS } from "@/domain/ports/card-schedule-repository";
 import type { CardType } from "@/domain/value-objects/card-type";
 import type { CardState } from "@/domain/value-objects/card-state";
 import type { FlashcardStatus } from "@/domain/value-objects/flashcard-status";
@@ -139,5 +146,66 @@ export class SupabaseCardScheduleRepository implements CardScheduleRepository {
 
     if (error) throw error;
     return data.map(toCardSchedule);
+  }
+
+  async listByUserPaged(input: ListFlashcardsPageInput): Promise<FlashcardsPage> {
+    const offset = (input.page - 1) * input.pageSize;
+
+    let query = this.client
+      .from("flashcards_with_schedule")
+      .select(FLASHCARD_WITH_SCHEDULE_COLUMNS, { count: "exact" })
+      .eq("user_id", input.userId);
+
+    if (input.filter === "pending") {
+      query = query.eq("status", "active").lte("due_at", input.now.toISOString());
+    } else if (input.filter === "new") {
+      query = query.eq("status", "active").eq("state", "new");
+    } else if (input.filter === "reviewed") {
+      query = query.eq("status", "active").gt("reps", 0);
+    } else if (input.filter === "suspended") {
+      query = query.eq("status", "suspended");
+    } else {
+      query = query.in("status", ["active", "suspended"]);
+    }
+
+    if (input.search?.trim()) {
+      const term = input.search.trim().replaceAll("%", "");
+      query = query.or(`front.ilike.%${term}%,back.ilike.%${term}%`);
+    }
+
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(offset, offset + input.pageSize - 1);
+
+    if (error) throw error;
+    return { items: data.map(toDueFlashcard), total: count ?? 0 };
+  }
+
+  async countByUserForEachFilter(userId: string, now: Date): Promise<FlashcardFilterCounts> {
+    const entries = await Promise.all(
+      FLASHCARD_LIST_FILTERS.map(async (filter) => {
+        let query = this.client
+          .from("flashcards_with_schedule")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId);
+
+        if (filter === "pending") {
+          query = query.eq("status", "active").lte("due_at", now.toISOString());
+        } else if (filter === "new") {
+          query = query.eq("status", "active").eq("state", "new");
+        } else if (filter === "reviewed") {
+          query = query.eq("status", "active").gt("reps", 0);
+        } else if (filter === "suspended") {
+          query = query.eq("status", "suspended");
+        } else {
+          query = query.in("status", ["active", "suspended"]);
+        }
+
+        const { count, error } = await query;
+        if (error) throw error;
+        return [filter, count ?? 0] as const;
+      }),
+    );
+    return Object.fromEntries(entries) as FlashcardFilterCounts;
   }
 }

@@ -17,7 +17,15 @@ import type {
 } from "@/domain/ports/analysis-agent";
 import type { AnalysisRepository } from "@/domain/ports/analysis-repository";
 import type { AnalysisWriter, MarkAnalysisCompletedInput } from "@/domain/ports/analysis-writer";
-import type { CardScheduleRepository, DueFlashcard } from "@/domain/ports/card-schedule-repository";
+import {
+  FLASHCARD_LIST_FILTERS,
+  type CardScheduleRepository,
+  type DueFlashcard,
+  type FlashcardFilterCounts,
+  type FlashcardListFilter,
+  type FlashcardsPage,
+  type ListFlashcardsPageInput,
+} from "@/domain/ports/card-schedule-repository";
 import type { ConversationAgent, ConversationReplyInput } from "@/domain/ports/conversation-agent";
 import type {
   ConversationRepository,
@@ -537,6 +545,45 @@ export class FakeCardScheduleRepository implements CardScheduleRepository {
     return flashcardIds
       .map((id) => this.schedules.get(id))
       .filter((schedule): schedule is CardSchedule => schedule !== undefined);
+  }
+
+  async listByUserPaged(input: ListFlashcardsPageInput): Promise<FlashcardsPage> {
+    const matching = [...this.schedules.values()].filter((schedule) =>
+      this.matchesFilter(schedule, input.filter, input.now),
+    );
+    const offset = (input.page - 1) * input.pageSize;
+    const page = matching.slice(offset, offset + input.pageSize);
+    return {
+      items: page.map((schedule) => ({ flashcard: {} as Flashcard, schedule })),
+      total: matching.length,
+    };
+  }
+
+  async countByUserForEachFilter(userId: string, now: Date): Promise<FlashcardFilterCounts> {
+    const counts: Partial<FlashcardFilterCounts> = {};
+    for (const filter of FLASHCARD_LIST_FILTERS) {
+      counts[filter] = [...this.schedules.values()].filter((schedule) =>
+        this.matchesFilter(schedule, filter, now),
+      ).length;
+    }
+    return counts as FlashcardFilterCounts;
+  }
+
+  /** Esta fake não guarda o status do flashcard, só o schedule — trata tudo
+   * como "active" (suficiente pros testes atuais, nenhum exercita "suspended"). */
+  private matchesFilter(schedule: CardSchedule, filter: FlashcardListFilter, now: Date): boolean {
+    switch (filter) {
+      case "pending":
+        return new Date(schedule.dueAt).getTime() <= now.getTime();
+      case "new":
+        return schedule.state === "new";
+      case "reviewed":
+        return schedule.reps > 0;
+      case "suspended":
+        return false;
+      case "all":
+        return true;
+    }
   }
 }
 
