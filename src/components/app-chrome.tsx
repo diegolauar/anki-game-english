@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/bottom-nav";
 
-const FOCUS_PATH_PREFIXES = ["/", "/login", "/review"];
+const FOCUS_PATH_PREFIXES = ["/", "/login", "/forgot-password", "/reset-password", "/review"];
 
 function isFocusPath(pathname: string): boolean {
   if (FOCUS_PATH_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
