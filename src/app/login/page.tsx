@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/browser-client";
 import { PASSWORD_REQUIREMENTS, signInSchema, signUpSchema } from "@/lib/auth-validation";
 
+type AuthTab = "signin" | "signup";
+
 export default function LoginPage() {
+  const [tab, setTab] = useState<AuthTab>("signin");
+
   return (
     <main className="grid min-h-dvh flex-1 grid-cols-1 max-[900px]:grid-cols-1 md:grid-cols-[1.1fr_1fr]">
       <section className="relative hidden flex-col justify-between overflow-hidden bg-acc p-12 text-acc-ink md:flex lg:p-14">
@@ -74,23 +77,36 @@ export default function LoginPage() {
 
       <section className="flex flex-1 items-center justify-center p-8">
         <div className="flex w-full max-w-[380px] flex-col gap-6">
-          <Tabs defaultValue="signin">
-            <TabsList className="w-full">
-              <TabsTrigger value="signin" className="flex-1">
+          <div>
+            <div className="flex h-14 items-center gap-1 rounded-full border border-line bg-surface2 p-1.5">
+              <button
+                type="button"
+                onClick={() => setTab("signin")}
+                aria-pressed={tab === "signin"}
+                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors ${
+                  tab === "signin"
+                    ? "bg-acc text-acc-ink shadow-[0_4px_14px_-4px_var(--acc)]"
+                    : "text-muted-foreground hover:text-ink"
+                }`}
+              >
                 Entrar
-              </TabsTrigger>
-              <TabsTrigger value="signup" className="flex-1">
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("signup")}
+                aria-pressed={tab === "signup"}
+                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors ${
+                  tab === "signup"
+                    ? "bg-acc text-acc-ink shadow-[0_4px_14px_-4px_var(--acc)]"
+                    : "text-muted-foreground hover:text-ink"
+                }`}
+              >
                 Criar conta
-              </TabsTrigger>
-            </TabsList>
+              </button>
+            </div>
 
-            <TabsContent value="signin" className="mt-6">
-              <SignInPanel />
-            </TabsContent>
-            <TabsContent value="signup" className="mt-6">
-              <SignUpPanel />
-            </TabsContent>
-          </Tabs>
+            <div className="mt-6">{tab === "signin" ? <SignInPanel /> : <SignUpPanel />}</div>
+          </div>
 
           <p className="text-xs text-muted-foreground">
             Ao continuar, você concorda com os Termos e a Política de Privacidade (LGPD). Áudios
@@ -104,7 +120,7 @@ export default function LoginPage() {
 
 function SignInPanel() {
   const router = useRouter();
-  const [mode, setMode] = useState<"password" | "magic-link">("magic-link");
+  const [mode, setMode] = useState<"password" | "magic-link">("password");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

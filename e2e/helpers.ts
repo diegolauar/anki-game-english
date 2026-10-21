@@ -42,6 +42,7 @@ export async function signInViaMagicLink(page: Page, email: string): Promise<voi
   await clearMailpit();
 
   await page.goto("/login");
+  await page.getByRole("button", { name: "Prefere entrar sem senha? Receba um link por e-mail" }).click();
   await page.getByLabel("E-mail").fill(email);
   await page.getByRole("button", { name: "Enviar link de acesso" }).click();
   await page.getByText("Link enviado para").waitFor();
