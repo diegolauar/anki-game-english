@@ -1,20 +1,15 @@
-import { redirect } from "next/navigation";
 import { ReviewSession, type ReviewQueueItem } from "@/components/review-session";
 import { calculateStreak } from "@/domain/rules/calculate-streak";
 import type { Rating } from "@/domain/value-objects/rating";
 import { RATINGS } from "@/domain/value-objects/rating";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
 import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
 import { TsFsrsReviewScheduler } from "@/infrastructure/scheduler/ts-fsrs-review-scheduler";
 
 export default async function ReviewPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const now = new Date();
   const dueFlashcards = await new SupabaseCardScheduleRepository(supabase).listDueForUser(

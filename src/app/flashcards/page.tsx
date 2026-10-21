@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FlashcardsList, type FlashcardRow } from "@/components/flashcards-list";
 import { FlashcardsSearchInput } from "@/components/flashcards-search-input";
 import type { CardSchedule } from "@/domain/entities/card-schedule";
 import type { Flashcard } from "@/domain/entities/flashcard";
 import { FLASHCARD_LIST_FILTERS, type FlashcardListFilter } from "@/domain/ports/card-schedule-repository";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
 
@@ -52,11 +51,7 @@ export default async function FlashcardsPage({
     : "pending";
   const page = Math.max(1, Number.parseInt(rawPage ?? "1", 10) || 1);
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const cardScheduleRepository = new SupabaseCardScheduleRepository(supabase);
   const now = new Date();

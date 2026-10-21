@@ -1,19 +1,14 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArrowLeft, Upload } from "lucide-react";
 import { importFlashcardsAction } from "@/app/flashcards/actions";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 
 export default async function ImportFlashcardsPage({
   searchParams,
 }: {
   searchParams: Promise<{ created?: string; skipped?: string; error?: string }>;
 }) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  await requireUser();
 
   const { created, skipped, error } = await searchParams;
 

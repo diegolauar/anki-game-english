@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createManualFlashcardAction } from "@/app/flashcards/actions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FlashcardForm } from "@/components/flashcard-form";
 
 export default async function NewFlashcardPage({
   searchParams,
@@ -24,35 +23,12 @@ export default async function NewFlashcardPage({
         Criar flashcard manual
       </h1>
 
-      <form action={createManualFlashcardAction} className="mt-6 flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="front">Frente</Label>
-          <Input
-            id="front"
-            name="front"
-            required
-            defaultValue={front}
-            placeholder="Pergunta ou situação em português"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="back">Verso</Label>
-          <Input id="back" name="back" required defaultValue={back} placeholder="Frase em inglês" />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="explanation">Explicação (opcional)</Label>
-          <Input id="explanation" name="explanation" placeholder="Contexto ou dica extra" />
-        </div>
-
-        <button
-          type="submit"
-          className="mt-2 flex h-12 items-center justify-center rounded-full bg-acc text-sm font-bold text-acc-ink"
-        >
-          Criar flashcard
-        </button>
-      </form>
+      <FlashcardForm
+        action={createManualFlashcardAction}
+        submitLabel="Criar flashcard"
+        defaultFront={front}
+        defaultBack={back}
+      />
     </main>
   );
 }

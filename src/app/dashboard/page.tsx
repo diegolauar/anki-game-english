@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArrowRight, CircleCheck, Flame, Play, Star } from "lucide-react";
 import { TopicIcon } from "@/components/topic-icon";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
@@ -59,12 +58,7 @@ function formatDuration(startedAt: string, endedAt: string | null): string {
 }
 
 export default async function DashboardPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const getDashboard = new GetDashboard(
     new SupabaseUserProfileRepository(supabase),

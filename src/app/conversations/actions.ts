@@ -12,6 +12,7 @@ import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
 import { logError } from "@/lib/logger";
 import { INPUT_MODES } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
 import type { ServiceRoleSupabaseClient } from "@/infrastructure/supabase/client-types";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
@@ -68,11 +69,7 @@ const startConversationSchema = z.object({
 });
 
 export async function startConversationAction(formData: FormData) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const rawCustomTopic = formData.get("customTopic");
   const customTopic =
@@ -166,11 +163,7 @@ export async function finishConversationAction(formData: FormData) {
     conversationId: formData.get("conversationId"),
   });
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const serviceRoleClient = createSupabaseServiceRoleClient();
   const finishConversation = new FinishConversation(
@@ -210,11 +203,7 @@ const retryAnalysisSchema = z.object({
 export async function retryAnalysisAction(formData: FormData) {
   const parsed = retryAnalysisSchema.parse({ analysisId: formData.get("analysisId") });
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const analysisRepository = new SupabaseAnalysisRepository(supabase);
   const analysis = await analysisRepository.findById(parsed.analysisId);

@@ -13,22 +13,13 @@ import { EditFlashcard } from "@/application/use-cases/edit-flashcard";
 import { ToggleFlashcardSuspension } from "@/application/use-cases/toggle-flashcard-suspension";
 import { parseFlashcardCsv } from "@/domain/rules/parse-flashcard-csv";
 import { RATINGS } from "@/domain/value-objects/rating";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseFlashcardRepository } from "@/infrastructure/supabase/flashcard-repository";
 import { SupabaseReviewLogRepository } from "@/infrastructure/supabase/review-log-repository";
 import { SupabaseXpEventWriter } from "@/infrastructure/supabase/xp-event-writer";
 import { TsFsrsReviewScheduler } from "@/infrastructure/scheduler/ts-fsrs-review-scheduler";
-
-async function requireUser() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  return { supabase, user };
-}
 
 const saveSuggestionSchema = z.object({
   flashcardId: z.string().uuid(),

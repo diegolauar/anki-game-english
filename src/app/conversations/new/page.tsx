@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { NewConversationForm } from "@/components/new-conversation-form";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 
@@ -13,11 +12,7 @@ export default async function NewConversationPage({
 }) {
   const { topicId: preselectedTopicId } = await searchParams;
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const [topics, profile] = await Promise.all([
     new SupabaseTopicRepository(supabase).listActive(),

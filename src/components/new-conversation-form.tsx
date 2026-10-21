@@ -10,6 +10,45 @@ import type { Difficulty } from "@/domain/value-objects/difficulty";
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 
+function SelectableCard({
+  selected,
+  onClick,
+  icon,
+  title,
+  description,
+  align = "items-start",
+  padding = "p-3.5",
+}: {
+  selected: boolean;
+  onClick: () => void;
+  icon?: React.ReactNode;
+  title: string;
+  description?: string | null;
+  align?: "items-start" | "items-center";
+  padding?: "p-3" | "p-3.5";
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={`flex ${align} gap-2.5 rounded-control border ${padding} text-left text-sm transition-colors ${
+        selected
+          ? "border-acc bg-acc-soft shadow-[0_0_0_3px_var(--acc-soft)]"
+          : "border-line hover:border-acc"
+      }`}
+    >
+      {icon}
+      <span className="min-w-0" style={{ overflowWrap: "anywhere" }}>
+        <span className="block font-bold">{title}</span>
+        {description && (
+          <span className="mt-0.5 block text-[12.5px] text-muted-foreground">{description}</span>
+        )}
+      </span>
+    </button>
+  );
+}
+
 export function NewConversationForm({
   topics,
   defaultDifficulty,
@@ -57,30 +96,18 @@ export function NewConversationForm({
             {topics.map((topic) => {
               const selected = !hasCustomTopic && topic.id === topicId;
               return (
-                <button
+                <SelectableCard
                   key={topic.id}
-                  type="button"
-                  aria-pressed={selected}
+                  selected={selected}
                   onClick={() => {
                     setTopicId(topic.id);
                     setCustomTopic("");
                   }}
-                  className={`flex items-start gap-2.5 rounded-control border p-3 text-left text-sm transition-colors ${
-                    selected
-                      ? "border-acc bg-acc-soft shadow-[0_0_0_3px_var(--acc-soft)]"
-                      : "border-line hover:border-acc"
-                  }`}
-                >
-                  <TopicIcon slug={topic.slug} />
-                  <span className="min-w-0" style={{ overflowWrap: "anywhere" }}>
-                    <span className="block font-bold">{topic.title}</span>
-                    {topic.description && (
-                      <span className="mt-0.5 block text-[12.5px] text-muted-foreground">
-                        {topic.description}
-                      </span>
-                    )}
-                  </span>
-                </button>
+                  icon={<TopicIcon slug={topic.slug} />}
+                  title={topic.title}
+                  description={topic.description}
+                  padding="p-3"
+                />
               );
             })}
           </div>
@@ -101,27 +128,15 @@ export function NewConversationForm({
             <span className="text-acc">2</span>&nbsp;&nbsp;Nível
           </legend>
           <div className="grid gap-2.5 sm:grid-cols-3">
-            {DIFFICULTIES.map((level) => {
-              const selected = difficulty === level;
-              return (
-                <button
-                  key={level}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setDifficulty(level)}
-                  className={`rounded-control border p-3.5 text-left text-sm transition-colors ${
-                    selected
-                      ? "border-acc bg-acc-soft shadow-[0_0_0_3px_var(--acc-soft)]"
-                      : "border-line hover:border-acc"
-                  }`}
-                >
-                  <span className="block font-bold">{DIFFICULTY_LABELS[level]}</span>
-                  <span className="mt-0.5 block text-[12.5px] text-muted-foreground">
-                    {DIFFICULTY_DESCRIPTIONS[level]}
-                  </span>
-                </button>
-              );
-            })}
+            {DIFFICULTIES.map((level) => (
+              <SelectableCard
+                key={level}
+                selected={difficulty === level}
+                onClick={() => setDifficulty(level)}
+                title={DIFFICULTY_LABELS[level]}
+                description={DIFFICULTY_DESCRIPTIONS[level]}
+              />
+            ))}
           </div>
         </fieldset>
 
@@ -130,42 +145,22 @@ export function NewConversationForm({
             <span className="text-acc">3</span>&nbsp;&nbsp;Como você quer responder?
           </legend>
           <div className="grid gap-2.5 sm:grid-cols-2">
-            <button
-              type="button"
-              aria-pressed={mode === "text"}
+            <SelectableCard
+              selected={mode === "text"}
               onClick={() => setMode("text")}
-              className={`flex items-center gap-2.5 rounded-control border p-3.5 text-left text-sm transition-colors ${
-                mode === "text"
-                  ? "border-acc bg-acc-soft shadow-[0_0_0_3px_var(--acc-soft)]"
-                  : "border-line hover:border-acc"
-              }`}
-            >
-              <Keyboard className="size-5 shrink-0" />
-              <span>
-                <span className="block font-bold">Texto</span>
-                <span className="block text-[12.5px] text-muted-foreground">
-                  Digite suas respostas.
-                </span>
-              </span>
-            </button>
-            <button
-              type="button"
-              aria-pressed={mode === "voice"}
+              icon={<Keyboard className="size-5 shrink-0" />}
+              title="Texto"
+              description="Digite suas respostas."
+              align="items-center"
+            />
+            <SelectableCard
+              selected={mode === "voice"}
               onClick={() => setMode("voice")}
-              className={`flex items-center gap-2.5 rounded-control border p-3.5 text-left text-sm transition-colors ${
-                mode === "voice"
-                  ? "border-acc bg-acc-soft shadow-[0_0_0_3px_var(--acc-soft)]"
-                  : "border-line hover:border-acc"
-              }`}
-            >
-              <Mic className="size-5 shrink-0" />
-              <span>
-                <span className="block font-bold">Voz</span>
-                <span className="block text-[12.5px] text-muted-foreground">
-                  Fale e revise a transcrição.
-                </span>
-              </span>
-            </button>
+              icon={<Mic className="size-5 shrink-0" />}
+              title="Voz"
+              description="Fale e revise a transcrição."
+              align="items-center"
+            />
           </div>
         </fieldset>
       </div>
