@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { importFlashcardsAction } from "@/app/flashcards/actions";
 import { Banner } from "@/components/banner";
+import { FilePicker } from "@/components/file-picker";
 import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/infrastructure/supabase/require-user";
 
@@ -45,21 +46,11 @@ export default async function ImportFlashcardsPage({
       )}
 
       <form action={importFlashcardsAction} className="mt-6 flex flex-col gap-4">
-        <label
-          htmlFor="file"
-          className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-control border border-dashed border-line px-4 py-10 text-center text-sm text-muted-foreground hover:border-acc"
-        >
-          <Upload className="size-6" />
-          <span>Escolha um arquivo .csv ou .txt</span>
-          <input
-            id="file"
-            name="file"
-            type="file"
-            accept=".csv,.txt,text/csv,text/plain"
-            required
-            className="hidden"
-          />
-        </label>
+        <FilePicker
+          name="file"
+          accept=".csv,.txt,text/csv,text/plain"
+          placeholder="Escolha um arquivo .csv ou .txt"
+        />
 
         <SubmitButton
           pendingLabel="Importando…"
