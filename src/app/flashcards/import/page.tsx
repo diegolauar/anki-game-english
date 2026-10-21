@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Upload } from "lucide-react";
 import { importFlashcardsAction } from "@/app/flashcards/actions";
 import { Banner } from "@/components/banner";
+import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/infrastructure/supabase/require-user";
 
 export default async function ImportFlashcardsPage({
@@ -60,12 +61,12 @@ export default async function ImportFlashcardsPage({
           />
         </label>
 
-        <button
-          type="submit"
-          className="flex h-12 items-center justify-center rounded-full bg-acc text-sm font-bold text-acc-ink"
+        <SubmitButton
+          pendingLabel="Importando…"
+          className="flex h-12 items-center justify-center rounded-full bg-acc text-sm font-bold text-acc-ink disabled:opacity-60"
         >
           Importar
-        </button>
+        </SubmitButton>
       </form>
 
       <div className="mt-8 rounded-card border border-line bg-surface p-4 text-sm">
