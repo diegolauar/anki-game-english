@@ -7,9 +7,11 @@ import { SaveFlashcardSuggestion } from "@/application/use-cases/save-flashcard-
 import { SaveFlashcardSuggestions } from "@/application/use-cases/save-flashcard-suggestions";
 import { DiscardFlashcardSuggestion } from "@/application/use-cases/discard-flashcard-suggestion";
 import { CreateManualFlashcard } from "@/application/use-cases/create-manual-flashcard";
+import { ImportFlashcards } from "@/application/use-cases/import-flashcards";
 import { ReviewFlashcard } from "@/application/use-cases/review-flashcard";
 import { EditFlashcard } from "@/application/use-cases/edit-flashcard";
 import { ToggleFlashcardSuspension } from "@/application/use-cases/toggle-flashcard-suspension";
+import { parseFlashcardCsv } from "@/domain/rules/parse-flashcard-csv";
 import { RATINGS } from "@/domain/value-objects/rating";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
@@ -142,6 +144,42 @@ export async function createManualFlashcardAction(formData: FormData) {
   await useCase.execute({ userId: user.id, ...parsed });
 
   redirect("/flashcards");
+}
+
+const MAX_FLASHCARD_IMPORT_FILE_SIZE_BYTES = 256 * 1024;
+
+export async function importFlashcardsAction(formData: FormData) {
+  const { supabase, user } = await requireUser();
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    redirect(`/flashcards/import?error=${encodeURIComponent("Selecione um arquivo .csv para importar.")}`);
+  }
+  if (file.size > MAX_FLASHCARD_IMPORT_FILE_SIZE_BYTES) {
+    redirect(`/flashcards/import?error=${encodeURIComponent("O arquivo não pode passar de 256 KB.")}`);
+  }
+
+  const content = await file.text();
+  const { rows, errors } = parseFlashcardCsv(content);
+
+  if (rows.length === 0) {
+    const message = errors[0]?.message ?? "Nenhum cartão válido encontrado no arquivo.";
+    redirect(`/flashcards/import?error=${encodeURIComponent(message)}`);
+  }
+
+  const useCase = new ImportFlashcards(
+    new CreateManualFlashcard(
+      new SupabaseFlashcardRepository(supabase),
+      new SupabaseCardScheduleRepository(supabase),
+      new TsFsrsReviewScheduler(),
+      new SupabaseXpEventWriter(createSupabaseServiceRoleClient()),
+    ),
+  );
+
+  const result = await useCase.execute({ userId: user.id, rows });
+  const skipped = errors.length + result.failed.length;
+
+  redirect(`/flashcards/import?created=${result.created.length}&skipped=${skipped}`);
 }
 
 const editFlashcardSchema = z.object({

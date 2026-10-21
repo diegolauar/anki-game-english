@@ -115,12 +115,20 @@ export default async function FlashcardsPage({
             {counts.all} cartões · {counts.pending} para revisar hoje
           </p>
         </div>
-        <Link
-          href="/flashcards/new"
-          className="flex h-11 items-center rounded-full bg-acc px-5 text-sm font-bold text-acc-ink"
-        >
-          + Novo cartão
-        </Link>
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/flashcards/import"
+            className="flex h-11 items-center rounded-full border border-line px-5 text-sm font-bold hover:border-acc"
+          >
+            Importar arquivo
+          </Link>
+          <Link
+            href="/flashcards/new"
+            className="flex h-11 items-center rounded-full bg-acc px-5 text-sm font-bold text-acc-ink"
+          >
+            + Novo cartão
+          </Link>
+        </div>
       </header>
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
