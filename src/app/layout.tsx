@@ -62,6 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="pt-BR"
       className={`${bricolage.variable} ${figtree.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
