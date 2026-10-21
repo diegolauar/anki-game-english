@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Check, Mail, X } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordRequirements } from "@/components/password-requirements";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/browser-client";
-import { PASSWORD_REQUIREMENTS, signInSchema, signUpSchema } from "@/lib/auth-validation";
+import { signInSchema, signUpSchema } from "@/lib/auth-validation";
 
 type AuthTab = "signin" | "signup";
 
@@ -17,7 +18,9 @@ export default function LoginPage() {
   const [tab, setTab] = useState<AuthTab>("signin");
 
   return (
-    <main className="grid min-h-dvh flex-1 grid-cols-1 max-[900px]:grid-cols-1 md:grid-cols-[1.1fr_1fr]">
+    <main className="grid min-h-dvh flex-1 grid-cols-1 md:grid-cols-[1.1fr_1fr]">
+      <h1 className="sr-only md:hidden">English Quest — Entrar ou criar conta</h1>
+
       <section className="relative hidden flex-col justify-between overflow-hidden bg-acc p-12 text-acc-ink md:flex lg:p-14">
         <div
           aria-hidden
@@ -75,37 +78,55 @@ export default function LoginPage() {
         </p>
       </section>
 
-      <section className="flex flex-1 items-center justify-center p-8">
-        <div className="flex w-full max-w-[380px] flex-col gap-6">
+      <section className="flex flex-1 justify-center overflow-y-auto p-8 pt-16 sm:pt-20">
+        <div className="flex h-fit w-full max-w-[380px] flex-col gap-6">
           <div>
-            <div className="flex h-14 items-center gap-1 rounded-full border border-line bg-surface2 p-1.5">
+            <div
+              role="tablist"
+              aria-label="Entrar ou criar conta"
+              className="flex h-14 items-center gap-1 rounded-full border border-line bg-surface2 p-1.5"
+            >
               <button
                 type="button"
+                role="tab"
+                id="signin-tab"
+                aria-selected={tab === "signin"}
+                aria-controls="signin-panel"
                 onClick={() => setTab("signin")}
-                aria-pressed={tab === "signin"}
-                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors ${
+                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors duration-150 ${
                   tab === "signin"
                     ? "bg-acc text-acc-ink shadow-[0_4px_14px_-4px_var(--acc)]"
-                    : "text-muted-foreground hover:text-ink"
+                    : "text-muted-foreground hover:bg-surface hover:text-ink"
                 }`}
               >
                 Entrar
               </button>
               <button
                 type="button"
+                role="tab"
+                id="signup-tab"
+                aria-selected={tab === "signup"}
+                aria-controls="signup-panel"
                 onClick={() => setTab("signup")}
-                aria-pressed={tab === "signup"}
-                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors ${
+                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors duration-150 ${
                   tab === "signup"
                     ? "bg-acc text-acc-ink shadow-[0_4px_14px_-4px_var(--acc)]"
-                    : "text-muted-foreground hover:text-ink"
+                    : "text-muted-foreground hover:bg-surface hover:text-ink"
                 }`}
               >
                 Criar conta
               </button>
             </div>
 
-            <div className="mt-6">{tab === "signin" ? <SignInPanel /> : <SignUpPanel />}</div>
+            <div
+              key={tab}
+              role="tabpanel"
+              id={`${tab}-panel`}
+              aria-labelledby={`${tab}-tab`}
+              className="mt-6 animate-in fade-in-0 slide-in-from-bottom-1 duration-200"
+            >
+              {tab === "signin" ? <SignInPanel /> : <SignUpPanel />}
+            </div>
           </div>
 
           <p className="text-xs text-muted-foreground">
@@ -403,25 +424,6 @@ function SignUpPanel() {
       <GoogleDivider />
       <GoogleButton onClick={handleGoogleSignUp} label="Continuar com Google" />
     </div>
-  );
-}
-
-function PasswordRequirements({ password }: { password: string }) {
-  return (
-    <ul className="mt-1 flex flex-col gap-0.5">
-      {PASSWORD_REQUIREMENTS.map((requirement) => {
-        const met = requirement.test(password);
-        return (
-          <li
-            key={requirement.label}
-            className={`flex items-center gap-1.5 text-xs ${met ? "text-ok" : "text-muted-foreground"}`}
-          >
-            {met ? <Check className="size-3.5" /> : <X className="size-3.5" />}
-            {requirement.label}
-          </li>
-        );
-      })}
-    </ul>
   );
 }
 

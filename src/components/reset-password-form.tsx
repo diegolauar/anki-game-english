@@ -5,8 +5,9 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordRequirements } from "@/components/password-requirements";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/browser-client";
-import { PASSWORD_REQUIREMENTS, newPasswordSchema } from "@/lib/auth-validation";
+import { newPasswordSchema } from "@/lib/auth-validation";
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -49,21 +50,7 @@ export function ResetPasswordForm() {
           onChange={setPassword}
           autoComplete="new-password"
         />
-        {password.length > 0 && (
-          <ul className="mt-1 flex flex-col gap-0.5">
-            {PASSWORD_REQUIREMENTS.map((requirement) => {
-              const met = requirement.test(password);
-              return (
-                <li
-                  key={requirement.label}
-                  className={`text-xs ${met ? "text-ok" : "text-muted-foreground"}`}
-                >
-                  {met ? "✓" : "·"} {requirement.label}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        {password.length > 0 && <PasswordRequirements password={password} />}
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="confirm-new-password">Confirmar nova senha</Label>
