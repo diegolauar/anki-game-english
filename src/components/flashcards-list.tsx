@@ -1,13 +1,8 @@
 import Link from "next/link";
 import { Pencil, PauseCircle } from "lucide-react";
 import { toggleFlashcardSuspensionAction } from "@/app/flashcards/actions";
+import { CARD_TYPE_LABELS } from "@/lib/card-type-labels";
 import type { CardType } from "@/domain/value-objects/card-type";
-
-const CARD_TYPE_LABELS: Record<CardType, string> = {
-  production: "Produção",
-  cloze: "Lacuna",
-  manual: "Manual",
-};
 
 export interface FlashcardRow {
   id: string;

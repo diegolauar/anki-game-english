@@ -17,13 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CARD_TYPE_LABELS } from "@/lib/card-type-labels";
 import type { Flashcard } from "@/domain/entities/flashcard";
-import type { CardType } from "@/domain/value-objects/card-type";
-
-const CARD_TYPE_LABELS: Partial<Record<CardType, string>> = {
-  production: "Produção",
-  cloze: "Lacuna",
-};
 
 type LocalStatus = "suggested" | "saving" | "active" | "discarded";
 
@@ -67,7 +62,7 @@ function SuggestionCard({
     <li className="rounded-control border border-line p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold tracking-[.04em] text-acc uppercase">
-          {CARD_TYPE_LABELS[flashcard.cardType] ?? "Cartão"}
+          {CARD_TYPE_LABELS[flashcard.cardType]}
         </span>
       </div>
       <p className="mt-2 text-[15px] font-semibold">{front}</p>

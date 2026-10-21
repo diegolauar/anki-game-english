@@ -1,17 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { History, PartyPopper, Speech, X } from "lucide-react";
 import { reviewFlashcardAction } from "@/app/flashcards/actions";
+import { CARD_TYPE_LABELS } from "@/lib/card-type-labels";
 import type { Rating } from "@/domain/value-objects/rating";
 import type { CardType } from "@/domain/value-objects/card-type";
-
-const CARD_TYPE_LABELS: Record<CardType, string> = {
-  production: "Produção",
-  cloze: "Lacuna",
-  manual: "Manual",
-};
 
 const RATING_INFO: Record<Rating, { label: string; className: string }> = {
   again: { label: "De novo", className: "bg-err-soft text-err" },
@@ -51,18 +46,21 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
   const current = queue[index];
   const finished = !current;
 
-  async function handleRate(rating: Rating) {
-    if (!current || isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      await reviewFlashcardAction({ flashcardId: current.flashcardId, rating });
-      setReviewedCount((count) => count + 1);
-      setIndex((previous) => previous + 1);
-      setRevealed(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+  const handleRate = useCallback(
+    async (rating: Rating) => {
+      if (!current || isSubmitting) return;
+      setIsSubmitting(true);
+      try {
+        await reviewFlashcardAction({ flashcardId: current.flashcardId, rating });
+        setReviewedCount((count) => count + 1);
+        setIndex((previous) => previous + 1);
+        setRevealed(false);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [current, isSubmitting],
+  );
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -81,8 +79,7 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed, finished, isSubmitting, current]);
+  }, [revealed, finished, isSubmitting, handleRate]);
 
   if (finished) {
     const xpGained =

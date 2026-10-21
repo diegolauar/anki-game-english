@@ -8,8 +8,7 @@ import { DIFFICULTY_DESCRIPTIONS, DIFFICULTY_LABELS } from "@/lib/difficulty-lab
 import type { Topic } from "@/domain/entities/topic";
 import type { Difficulty } from "@/domain/value-objects/difficulty";
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
-
-type InputMode = "text" | "voice";
+import type { InputMode } from "@/domain/value-objects/input-mode";
 
 export function NewConversationForm({
   topics,
