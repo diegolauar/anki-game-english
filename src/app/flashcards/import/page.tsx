@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Upload } from "lucide-react";
 import { importFlashcardsAction } from "@/app/flashcards/actions";
+import { Banner } from "@/components/banner";
 import { requireUser } from "@/infrastructure/supabase/require-user";
 
 export default async function ImportFlashcardsPage({
@@ -31,13 +32,15 @@ export default async function ImportFlashcardsPage({
       </p>
 
       {error && (
-        <p className="mt-4 rounded-control bg-err-soft p-3 text-sm text-err">{error}</p>
+        <Banner tone="error" className="mt-4">
+          {error}
+        </Banner>
       )}
       {created !== undefined && !error && (
-        <p className="mt-4 rounded-control bg-acc-soft p-3 text-sm text-acc-strong">
+        <Banner tone="success" className="mt-4">
           {created} cartão{created === "1" ? "" : "s"} importado{created === "1" ? "" : "s"}.
           {skipped && skipped !== "0" ? ` ${skipped} linha${skipped === "1" ? "" : "s"} ignorada${skipped === "1" ? "" : "s"}.` : ""}
-        </p>
+        </Banner>
       )}
 
       <form action={importFlashcardsAction} className="mt-6 flex flex-col gap-4">

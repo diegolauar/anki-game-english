@@ -11,8 +11,9 @@ import {
   Square,
 } from "lucide-react";
 import { finishConversationAction, sendMessageAction } from "@/app/conversations/actions";
+import { Banner } from "@/components/banner";
 import { TopicIcon } from "@/components/topic-icon";
-import { useVoiceRecorder } from "@/components/use-voice-recorder";
+import { useVoiceRecorder } from "@/hooks/use-voice-recorder";
 import type { Message } from "@/domain/entities/message";
 import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP } from "@/domain/rules/xp-rewards";
 import type { InputMode } from "@/domain/value-objects/input-mode";
@@ -259,9 +260,9 @@ export function ChatView({
           {error && <p className="mb-2 text-sm text-err">{error}</p>}
 
           {voice.state === "denied" && (
-            <p className="mb-2 rounded-control bg-err-soft px-3 py-2 text-[13px] text-err">
+            <Banner tone="error" className="mb-2 px-3 py-2 text-[13px]">
               Sem acesso ao microfone. Você pode continuar digitando.
-            </p>
+            </Banner>
           )}
 
           {voice.state === "review" && (
