@@ -1,41 +1,26 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordRequirements } from "@/components/password-requirements";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/browser-client";
+import { signInSchema, signUpSchema } from "@/lib/auth-validation";
 
-type Status = "idle" | "sending" | "sent" | "error";
+type AuthTab = "signin" | "signup";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
-
-  async function handleMagicLink(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("sending");
-
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    });
-
-    setStatus(error ? "error" : "sent");
-  }
-
-  async function handleGoogleLogin() {
-    const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-  }
+  const [tab, setTab] = useState<AuthTab>("signin");
 
   return (
-    <main className="grid min-h-dvh flex-1 grid-cols-1 max-[900px]:grid-cols-1 md:grid-cols-[1.1fr_1fr]">
+    <main className="grid min-h-dvh flex-1 grid-cols-1 md:grid-cols-[1.1fr_1fr]">
+      <h1 className="sr-only md:hidden">English Quest — Entrar ou criar conta</h1>
+
       <section className="relative hidden flex-col justify-between overflow-hidden bg-acc p-12 text-acc-ink md:flex lg:p-14">
         <div
           aria-hidden
@@ -93,64 +78,371 @@ export default function LoginPage() {
         </p>
       </section>
 
-      <section className="flex flex-1 items-center justify-center p-8">
-        <div className="flex w-full max-w-[380px] flex-col gap-6">
+      <section className="flex flex-1 justify-center overflow-y-auto p-8 pt-16 sm:pt-20">
+        <div className="flex h-fit w-full max-w-[380px] flex-col gap-6">
           <div>
-            <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Entrar</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sem senha. Enviamos um link de acesso para o seu e-mail.
-            </p>
-          </div>
-
-          <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="voce@exemplo.com"
-                className={status === "error" ? "border-err" : undefined}
-              />
+            <div
+              role="tablist"
+              aria-label="Entrar ou criar conta"
+              className="flex h-14 items-center gap-1 rounded-full border border-line bg-surface2 p-1.5"
+            >
+              <button
+                type="button"
+                role="tab"
+                id="signin-tab"
+                aria-selected={tab === "signin"}
+                aria-controls="signin-panel"
+                onClick={() => setTab("signin")}
+                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors duration-150 ${
+                  tab === "signin"
+                    ? "bg-acc text-acc-ink shadow-[0_4px_14px_-4px_var(--acc)]"
+                    : "text-muted-foreground hover:bg-surface hover:text-ink"
+                }`}
+              >
+                Entrar
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="signup-tab"
+                aria-selected={tab === "signup"}
+                aria-controls="signup-panel"
+                onClick={() => setTab("signup")}
+                className={`h-full flex-1 rounded-full text-[15px] font-bold transition-colors duration-150 ${
+                  tab === "signup"
+                    ? "bg-acc text-acc-ink shadow-[0_4px_14px_-4px_var(--acc)]"
+                    : "text-muted-foreground hover:bg-surface hover:text-ink"
+                }`}
+              >
+                Criar conta
+              </button>
             </div>
-            <Button type="submit" disabled={status === "sending"} className="h-[50px] text-[15px]">
-              <Mail className="size-4" />
-              {status === "sending" ? "Enviando…" : "Enviar link de acesso"}
-            </Button>
-            {status === "sent" && (
-              <p className="text-sm text-ok">
-                Link enviado para {email} — confira sua caixa de entrada.
-              </p>
-            )}
-            {status === "error" && (
-              <p className="text-sm text-err">Não foi possível enviar o link. Tente novamente.</p>
-            )}
-          </form>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-line" />
-            ou
-            <span className="h-px flex-1 bg-line" />
+            <div
+              key={tab}
+              role="tabpanel"
+              id={`${tab}-panel`}
+              aria-labelledby={`${tab}-tab`}
+              className="mt-6 animate-in fade-in-0 slide-in-from-bottom-1 duration-200"
+            >
+              {tab === "signin" ? <SignInPanel /> : <SignUpPanel />}
+            </div>
           </div>
-
-          <Button
-            variant="outline"
-            onClick={handleGoogleLogin}
-            className="h-[50px] text-[15px]"
-          >
-            <GoogleLogo className="size-4" />
-            Continuar com Google
-          </Button>
 
           <p className="text-xs text-muted-foreground">
-            Ao entrar, você concorda com os Termos e a Política de Privacidade (LGPD). Áudios de
-            voz nunca são armazenados.
+            Ao continuar, você concorda com os Termos e a Política de Privacidade (LGPD). Áudios
+            de voz nunca são armazenados.
           </p>
         </div>
       </section>
     </main>
+  );
+}
+
+function SignInPanel() {
+  const router = useRouter();
+  const [mode, setMode] = useState<"password" | "magic-link">("password");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicStatus, setMagicStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function handlePasswordSignIn(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const parsed = signInSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setStatus("error");
+      setErrorMessage(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+      return;
+    }
+
+    setStatus("loading");
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+
+    if (error) {
+      setStatus("error");
+      setErrorMessage("E-mail ou senha incorretos.");
+      return;
+    }
+
+    router.push("/dashboard");
+    router.refresh();
+  }
+
+  async function handleMagicLink(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMagicStatus("sending");
+
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email: magicEmail,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+
+    setMagicStatus(error ? "error" : "sent");
+  }
+
+  async function handleGoogleLogin() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }
+
+  if (mode === "magic-link") {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Entrar</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sem senha. Enviamos um link de acesso para o seu e-mail.
+          </p>
+        </div>
+
+        <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="magic-email">E-mail</Label>
+            <Input
+              id="magic-email"
+              type="email"
+              required
+              value={magicEmail}
+              onChange={(event) => setMagicEmail(event.target.value)}
+              placeholder="voce@exemplo.com"
+              className={magicStatus === "error" ? "border-err" : undefined}
+            />
+          </div>
+          <Button type="submit" disabled={magicStatus === "sending"} className="h-[50px] text-[15px]">
+            <Mail className="size-4" />
+            {magicStatus === "sending" ? "Enviando…" : "Enviar link de acesso"}
+          </Button>
+          {magicStatus === "sent" && (
+            <p className="text-sm text-ok">
+              Link enviado para {magicEmail} — confira sua caixa de entrada.
+            </p>
+          )}
+          {magicStatus === "error" && (
+            <p className="text-sm text-err">Não foi possível enviar o link. Tente novamente.</p>
+          )}
+        </form>
+
+        <button
+          type="button"
+          onClick={() => setMode("password")}
+          className="text-left text-sm font-semibold text-acc-strong hover:underline"
+        >
+          Entrar com e-mail e senha
+        </button>
+
+        <GoogleDivider />
+        <GoogleButton onClick={handleGoogleLogin} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Entrar</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Acesse com seu e-mail e senha.</p>
+      </div>
+
+      <form onSubmit={handlePasswordSignIn} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="signin-email">E-mail</Label>
+          <Input
+            id="signin-email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="voce@exemplo.com"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="signin-password">Senha</Label>
+            <Link href="/forgot-password" className="text-xs font-semibold text-acc-strong hover:underline">
+              Esqueceu a senha?
+            </Link>
+          </div>
+          <PasswordInput
+            id="signin-password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="current-password"
+          />
+        </div>
+        <Button type="submit" disabled={status === "loading"} className="h-[50px] text-[15px]">
+          {status === "loading" ? "Entrando…" : "Entrar"}
+        </Button>
+        {status === "error" && <p className="text-sm text-err">{errorMessage}</p>}
+      </form>
+
+      <button
+        type="button"
+        onClick={() => setMode("magic-link")}
+        className="text-left text-sm font-semibold text-acc-strong hover:underline"
+      >
+        Prefere entrar sem senha? Receba um link por e-mail
+      </button>
+
+      <GoogleDivider />
+      <GoogleButton onClick={handleGoogleLogin} />
+    </div>
+  );
+}
+
+function SignUpPanel() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleSignUp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const parsed = signUpSchema.safeParse({ name, email, password, confirmPassword });
+    if (!parsed.success) {
+      setStatus("error");
+      setErrorMessage(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+      return;
+    }
+
+    setStatus("loading");
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        data: { full_name: parsed.data.name },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setStatus("error");
+      setErrorMessage(
+        error.status === 429
+          ? "Muitas tentativas. Aguarde um pouco e tente de novo."
+          : "Não foi possível criar sua conta. Tente novamente.",
+      );
+      return;
+    }
+
+    // Mesma mensagem independente de o e-mail já existir ou não (evita
+    // confirmar pra quem está testando se um e-mail já tem conta).
+    setStatus("sent");
+  }
+
+  async function handleGoogleSignUp() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }
+
+  if (status === "sent") {
+    return (
+      <div className="flex flex-col gap-3">
+        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Quase lá</h2>
+        <p className="text-sm text-muted-foreground">
+          Se {email} ainda não tiver uma conta, enviamos um link de confirmação pra esse endereço
+          — confira sua caixa de entrada pra ativar o acesso.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Criar conta</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Nome, e-mail e senha — só isso.</p>
+      </div>
+
+      <form onSubmit={handleSignUp} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="signup-name">Nome</Label>
+          <Input
+            id="signup-name"
+            required
+            autoComplete="name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Seu nome"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="signup-email">E-mail</Label>
+          <Input
+            id="signup-email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="voce@exemplo.com"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="signup-password">Senha</Label>
+          <PasswordInput
+            id="signup-password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+          />
+          {password.length > 0 && <PasswordRequirements password={password} />}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="signup-confirm-password">Confirmar senha</Label>
+          <PasswordInput
+            id="signup-confirm-password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            autoComplete="new-password"
+          />
+        </div>
+        <Button type="submit" disabled={status === "loading"} className="h-[50px] text-[15px]">
+          {status === "loading" ? "Criando conta…" : "Criar conta"}
+        </Button>
+        {status === "error" && <p className="text-sm text-err">{errorMessage}</p>}
+      </form>
+
+      <GoogleDivider />
+      <GoogleButton onClick={handleGoogleSignUp} label="Continuar com Google" />
+    </div>
+  );
+}
+
+function GoogleDivider() {
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <span className="h-px flex-1 bg-line" />
+      ou
+      <span className="h-px flex-1 bg-line" />
+    </div>
+  );
+}
+
+function GoogleButton({ onClick, label = "Continuar com Google" }: { onClick: () => void; label?: string }) {
+  return (
+    <Button variant="outline" onClick={onClick} className="h-[50px] text-[15px]">
+      <GoogleLogo className="size-4" />
+      {label}
+    </Button>
   );
 }
 
