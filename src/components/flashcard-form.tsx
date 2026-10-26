@@ -1,7 +1,8 @@
+import { getTranslations } from "next-intl/server";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function FlashcardForm({
+export async function FlashcardForm({
   action,
   submitLabel,
   hiddenFields,
@@ -16,6 +17,8 @@ export function FlashcardForm({
   defaultBack?: string;
   defaultExplanation?: string;
 }) {
+  const t = await getTranslations("flashcards.form");
+
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
       {hiddenFields &&
@@ -24,34 +27,34 @@ export function FlashcardForm({
         ))}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="front">Frente</Label>
+        <Label htmlFor="front">{t("frontLabel")}</Label>
         <Input
           id="front"
           name="front"
           required
           defaultValue={defaultFront}
-          placeholder="Pergunta ou situação em português"
+          placeholder={t("frontPlaceholder")}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="back">Verso</Label>
+        <Label htmlFor="back">{t("backLabel")}</Label>
         <Input
           id="back"
           name="back"
           required
           defaultValue={defaultBack}
-          placeholder="Frase em inglês"
+          placeholder={t("backPlaceholder")}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="explanation">Explicação (opcional)</Label>
+        <Label htmlFor="explanation">{t("explanationLabel")}</Label>
         <Input
           id="explanation"
           name="explanation"
           defaultValue={defaultExplanation}
-          placeholder="Contexto ou dica extra"
+          placeholder={t("explanationPlaceholder")}
         />
       </div>
 

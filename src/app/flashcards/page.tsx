@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { FlashcardsList, type FlashcardRow } from "@/components/flashcards-list";
 import { FlashcardsSearchInput } from "@/components/flashcards-search-input";
 import type { CardSchedule } from "@/domain/entities/card-schedule";
@@ -11,31 +12,26 @@ import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learn
 
 const PAGE_SIZE = 20;
 
-const FILTER_LABELS: Record<FlashcardListFilter, string> = {
-  pending: "Pendentes",
-  new: "Novos",
-  reviewed: "Revisados",
-  suspended: "Suspensos",
-  all: "Todos",
-};
+type FlashcardsTranslator = Awaited<ReturnType<typeof getTranslations>>;
 
 function buildDueChip(
+  t: FlashcardsTranslator,
   flashcard: Flashcard,
   schedule: CardSchedule,
   now: Date,
 ): { label: string; className: string } {
   if (flashcard.status === "suspended") {
-    return { label: "Suspenso", className: "text-muted-foreground" };
+    return { label: t("dueChip.suspended"), className: "text-muted-foreground" };
   }
   if (schedule.state === "new") {
-    return { label: "Novo", className: "bg-acc-soft text-acc-strong" };
+    return { label: t("dueChip.new"), className: "bg-acc-soft text-acc-strong" };
   }
   const dueAt = new Date(schedule.dueAt).getTime();
   if (dueAt <= now.getTime()) {
-    return { label: "Hoje", className: "bg-err-soft text-err" };
+    return { label: t("dueChip.today"), className: "bg-err-soft text-err" };
   }
   const days = Math.ceil((dueAt - now.getTime()) / (24 * 60 * 60 * 1000));
-  return { label: `Em ${days} ${days === 1 ? "dia" : "dias"}`, className: "text-muted-foreground" };
+  return { label: t("dueChip.inDays", { days }), className: "text-muted-foreground" };
 }
 
 export default async function FlashcardsPage({
@@ -50,6 +46,7 @@ export default async function FlashcardsPage({
     ? (rawFilter as FlashcardListFilter)
     : "pending";
   const page = Math.max(1, Number.parseInt(rawPage ?? "1", 10) || 1);
+  const t = await getTranslations("flashcards");
 
   const { supabase, user } = await requireUser();
 
@@ -81,7 +78,7 @@ export default async function FlashcardsPage({
   const categoryByLearningPointId = new Map(learningPoints.map((point) => [point.id, point.category]));
 
   const rows: FlashcardRow[] = pageResult.items.map(({ flashcard, schedule }) => {
-    const chip = buildDueChip(flashcard, schedule, now);
+    const chip = buildDueChip(t, flashcard, schedule, now);
     return {
       id: flashcard.id,
       front: flashcard.front,
@@ -104,10 +101,10 @@ export default async function FlashcardsPage({
       <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-[40px] leading-[1.05] font-bold tracking-[-0.03em]">
-            Flashcards
+            {t("heading")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {counts.all} cartões · {counts.pending} para revisar hoje
+            {t("countSummary", { total: counts.all, pending: counts.pending })}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -115,13 +112,13 @@ export default async function FlashcardsPage({
             href="/flashcards/import"
             className="flex h-11 items-center rounded-full border border-line px-5 text-sm font-bold hover:border-acc"
           >
-            Importar arquivo
+            {t("importFile")}
           </Link>
           <Link
             href="/flashcards/new"
             className="flex h-11 items-center rounded-full bg-acc px-5 text-sm font-bold text-acc-ink"
           >
-            + Novo cartão
+            {t("newCard")}
           </Link>
         </div>
       </header>
@@ -138,7 +135,7 @@ export default async function FlashcardsPage({
                   : "border border-line text-muted-foreground hover:border-acc"
               }`}
             >
-              {FILTER_LABELS[key]} <span className="opacity-60">{counts[key]}</span>
+              {t(`filters.${key}`)} <span className="opacity-60">{counts[key]}</span>
             </Link>
           ))}
         </nav>
@@ -157,11 +154,9 @@ export default async function FlashcardsPage({
             }`}
           >
             <ChevronLeft className="size-4" />
-            Anterior
+            {t("pagination.previous")}
           </Link>
-          <span>
-            Página {page} de {totalPages}
-          </span>
+          <span>{t("pagination.pageOf", { page, total: totalPages })}</span>
           <Link
             aria-disabled={page >= totalPages}
             href={`/flashcards?filter=${filter}&page=${page + 1}${searchSuffix}`}
@@ -169,7 +164,7 @@ export default async function FlashcardsPage({
               page >= totalPages ? "pointer-events-none opacity-40" : "hover:border-acc"
             }`}
           >
-            Próxima
+            {t("pagination.next")}
             <ChevronRight className="size-4" />
           </Link>
         </div>

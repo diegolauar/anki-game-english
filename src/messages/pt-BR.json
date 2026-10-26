@@ -3,7 +3,125 @@
     "language": "Idioma",
     "hidePassword": "Esconder senha",
     "showPassword": "Mostrar senha",
-    "backToHome": "Início"
+    "backToHome": "Início",
+    "close": "Fechar"
+  },
+  "cardType": {
+    "productionLabel": "Produção",
+    "clozeLabel": "Lacuna",
+    "manualLabel": "Manual"
+  },
+  "nav": {
+    "home": "Início",
+    "talk": "Conversar",
+    "review": "Revisar",
+    "flashcards": "Cartões",
+    "signOut": "Sair",
+    "ariaLabel": "Navegação principal"
+  },
+  "flashcards": {
+    "heading": "Flashcards",
+    "countSummary": "{total, plural, one {# cartão} other {# cartões}} · {pending} para revisar hoje",
+    "importFile": "Importar arquivo",
+    "newCard": "+ Novo cartão",
+    "filters": {
+      "pending": "Pendentes",
+      "new": "Novos",
+      "reviewed": "Revisados",
+      "suspended": "Suspensos",
+      "all": "Todos"
+    },
+    "search": "Buscar",
+    "dueChip": {
+      "suspended": "Suspenso",
+      "new": "Novo",
+      "today": "Hoje",
+      "inDays": "Em {days, plural, one {# dia} other {# dias}}"
+    },
+    "emptyList": "Nenhum cartão aqui por enquanto.",
+    "edit": "Editar",
+    "reactivate": "Reativar",
+    "suspend": "Suspender",
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Próxima",
+      "pageOf": "Página {page} de {total}"
+    },
+    "form": {
+      "frontLabel": "Frente",
+      "frontPlaceholder": "Pergunta ou situação em português",
+      "backLabel": "Verso",
+      "backPlaceholder": "Frase em inglês",
+      "explanationLabel": "Explicação (opcional)",
+      "explanationPlaceholder": "Contexto ou dica extra"
+    },
+    "new": {
+      "title": "Criar flashcard manual",
+      "submit": "Criar flashcard"
+    },
+    "editPage": {
+      "title": "Editar flashcard",
+      "submit": "Salvar alterações"
+    },
+    "suggestions": {
+      "heading": "Flashcards sugeridos",
+      "xpPerCard": "+{xp} XP por cartão salvo",
+      "saveAll": "Salvar todos",
+      "saved": "✓ Salvo · já disponível para revisar",
+      "discardedLabel": "Descartado",
+      "save": "Salvar",
+      "edit": "Editar",
+      "discard": "Descartar",
+      "editDialogTitle": "Editar flashcard",
+      "frontLabel": "Frente",
+      "backLabel": "Verso",
+      "explanationLabel": "Explicação",
+      "cancel": "Cancelar",
+      "saveEdit": "Salvar edição"
+    },
+    "import": {
+      "title": "Importar flashcards de um arquivo",
+      "description": "Envie um arquivo .csv ou .txt com as colunas <strong>front</strong> e <strong>back</strong> (e opcionalmente <strong>explanation</strong>), separadas por vírgula, ponto-e-vírgula ou tab. Cada linha vira um cartão manual, já pronto para revisar.",
+      "chooseFile": "Escolha um arquivo .csv ou .txt",
+      "importing": "Importando…",
+      "submit": "Importar",
+      "importedSummary": "{created, plural, one {# cartão importado} other {# cartões importados}}",
+      "skippedSummary": " {skipped, plural, one {# linha ignorada} other {# linhas ignoradas}}.",
+      "csvExampleHeading": "Exemplo em CSV (vírgula)",
+      "txtExampleHeading": "Exemplo em .txt (ponto-e-vírgula)",
+      "errors": {
+        "emptyFile": "Arquivo vazio.",
+        "missingColumns": "O cabeçalho precisa ter as colunas 'front' e 'back' (explanation é opcional).",
+        "rowLimitReached": "Limite de {max} cartões por importação atingido; linhas restantes foram ignoradas.",
+        "missingFrontOrBack": "Faltam 'front' ou 'back' nessa linha.",
+        "noFileSelected": "Selecione um arquivo .csv para importar.",
+        "fileTooLarge": "O arquivo não pode passar de 256 KB.",
+        "noValidCards": "Nenhum cartão válido encontrado no arquivo."
+      }
+    }
+  },
+  "review": {
+    "ratings": {
+      "again": "De novo",
+      "hard": "Difícil",
+      "good": "Bom",
+      "easy": "Fácil"
+    },
+    "intervalMinutes": "{minutes} min",
+    "intervalHours": "{hours} h",
+    "intervalDays": "{days, plural, one {# dia} other {# dias}}",
+    "sessionDoneTitle": "Revisão do dia concluída!",
+    "nothingToReviewTitle": "Nada para revisar agora",
+    "sessionDoneMessage": "Volte amanhã para manter o ritmo.",
+    "nothingToReviewMessage": "Volte mais tarde para revisar novos cartões.",
+    "xpGained": "+{xp} XP",
+    "streakDays": "{count, plural, one {# dia seguido} other {# dias seguidos}}",
+    "reviewAgain": "Revisar de novo",
+    "applyInConversation": "Aplicar numa conversa",
+    "closeReview": "Fechar revisão",
+    "progressCount": "{current} / {total}",
+    "tryAnswerAloud": "Tente responder em voz alta antes de revelar.",
+    "showAnswer": "Mostrar resposta"
   },
   "difficulty": {
     "beginnerLabel": "Iniciante",

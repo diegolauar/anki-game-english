@@ -3,7 +3,125 @@
     "language": "Language",
     "hidePassword": "Hide password",
     "showPassword": "Show password",
-    "backToHome": "Home"
+    "backToHome": "Home",
+    "close": "Close"
+  },
+  "cardType": {
+    "productionLabel": "Production",
+    "clozeLabel": "Cloze",
+    "manualLabel": "Manual"
+  },
+  "nav": {
+    "home": "Home",
+    "talk": "Talk",
+    "review": "Review",
+    "flashcards": "Cards",
+    "signOut": "Sign out",
+    "ariaLabel": "Main navigation"
+  },
+  "flashcards": {
+    "heading": "Flashcards",
+    "countSummary": "{total, plural, one {# card} other {# cards}} · {pending} to review today",
+    "importFile": "Import file",
+    "newCard": "+ New card",
+    "filters": {
+      "pending": "Pending",
+      "new": "New",
+      "reviewed": "Reviewed",
+      "suspended": "Suspended",
+      "all": "All"
+    },
+    "search": "Search",
+    "dueChip": {
+      "suspended": "Suspended",
+      "new": "New",
+      "today": "Today",
+      "inDays": "In {days, plural, one {# day} other {# days}}"
+    },
+    "emptyList": "No cards here yet.",
+    "edit": "Edit",
+    "reactivate": "Reactivate",
+    "suspend": "Suspend",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {total}"
+    },
+    "form": {
+      "frontLabel": "Front",
+      "frontPlaceholder": "Question or situation in your language",
+      "backLabel": "Back",
+      "backPlaceholder": "Sentence in English",
+      "explanationLabel": "Explanation (optional)",
+      "explanationPlaceholder": "Extra context or hint"
+    },
+    "new": {
+      "title": "Create manual flashcard",
+      "submit": "Create flashcard"
+    },
+    "editPage": {
+      "title": "Edit flashcard",
+      "submit": "Save changes"
+    },
+    "suggestions": {
+      "heading": "Suggested flashcards",
+      "xpPerCard": "+{xp} XP per card saved",
+      "saveAll": "Save all",
+      "saved": "✓ Saved · ready to review",
+      "discardedLabel": "Discarded",
+      "save": "Save",
+      "edit": "Edit",
+      "discard": "Discard",
+      "editDialogTitle": "Edit flashcard",
+      "frontLabel": "Front",
+      "backLabel": "Back",
+      "explanationLabel": "Explanation",
+      "cancel": "Cancel",
+      "saveEdit": "Save edit"
+    },
+    "import": {
+      "title": "Import flashcards from a file",
+      "description": "Upload a .csv or .txt file with the columns <strong>front</strong> and <strong>back</strong> (and optionally <strong>explanation</strong>), separated by comma, semicolon, or tab. Each line becomes a manual card, ready to review.",
+      "chooseFile": "Choose a .csv or .txt file",
+      "importing": "Importing…",
+      "submit": "Import",
+      "importedSummary": "{created, plural, one {# card imported} other {# cards imported}}",
+      "skippedSummary": " {skipped, plural, one {# row skipped} other {# rows skipped}}.",
+      "csvExampleHeading": "CSV example (comma)",
+      "txtExampleHeading": ".txt example (semicolon)",
+      "errors": {
+        "emptyFile": "Empty file.",
+        "missingColumns": "The header needs the 'front' and 'back' columns (explanation is optional).",
+        "rowLimitReached": "Limit of {max} cards per import reached; remaining rows were skipped.",
+        "missingFrontOrBack": "Missing 'front' or 'back' on this row.",
+        "noFileSelected": "Select a .csv file to import.",
+        "fileTooLarge": "The file can't be larger than 256 KB.",
+        "noValidCards": "No valid cards found in the file."
+      }
+    }
+  },
+  "review": {
+    "ratings": {
+      "again": "Again",
+      "hard": "Hard",
+      "good": "Good",
+      "easy": "Easy"
+    },
+    "intervalMinutes": "{minutes} min",
+    "intervalHours": "{hours} h",
+    "intervalDays": "{days, plural, one {# day} other {# days}}",
+    "sessionDoneTitle": "Today's review is done!",
+    "nothingToReviewTitle": "Nothing to review right now",
+    "sessionDoneMessage": "Come back tomorrow to keep the streak going.",
+    "nothingToReviewMessage": "Come back later to review new cards.",
+    "xpGained": "+{xp} XP",
+    "streakDays": "{count, plural, one {# day streak} other {# day streak}}",
+    "reviewAgain": "Review again",
+    "applyInConversation": "Use it in a conversation",
+    "closeReview": "Close review",
+    "progressCount": "{current} / {total}",
+    "tryAnswerAloud": "Try answering out loud before revealing it.",
+    "showAnswer": "Show answer"
   },
   "difficulty": {
     "beginnerLabel": "Beginner",

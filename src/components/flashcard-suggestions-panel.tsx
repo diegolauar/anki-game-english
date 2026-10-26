@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   discardFlashcardSuggestionAction,
   saveAllFlashcardSuggestionsAction,
@@ -17,8 +18,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CARD_TYPE_LABELS } from "@/lib/card-type-labels";
+import { buildCardTypeLabels } from "@/lib/card-type-labels";
 import type { Flashcard } from "@/domain/entities/flashcard";
+import { XP_REWARDS } from "@/domain/rules/xp-rewards";
 
 type LocalStatus = "suggested" | "saving" | "active" | "discarded";
 
@@ -33,6 +35,9 @@ function SuggestionCard({
   onSave: (update?: { front: string; back: string; explanation: string | null }) => void;
   onDiscard: () => void;
 }) {
+  const t = useTranslations("flashcards.suggestions");
+  const tCardType = useTranslations("cardType");
+  const cardTypeLabels = buildCardTypeLabels(tCardType);
   const [editing, setEditing] = useState(false);
   const [front, setFront] = useState(flashcard.front);
   const [back, setBack] = useState(flashcard.back);
@@ -43,7 +48,7 @@ function SuggestionCard({
       <li className="rounded-control border border-ok p-4">
         <p className="text-[15px] font-semibold">{front}</p>
         <p className="mt-1 text-[15px] text-muted-foreground">{back}</p>
-        <p className="mt-3 text-sm font-semibold text-ok">✓ Salvo · já disponível para revisar</p>
+        <p className="mt-3 text-sm font-semibold text-ok">{t("saved")}</p>
       </li>
     );
   }
@@ -53,7 +58,7 @@ function SuggestionCard({
       <li className="rounded-control border border-line p-4 opacity-50">
         <p className="text-[15px] font-semibold">{front}</p>
         <p className="mt-1 text-[15px] text-muted-foreground">{back}</p>
-        <p className="mt-3 text-sm text-muted-foreground">Descartado</p>
+        <p className="mt-3 text-sm text-muted-foreground">{t("discardedLabel")}</p>
       </li>
     );
   }
@@ -62,7 +67,7 @@ function SuggestionCard({
     <li className="rounded-control border border-line p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold tracking-[.04em] text-acc uppercase">
-          {CARD_TYPE_LABELS[flashcard.cardType]}
+          {cardTypeLabels[flashcard.cardType]}
         </span>
       </div>
       <p className="mt-2 text-[15px] font-semibold">{front}</p>
@@ -74,40 +79,40 @@ function SuggestionCard({
           onClick={() => onSave()}
           className="flex h-9 items-center rounded-control bg-ink px-3.5 text-sm font-semibold text-bg disabled:opacity-50"
         >
-          Salvar
+          {t("save")}
         </button>
         <button
           type="button"
           onClick={() => setEditing(true)}
           className="flex h-9 items-center rounded-control border border-line px-3.5 text-sm font-semibold hover:border-acc"
         >
-          Editar
+          {t("edit")}
         </button>
         <button
           type="button"
           onClick={onDiscard}
           className="flex h-9 items-center px-2 text-sm font-semibold text-muted-foreground hover:text-ink"
         >
-          Descartar
+          {t("discard")}
         </button>
       </div>
 
       <Dialog open={editing} onOpenChange={setEditing}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar flashcard</DialogTitle>
+            <DialogTitle>{t("editDialogTitle")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`front-${flashcard.id}`}>Frente</Label>
+              <Label htmlFor={`front-${flashcard.id}`}>{t("frontLabel")}</Label>
               <Input id={`front-${flashcard.id}`} value={front} onChange={(e) => setFront(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`back-${flashcard.id}`}>Verso</Label>
+              <Label htmlFor={`back-${flashcard.id}`}>{t("backLabel")}</Label>
               <Input id={`back-${flashcard.id}`} value={back} onChange={(e) => setBack(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`explanation-${flashcard.id}`}>Explicação</Label>
+              <Label htmlFor={`explanation-${flashcard.id}`}>{t("explanationLabel")}</Label>
               <Input
                 id={`explanation-${flashcard.id}`}
                 value={explanation}
@@ -117,7 +122,7 @@ function SuggestionCard({
           </div>
           <DialogFooter>
             <DialogClose className="flex h-10 items-center rounded-control border border-line px-4 text-sm font-semibold">
-              Cancelar
+              {t("cancel")}
             </DialogClose>
             <button
               type="button"
@@ -127,7 +132,7 @@ function SuggestionCard({
               }}
               className="flex h-10 items-center rounded-control bg-acc px-4 text-sm font-bold text-acc-ink"
             >
-              Salvar edição
+              {t("saveEdit")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -143,6 +148,7 @@ export function FlashcardSuggestionsPanel({
   flashcards: Flashcard[];
   resultsPath: string;
 }) {
+  const t = useTranslations("flashcards.suggestions");
   const [statusByCard, setStatusByCard] = useState<Record<string, LocalStatus>>({});
 
   if (flashcards.length === 0) return null;
@@ -199,10 +205,10 @@ export function FlashcardSuggestionsPanel({
     <section className="mt-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em]">
-            Flashcards sugeridos
-          </h2>
-          <p className="text-xs text-muted-foreground">+2 XP por cartão salvo</p>
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em]">{t("heading")}</h2>
+          <p className="text-xs text-muted-foreground">
+            {t("xpPerCard", { xp: XP_REWARDS.flashcard_saved })}
+          </p>
         </div>
         <button
           type="button"
@@ -210,7 +216,7 @@ export function FlashcardSuggestionsPanel({
           className="flex h-10 items-center gap-1.5 rounded-control border border-line px-4 text-sm font-semibold hover:border-acc"
         >
           <CheckCheck className="size-4" />
-          Salvar todos
+          {t("saveAll")}
         </button>
       </div>
 

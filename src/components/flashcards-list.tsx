@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Pencil, PauseCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { toggleFlashcardSuspensionAction } from "@/app/flashcards/actions";
-import { CARD_TYPE_LABELS } from "@/lib/card-type-labels";
+import { buildCardTypeLabels } from "@/lib/card-type-labels";
 import type { CardType } from "@/domain/value-objects/card-type";
 
 export interface FlashcardRow {
@@ -15,9 +16,12 @@ export interface FlashcardRow {
   dueClassName: string;
 }
 
-export function FlashcardsList({ rows }: { rows: FlashcardRow[] }) {
+export async function FlashcardsList({ rows }: { rows: FlashcardRow[] }) {
+  const [t, tCardType] = await Promise.all([getTranslations("flashcards"), getTranslations("cardType")]);
+  const cardTypeLabels = buildCardTypeLabels(tCardType);
+
   if (rows.length === 0) {
-    return <p className="mt-6 text-sm text-muted-foreground">Nenhum cartão aqui por enquanto.</p>;
+    return <p className="mt-6 text-sm text-muted-foreground">{t("emptyList")}</p>;
   }
 
   return (
@@ -33,7 +37,7 @@ export function FlashcardsList({ rows }: { rows: FlashcardRow[] }) {
           </div>
           <p className="truncate font-mono text-xs text-muted-foreground">{row.category ?? "—"}</p>
           <p className="text-xs font-bold tracking-[.04em] text-acc uppercase">
-            {CARD_TYPE_LABELS[row.cardType]}
+            {cardTypeLabels[row.cardType]}
           </p>
           <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-bold ${row.dueClassName}`}>
             {row.dueLabel}
@@ -41,7 +45,7 @@ export function FlashcardsList({ rows }: { rows: FlashcardRow[] }) {
           <div className="flex items-center gap-1.5 max-sm:justify-end">
             <Link
               href={`/flashcards/${row.id}/edit`}
-              aria-label="Editar"
+              aria-label={t("edit")}
               className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-surface2"
             >
               <Pencil className="size-4" />
@@ -50,7 +54,7 @@ export function FlashcardsList({ rows }: { rows: FlashcardRow[] }) {
               <input type="hidden" name="flashcardId" value={row.id} />
               <button
                 type="submit"
-                aria-label={row.suspended ? "Reativar" : "Suspender"}
+                aria-label={row.suspended ? t("reactivate") : t("suspend")}
                 className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-surface2"
               >
                 <PauseCircle className="size-4" />

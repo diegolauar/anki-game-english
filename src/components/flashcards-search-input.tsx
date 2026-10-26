@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const DEBOUNCE_MS = 300;
 
 export function FlashcardsSearchInput() {
+  const t = useTranslations("flashcards");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -44,7 +46,7 @@ export function FlashcardsSearchInput() {
       <input
         value={value}
         onChange={(event) => handleChange(event.target.value)}
-        placeholder="Buscar"
+        placeholder={t("search")}
         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
     </div>

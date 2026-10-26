@@ -1,5 +1,13 @@
 export const MAX_FLASHCARD_IMPORT_ROWS = 100;
 
+/**
+ * Tipagem estrutural mínima pro tradutor do next-intl — não importamos
+ * `next-intl` aqui pra manter o domínio livre de dependências externas (seção 3
+ * do CLAUDE.md); o tipo real (`useTranslations`/`getTranslations`) satisfaz essa
+ * assinatura por duck typing.
+ */
+export type ParseFlashcardCsvTranslator = (key: string, values?: Record<string, string | number>) => string;
+
 export interface ParsedFlashcardRow {
   line: number;
   front: string;
@@ -76,7 +84,10 @@ function splitDelimitedRecords(text: string, delimiter: string): string[][] {
  * Aceita vírgula, ponto-e-vírgula ou tab como separador (detectado pelo cabeçalho) — cobre tanto CSV
  * quanto .txt exportado de bloco de notas/Excel. Regra pura de domínio: nenhuma leitura de arquivo ou I/O aqui.
  */
-export function parseFlashcardCsv(content: string): ParseFlashcardCsvResult {
+export function parseFlashcardCsv(
+  content: string,
+  t: ParseFlashcardCsvTranslator,
+): ParseFlashcardCsvResult {
   const normalized = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const firstNewline = normalized.indexOf("\n");
   const headerLine = firstNewline === -1 ? normalized : normalized.slice(0, firstNewline);
@@ -84,7 +95,7 @@ export function parseFlashcardCsv(content: string): ParseFlashcardCsvResult {
   const records = splitDelimitedRecords(normalized, delimiter);
 
   if (records.length === 0) {
-    return { rows: [], errors: [{ line: 1, message: "Arquivo vazio." }] };
+    return { rows: [], errors: [{ line: 1, message: t("emptyFile") }] };
   }
 
   const header = records[0].map((cell) => cell.trim().toLowerCase());
@@ -95,12 +106,7 @@ export function parseFlashcardCsv(content: string): ParseFlashcardCsvResult {
   if (frontIndex === -1 || backIndex === -1) {
     return {
       rows: [],
-      errors: [
-        {
-          line: 1,
-          message: "O cabeçalho precisa ter as colunas 'front' e 'back' (explanation é opcional).",
-        },
-      ],
+      errors: [{ line: 1, message: t("missingColumns") }],
     };
   }
 
@@ -113,7 +119,7 @@ export function parseFlashcardCsv(content: string): ParseFlashcardCsvResult {
     if (rows.length >= MAX_FLASHCARD_IMPORT_ROWS) {
       errors.push({
         line,
-        message: `Limite de ${MAX_FLASHCARD_IMPORT_ROWS} cartões por importação atingido; linhas restantes foram ignoradas.`,
+        message: t("rowLimitReached", { max: MAX_FLASHCARD_IMPORT_ROWS }),
       });
       break;
     }
@@ -124,7 +130,7 @@ export function parseFlashcardCsv(content: string): ParseFlashcardCsvResult {
     const explanation = explanationIndex >= 0 ? (record[explanationIndex] ?? "").trim() : "";
 
     if (!front || !back) {
-      errors.push({ line, message: "Faltam 'front' ou 'back' nessa linha." });
+      errors.push({ line, message: t("missingFrontOrBack") });
       continue;
     }
 

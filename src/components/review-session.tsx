@@ -3,27 +3,29 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { History, PartyPopper, Speech, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { reviewFlashcardAction } from "@/app/flashcards/actions";
-import { CARD_TYPE_LABELS } from "@/lib/card-type-labels";
+import { buildCardTypeLabels } from "@/lib/card-type-labels";
 import type { Rating } from "@/domain/value-objects/rating";
 import type { CardType } from "@/domain/value-objects/card-type";
 
-const RATING_INFO: Record<Rating, { label: string; className: string }> = {
-  again: { label: "De novo", className: "bg-err-soft text-err" },
-  hard: { label: "Difícil", className: "bg-sug-soft text-sug-ink" },
-  good: { label: "Bom", className: "bg-acc-soft text-acc-strong" },
-  easy: { label: "Fácil", className: "bg-ok-soft text-ok" },
+const RATING_CLASSNAMES: Record<Rating, string> = {
+  again: "bg-err-soft text-err",
+  hard: "bg-sug-soft text-sug-ink",
+  good: "bg-acc-soft text-acc-strong",
+  easy: "bg-ok-soft text-ok",
 };
 
 const RATING_ORDER: Rating[] = ["again", "hard", "good", "easy"];
 const XP_PER_REVIEW = 1;
 const XP_DAILY_REVIEWS_COMPLETED = 10;
 
-function formatInterval(days: number): string {
-  if (days < 1 / 24) return `${Math.max(1, Math.round(days * 24 * 60))} min`;
-  if (days < 1) return `${Math.round(days * 24)} h`;
-  const rounded = Math.round(days);
-  return `${rounded} ${rounded === 1 ? "dia" : "dias"}`;
+type Translator = ReturnType<typeof useTranslations>;
+
+function formatInterval(t: Translator, days: number): string {
+  if (days < 1 / 24) return t("intervalMinutes", { minutes: Math.max(1, Math.round(days * 24 * 60)) });
+  if (days < 1) return t("intervalHours", { hours: Math.round(days * 24) });
+  return t("intervalDays", { days: Math.round(days) });
 }
 
 export interface ReviewQueueItem {
@@ -37,6 +39,9 @@ export interface ReviewQueueItem {
 }
 
 export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; streak: number }) {
+  const t = useTranslations("review");
+  const tCardType = useTranslations("cardType");
+  const cardTypeLabels = buildCardTypeLabels(tCardType);
   const [queue] = useState(items);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -91,20 +96,18 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
           <PartyPopper className="size-10 text-acc-strong" />
         </span>
         <h1 className="font-display text-2xl font-bold">
-          {reviewedCount > 0 ? "Revisão do dia concluída!" : "Nada para revisar agora"}
+          {reviewedCount > 0 ? t("sessionDoneTitle") : t("nothingToReviewTitle")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {reviewedCount > 0
-            ? "Volte amanhã para manter o ritmo."
-            : "Volte mais tarde para revisar novos cartões."}
+          {reviewedCount > 0 ? t("sessionDoneMessage") : t("nothingToReviewMessage")}
         </p>
         {reviewedCount > 0 && (
           <div className="mt-1 flex gap-2">
             <span className="rounded-full bg-xp/15 px-3 py-1 text-sm font-bold text-xp">
-              +{xpGained} XP
+              {t("xpGained", { xp: xpGained })}
             </span>
             <span className="rounded-full bg-fire/15 px-3 py-1 text-sm font-bold text-fire">
-              {streak} {streak === 1 ? "dia seguido" : "dias seguidos"}
+              {t("streakDays", { count: streak })}
             </span>
           </div>
         )}
@@ -113,13 +116,13 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
             href="/review"
             className="flex h-11 items-center justify-center rounded-full border border-line px-5 text-sm font-bold hover:border-acc"
           >
-            Revisar de novo
+            {t("reviewAgain")}
           </Link>
           <Link
             href="/conversations/new"
             className="flex h-11 items-center justify-center rounded-full bg-acc px-5 text-sm font-bold text-acc-ink"
           >
-            Aplicar numa conversa
+            {t("applyInConversation")}
           </Link>
         </div>
       </div>
@@ -133,7 +136,7 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
       <header className="flex items-center gap-3">
         <Link
           href="/dashboard"
-          aria-label="Fechar revisão"
+          aria-label={t("closeReview")}
           className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-surface2"
         >
           <X className="size-4" />
@@ -142,14 +145,14 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
           <div className="h-full bg-acc transition-all duration-300" style={{ width: `${progressPercent}%` }} />
         </div>
         <span className="font-mono text-xs text-muted-foreground">
-          {index + 1} / {queue.length}
+          {t("progressCount", { current: index + 1, total: queue.length })}
         </span>
       </header>
 
       <div className="flex min-h-[340px] flex-col rounded-[28px] border border-line bg-surface p-10 shadow-card">
         <div className="flex items-center justify-between">
           <span className="rounded-full bg-acc-soft px-3 py-1 text-xs font-bold tracking-[.04em] text-acc-strong uppercase">
-            {CARD_TYPE_LABELS[current.cardType]}
+            {cardTypeLabels[current.cardType]}
           </span>
           {current.learningPointTag && (
             <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
@@ -175,14 +178,14 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
           <div className="mt-auto flex flex-col items-center gap-4 pt-8 text-center">
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Speech className="size-4" />
-              Tente responder em voz alta antes de revelar.
+              {t("tryAnswerAloud")}
             </p>
             <button
               type="button"
               onClick={() => setRevealed(true)}
               className="flex h-[54px] w-full max-w-xs items-center justify-center rounded-full bg-acc text-sm font-bold text-acc-ink"
             >
-              Mostrar resposta
+              {t("showAnswer")}
             </button>
           </div>
         )}
@@ -196,11 +199,11 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
               type="button"
               disabled={isSubmitting}
               onClick={() => handleRate(rating)}
-              className={`flex h-16 flex-col items-center justify-center gap-0.5 rounded-control font-bold disabled:opacity-50 ${RATING_INFO[rating].className}`}
+              className={`flex h-16 flex-col items-center justify-center gap-0.5 rounded-control font-bold disabled:opacity-50 ${RATING_CLASSNAMES[rating]}`}
             >
-              <span className="text-[15px]">{RATING_INFO[rating].label}</span>
+              <span className="text-[15px]">{t(`ratings.${rating}`)}</span>
               <span className="text-xs font-semibold opacity-80">
-                {formatInterval(current.previews[rating])} · {i + 1}
+                {formatInterval(t, current.previews[rating])} · {i + 1}
               </span>
             </button>
           ))}

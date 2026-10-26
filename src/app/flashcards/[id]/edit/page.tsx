@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { editFlashcardAction } from "@/app/flashcards/actions";
 import { FlashcardForm } from "@/components/flashcard-form";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
@@ -12,6 +13,10 @@ export default async function EditFlashcardPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const [t, tFlashcards] = await Promise.all([
+    getTranslations("flashcards.editPage"),
+    getTranslations("flashcards"),
+  ]);
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -31,15 +36,13 @@ export default async function EditFlashcardPage({
         className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-ink"
       >
         <ArrowLeft className="size-4" />
-        Flashcards
+        {tFlashcards("heading")}
       </Link>
-      <h1 className="mt-2 font-display text-[32px] font-bold tracking-[-0.02em]">
-        Editar flashcard
-      </h1>
+      <h1 className="mt-2 font-display text-[32px] font-bold tracking-[-0.02em]">{t("title")}</h1>
 
       <FlashcardForm
         action={editFlashcardAction}
-        submitLabel="Salvar alterações"
+        submitLabel={t("submit")}
         hiddenFields={{ flashcardId: flashcard.id }}
         defaultFront={flashcard.front}
         defaultBack={flashcard.back}

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { SaveFlashcardSuggestion } from "@/application/use-cases/save-flashcard-suggestion";
 import { SaveFlashcardSuggestions } from "@/application/use-cases/save-flashcard-suggestions";
@@ -141,20 +142,21 @@ const MAX_FLASHCARD_IMPORT_FILE_SIZE_BYTES = 256 * 1024;
 
 export async function importFlashcardsAction(formData: FormData) {
   const { supabase, user } = await requireUser();
+  const t = await getTranslations("flashcards.import.errors");
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    redirect(`/flashcards/import?error=${encodeURIComponent("Selecione um arquivo .csv para importar.")}`);
+    redirect(`/flashcards/import?error=${encodeURIComponent(t("noFileSelected"))}`);
   }
   if (file.size > MAX_FLASHCARD_IMPORT_FILE_SIZE_BYTES) {
-    redirect(`/flashcards/import?error=${encodeURIComponent("O arquivo não pode passar de 256 KB.")}`);
+    redirect(`/flashcards/import?error=${encodeURIComponent(t("fileTooLarge"))}`);
   }
 
   const content = await file.text();
-  const { rows, errors } = parseFlashcardCsv(content);
+  const { rows, errors } = parseFlashcardCsv(content, t);
 
   if (rows.length === 0) {
-    const message = errors[0]?.message ?? "Nenhum cartão válido encontrado no arquivo.";
+    const message = errors[0]?.message ?? t("noValidCards");
     redirect(`/flashcards/import?error=${encodeURIComponent(message)}`);
   }
 
