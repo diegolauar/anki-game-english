@@ -2,24 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordRequirements } from "@/components/password-requirements";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/browser-client";
-import { signInSchema, signUpSchema } from "@/lib/auth-validation";
+import { buildSignInSchema, buildSignUpSchema } from "@/lib/auth-validation";
 
 type AuthTab = "signin" | "signup";
 
 export default function LoginPage() {
   const [tab, setTab] = useState<AuthTab>("signin");
+  const t = useTranslations("login");
 
   return (
     <main className="grid min-h-dvh flex-1 grid-cols-1 md:grid-cols-[1.1fr_1fr]">
-      <h1 className="sr-only md:hidden">Fluency Mind — Entrar ou criar conta</h1>
+      <h1 className="sr-only md:hidden">{t("ariaTitle")}</h1>
 
       <section className="relative hidden flex-col justify-between overflow-hidden bg-acc p-12 text-acc-ink md:flex lg:p-14">
         <div
@@ -41,12 +43,9 @@ export default function LoginPage() {
         <div className="relative flex flex-col gap-6">
           <div>
             <h1 className="font-display text-[52px] leading-[1.02] font-bold tracking-[-0.03em]">
-              Fale inglês sem medo de errar.
+              {t("heroTitle")}
             </h1>
-            <p className="mt-4 max-w-md text-lg opacity-88">
-              Converse com a IA sobre o que você gosta. As correções vêm só no final — e viram
-              flashcards para você revisar.
-            </p>
+            <p className="mt-4 max-w-md text-lg opacity-88">{t("heroDescription")}</p>
           </div>
 
           <div className="flex max-w-sm flex-col gap-3">
@@ -64,18 +63,14 @@ export default function LoginPage() {
                     <span className="text-muted-foreground line-through">have worked</span> →{" "}
                     <span className="font-semibold text-acc-strong">worked</span>
                   </p>
-                  <p className="mt-1 text-muted-foreground">
-                    Com &ldquo;yesterday&rdquo;, use o Simple Past.
-                  </p>
+                  <p className="mt-1 text-muted-foreground">{t("heroMockupExplanation")}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <p className="relative text-sm font-semibold opacity-90">
-          1 · Converse&nbsp;&nbsp;&nbsp;2 · Entenda&nbsp;&nbsp;&nbsp;3 · Revise
-        </p>
+        <p className="relative text-sm font-semibold opacity-90">{t("heroSteps")}</p>
       </section>
 
       <section className="flex flex-1 justify-center overflow-y-auto p-8 pt-16 sm:pt-20">
@@ -83,7 +78,7 @@ export default function LoginPage() {
           <div>
             <div
               role="tablist"
-              aria-label="Entrar ou criar conta"
+              aria-label={t("tabsAriaLabel")}
               className="flex h-14 items-center gap-1 rounded-full border border-line bg-surface2 p-1.5"
             >
               <button
@@ -99,7 +94,7 @@ export default function LoginPage() {
                     : "text-muted-foreground hover:bg-surface hover:text-ink"
                 }`}
               >
-                Entrar
+                {t("signInTab")}
               </button>
               <button
                 type="button"
@@ -114,7 +109,7 @@ export default function LoginPage() {
                     : "text-muted-foreground hover:bg-surface hover:text-ink"
                 }`}
               >
-                Criar conta
+                {t("signUpTab")}
               </button>
             </div>
 
@@ -129,10 +124,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Ao continuar, você concorda com os Termos e a Política de Privacidade (LGPD). Áudios
-            de voz nunca são armazenados.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("legalNotice")}</p>
         </div>
       </section>
     </main>
@@ -141,6 +133,9 @@ export default function LoginPage() {
 
 function SignInPanel() {
   const router = useRouter();
+  const t = useTranslations("login");
+  const tValidation = useTranslations("validation");
+  const signInSchema = useMemo(() => buildSignInSchema(tValidation), [tValidation]);
   const [mode, setMode] = useState<"password" | "magic-link">("password");
 
   const [email, setEmail] = useState("");
@@ -157,7 +152,7 @@ function SignInPanel() {
     const parsed = signInSchema.safeParse({ email, password });
     if (!parsed.success) {
       setStatus("error");
-      setErrorMessage(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+      setErrorMessage(parsed.error.issues[0]?.message ?? t("invalidData"));
       return;
     }
 
@@ -167,7 +162,7 @@ function SignInPanel() {
 
     if (error) {
       setStatus("error");
-      setErrorMessage("E-mail ou senha incorretos.");
+      setErrorMessage(t("signIn.wrongCredentials"));
       return;
     }
 
@@ -200,37 +195,31 @@ function SignInPanel() {
     return (
       <div className="flex flex-col gap-6">
         <div>
-          <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Entrar</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sem senha. Enviamos um link de acesso para o seu e-mail.
-          </p>
+          <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">{t("signIn.title")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("signIn.magicLinkSubtitle")}</p>
         </div>
 
         <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="magic-email">E-mail</Label>
+            <Label htmlFor="magic-email">{t("signIn.emailLabel")}</Label>
             <Input
               id="magic-email"
               type="email"
               required
               value={magicEmail}
               onChange={(event) => setMagicEmail(event.target.value)}
-              placeholder="voce@exemplo.com"
+              placeholder={t("signIn.emailPlaceholder")}
               className={magicStatus === "error" ? "border-err" : undefined}
             />
           </div>
           <Button type="submit" disabled={magicStatus === "sending"} className="h-[50px] text-[15px]">
             <Mail className="size-4" />
-            {magicStatus === "sending" ? "Enviando…" : "Enviar link de acesso"}
+            {magicStatus === "sending" ? t("signIn.sendingLink") : t("signIn.sendLinkButton")}
           </Button>
           {magicStatus === "sent" && (
-            <p className="text-sm text-ok">
-              Link enviado para {magicEmail} — confira sua caixa de entrada.
-            </p>
+            <p className="text-sm text-ok">{t("signIn.linkSentMessage", { email: magicEmail })}</p>
           )}
-          {magicStatus === "error" && (
-            <p className="text-sm text-err">Não foi possível enviar o link. Tente novamente.</p>
-          )}
+          {magicStatus === "error" && <p className="text-sm text-err">{t("signIn.linkErrorMessage")}</p>}
         </form>
 
         <button
@@ -238,7 +227,7 @@ function SignInPanel() {
           onClick={() => setMode("password")}
           className="text-left text-sm font-semibold text-acc-strong hover:underline"
         >
-          Entrar com e-mail e senha
+          {t("signIn.switchToPassword")}
         </button>
 
         <GoogleDivider />
@@ -250,13 +239,13 @@ function SignInPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Entrar</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Acesse com seu e-mail e senha.</p>
+        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">{t("signIn.title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("signIn.passwordSubtitle")}</p>
       </div>
 
       <form onSubmit={handlePasswordSignIn} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="signin-email">E-mail</Label>
+          <Label htmlFor="signin-email">{t("signIn.emailLabel")}</Label>
           <Input
             id="signin-email"
             type="email"
@@ -264,14 +253,14 @@ function SignInPanel() {
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="voce@exemplo.com"
+            placeholder={t("signIn.emailPlaceholder")}
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="signin-password">Senha</Label>
+            <Label htmlFor="signin-password">{t("signIn.passwordLabel")}</Label>
             <Link href="/forgot-password" className="text-xs font-semibold text-acc-strong hover:underline">
-              Esqueceu a senha?
+              {t("signIn.forgotPassword")}
             </Link>
           </div>
           <PasswordInput
@@ -282,7 +271,7 @@ function SignInPanel() {
           />
         </div>
         <Button type="submit" disabled={status === "loading"} className="h-[50px] text-[15px]">
-          {status === "loading" ? "Entrando…" : "Entrar"}
+          {status === "loading" ? t("signIn.signingIn") : t("signIn.submit")}
         </Button>
         {status === "error" && <p className="text-sm text-err">{errorMessage}</p>}
       </form>
@@ -292,7 +281,7 @@ function SignInPanel() {
         onClick={() => setMode("magic-link")}
         className="text-left text-sm font-semibold text-acc-strong hover:underline"
       >
-        Prefere entrar sem senha? Receba um link por e-mail
+        {t("signIn.switchToMagicLink")}
       </button>
 
       <GoogleDivider />
@@ -302,6 +291,10 @@ function SignInPanel() {
 }
 
 function SignUpPanel() {
+  const t = useTranslations("login");
+  const tValidation = useTranslations("validation");
+  const signUpSchema = useMemo(() => buildSignUpSchema(tValidation), [tValidation]);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -315,7 +308,7 @@ function SignUpPanel() {
     const parsed = signUpSchema.safeParse({ name, email, password, confirmPassword });
     if (!parsed.success) {
       setStatus("error");
-      setErrorMessage(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+      setErrorMessage(parsed.error.issues[0]?.message ?? t("invalidData"));
       return;
     }
 
@@ -332,11 +325,7 @@ function SignUpPanel() {
 
     if (error) {
       setStatus("error");
-      setErrorMessage(
-        error.status === 429
-          ? "Muitas tentativas. Aguarde um pouco e tente de novo."
-          : "Não foi possível criar sua conta. Tente novamente.",
-      );
+      setErrorMessage(error.status === 429 ? t("signUp.tooManyAttempts") : t("signUp.genericError"));
       return;
     }
 
@@ -356,11 +345,10 @@ function SignUpPanel() {
   if (status === "sent") {
     return (
       <div className="flex flex-col gap-3">
-        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Quase lá</h2>
-        <p className="text-sm text-muted-foreground">
-          Se {email} ainda não tiver uma conta, enviamos um link de confirmação pra esse endereço
-          — confira sua caixa de entrada pra ativar o acesso.
-        </p>
+        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">
+          {t("signUp.almostThereTitle")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("signUp.almostThereMessage", { email })}</p>
       </div>
     );
   }
@@ -368,24 +356,24 @@ function SignUpPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">Criar conta</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Nome, e-mail e senha — só isso.</p>
+        <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">{t("signUp.title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("signUp.subtitle")}</p>
       </div>
 
       <form onSubmit={handleSignUp} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="signup-name">Nome</Label>
+          <Label htmlFor="signup-name">{t("signUp.nameLabel")}</Label>
           <Input
             id="signup-name"
             required
             autoComplete="name"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Seu nome"
+            placeholder={t("signUp.namePlaceholder")}
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="signup-email">E-mail</Label>
+          <Label htmlFor="signup-email">{t("signUp.emailLabel")}</Label>
           <Input
             id="signup-email"
             type="email"
@@ -393,11 +381,11 @@ function SignUpPanel() {
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="voce@exemplo.com"
+            placeholder={t("signUp.emailPlaceholder")}
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="signup-password">Senha</Label>
+          <Label htmlFor="signup-password">{t("signUp.passwordLabel")}</Label>
           <PasswordInput
             id="signup-password"
             value={password}
@@ -407,7 +395,7 @@ function SignUpPanel() {
           {password.length > 0 && <PasswordRequirements password={password} />}
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="signup-confirm-password">Confirmar senha</Label>
+          <Label htmlFor="signup-confirm-password">{t("signUp.confirmPasswordLabel")}</Label>
           <PasswordInput
             id="signup-confirm-password"
             value={confirmPassword}
@@ -416,32 +404,34 @@ function SignUpPanel() {
           />
         </div>
         <Button type="submit" disabled={status === "loading"} className="h-[50px] text-[15px]">
-          {status === "loading" ? "Criando conta…" : "Criar conta"}
+          {status === "loading" ? t("signUp.creating") : t("signUp.submit")}
         </Button>
         {status === "error" && <p className="text-sm text-err">{errorMessage}</p>}
       </form>
 
       <GoogleDivider />
-      <GoogleButton onClick={handleGoogleSignUp} label="Continuar com Google" />
+      <GoogleButton onClick={handleGoogleSignUp} label={t("google.continueWith")} />
     </div>
   );
 }
 
 function GoogleDivider() {
+  const t = useTranslations("login");
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground">
       <span className="h-px flex-1 bg-line" />
-      ou
+      {t("google.divider")}
       <span className="h-px flex-1 bg-line" />
     </div>
   );
 }
 
-function GoogleButton({ onClick, label = "Continuar com Google" }: { onClick: () => void; label?: string }) {
+function GoogleButton({ onClick, label }: { onClick: () => void; label?: string }) {
+  const t = useTranslations("login");
   return (
     <Button variant="outline" onClick={onClick} className="h-[50px] text-[15px]">
       <GoogleLogo className="size-4" />
-      {label}
+      {label ?? t("google.continueWith")}
     </Button>
   );
 }

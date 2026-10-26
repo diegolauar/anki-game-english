@@ -10,6 +10,10 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:3100",
     trace: "retain-on-failure",
+    // Fixa pt-BR independente do locale do SO/CI: os specs ainda comparam texto
+    // pt-BR literal (ver CLAUDE.md §10 Fase 6 — internacionalizar os specs é
+    // trabalho futuro, não bloqueia o suporte a i18n em si).
+    locale: "pt-BR",
   },
   // Produção (não `next dev`): o servidor de dev com Turbopack falha o handshake
   // do WebSocket de HMR contra o Chromium do Playwright e cai num loop de reload

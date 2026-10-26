@@ -62,5 +62,87 @@
     "footer": {
       "audioNotice": "Áudios de voz nunca são armazenados."
     }
+  },
+  "login": {
+    "ariaTitle": "Fluency Mind — Entrar ou criar conta",
+    "heroTitle": "Fale inglês sem medo de errar.",
+    "heroDescription": "Converse com a IA sobre o que você gosta. As correções vêm só no final — e viram flashcards para você revisar.",
+    "heroMockupExplanation": "Com \"yesterday\", use o Simple Past.",
+    "heroSteps": "1 · Converse   2 · Entenda   3 · Revise",
+    "tabsAriaLabel": "Entrar ou criar conta",
+    "signInTab": "Entrar",
+    "signUpTab": "Criar conta",
+    "legalNotice": "Ao continuar, você concorda com os Termos e a Política de Privacidade (LGPD). Áudios de voz nunca são armazenados.",
+    "signIn": {
+      "title": "Entrar",
+      "magicLinkSubtitle": "Sem senha. Enviamos um link de acesso para o seu e-mail.",
+      "passwordSubtitle": "Acesse com seu e-mail e senha.",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "voce@exemplo.com",
+      "sendingLink": "Enviando…",
+      "sendLinkButton": "Enviar link de acesso",
+      "linkSentMessage": "Link enviado para {email} — confira sua caixa de entrada.",
+      "linkErrorMessage": "Não foi possível enviar o link. Tente novamente.",
+      "switchToPassword": "Entrar com e-mail e senha",
+      "passwordLabel": "Senha",
+      "forgotPassword": "Esqueceu a senha?",
+      "signingIn": "Entrando…",
+      "submit": "Entrar",
+      "wrongCredentials": "E-mail ou senha incorretos.",
+      "switchToMagicLink": "Prefere entrar sem senha? Receba um link por e-mail"
+    },
+    "signUp": {
+      "title": "Criar conta",
+      "subtitle": "Nome, e-mail e senha — só isso.",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Seu nome",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "voce@exemplo.com",
+      "passwordLabel": "Senha",
+      "confirmPasswordLabel": "Confirmar senha",
+      "submit": "Criar conta",
+      "creating": "Criando conta…",
+      "tooManyAttempts": "Muitas tentativas. Aguarde um pouco e tente de novo.",
+      "genericError": "Não foi possível criar sua conta. Tente novamente.",
+      "almostThereTitle": "Quase lá",
+      "almostThereMessage": "Se {email} ainda não tiver uma conta, enviamos um link de confirmação pra esse endereço — confira sua caixa de entrada pra ativar o acesso."
+    },
+    "google": {
+      "divider": "ou",
+      "continueWith": "Continuar com Google"
+    },
+    "invalidData": "Dados inválidos."
+  },
+  "validation": {
+    "nameRequired": "Informe seu nome.",
+    "nameTooLong": "Nome muito longo.",
+    "emailRequired": "Informe seu e-mail.",
+    "emailInvalid": "E-mail inválido.",
+    "passwordRequired": "Informe sua senha.",
+    "passwordRequirementsNotMet": "A senha não atende aos requisitos mínimos.",
+    "passwordsDoNotMatch": "As senhas não coincidem.",
+    "passwordMinLength": "Mínimo de {min} caracteres",
+    "passwordUppercase": "Uma letra maiúscula",
+    "passwordLowercase": "Uma letra minúscula",
+    "passwordNumber": "Um número"
+  },
+  "forgotPassword": {
+    "backToSignIn": "Entrar",
+    "sentTitle": "Verifique seu e-mail",
+    "sentMessage": "Se {email} tiver uma conta, enviamos um link pra você escolher uma nova senha.",
+    "title": "Esqueceu a senha?",
+    "description": "Digite seu e-mail e enviamos um link pra você escolher uma nova senha.",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "sending": "Enviando…",
+    "submit": "Enviar link",
+    "invalidEmail": "Informe um e-mail válido."
+  },
+  "resetPassword": {
+    "newPasswordLabel": "Nova senha",
+    "confirmNewPasswordLabel": "Confirmar nova senha",
+    "saving": "Salvando…",
+    "submit": "Salvar nova senha",
+    "updateError": "Não foi possível atualizar a senha. Tente pedir um novo link."
   }
 }

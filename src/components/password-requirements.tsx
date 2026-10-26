@@ -1,10 +1,14 @@
 import { Check, X } from "lucide-react";
-import { PASSWORD_REQUIREMENTS } from "@/lib/auth-validation";
+import { useTranslations } from "next-intl";
+import { buildPasswordRequirements } from "@/lib/auth-validation";
 
 export function PasswordRequirements({ password }: { password: string }) {
+  const t = useTranslations("validation");
+  const requirements = buildPasswordRequirements(t);
+
   return (
     <ul className="mt-1 flex flex-col gap-0.5">
-      {PASSWORD_REQUIREMENTS.map((requirement) => {
+      {requirements.map((requirement) => {
         const met = requirement.test(password);
         return (
           <li

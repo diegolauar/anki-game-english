@@ -62,5 +62,87 @@
     "footer": {
       "audioNotice": "Las grabaciones de voz nunca se almacenan."
     }
+  },
+  "login": {
+    "ariaTitle": "Fluency Mind — Iniciar sesión o crear cuenta",
+    "heroTitle": "Habla inglés sin miedo a equivocarte.",
+    "heroDescription": "Conversa con la IA sobre lo que te guste. Las correcciones llegan solo al final — y se convierten en flashcards para que repases.",
+    "heroMockupExplanation": "Con \"yesterday\", usa el Simple Past.",
+    "heroSteps": "1 · Conversa   2 · Entiende   3 · Repasa",
+    "tabsAriaLabel": "Iniciar sesión o crear cuenta",
+    "signInTab": "Iniciar sesión",
+    "signUpTab": "Crear cuenta",
+    "legalNotice": "Al continuar, aceptas los Términos y la Política de Privacidad (LGPD). Las grabaciones de voz nunca se almacenan.",
+    "signIn": {
+      "title": "Iniciar sesión",
+      "magicLinkSubtitle": "Sin contraseña. Te enviamos un enlace de acceso a tu correo.",
+      "passwordSubtitle": "Ingresa con tu correo y contraseña.",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "sendingLink": "Enviando…",
+      "sendLinkButton": "Enviar enlace de acceso",
+      "linkSentMessage": "Enlace enviado a {email} — revisa tu bandeja de entrada.",
+      "linkErrorMessage": "No se pudo enviar el enlace. Inténtalo de nuevo.",
+      "switchToPassword": "Iniciar sesión con correo y contraseña",
+      "passwordLabel": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "signingIn": "Iniciando sesión…",
+      "submit": "Iniciar sesión",
+      "wrongCredentials": "Correo o contraseña incorrectos.",
+      "switchToMagicLink": "¿Prefieres entrar sin contraseña? Recibe un enlace por correo"
+    },
+    "signUp": {
+      "title": "Crear cuenta",
+      "subtitle": "Nombre, correo y contraseña — nada más.",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Tu nombre",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "passwordLabel": "Contraseña",
+      "confirmPasswordLabel": "Confirmar contraseña",
+      "submit": "Crear cuenta",
+      "creating": "Creando cuenta…",
+      "tooManyAttempts": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+      "genericError": "No se pudo crear tu cuenta. Inténtalo de nuevo.",
+      "almostThereTitle": "Ya casi",
+      "almostThereMessage": "Si {email} todavía no tiene una cuenta, enviamos un enlace de confirmación a esa dirección — revisa tu bandeja de entrada para activar el acceso."
+    },
+    "google": {
+      "divider": "o",
+      "continueWith": "Continuar con Google"
+    },
+    "invalidData": "Datos inválidos."
+  },
+  "validation": {
+    "nameRequired": "Indica tu nombre.",
+    "nameTooLong": "El nombre es demasiado largo.",
+    "emailRequired": "Indica tu correo electrónico.",
+    "emailInvalid": "Correo electrónico inválido.",
+    "passwordRequired": "Indica tu contraseña.",
+    "passwordRequirementsNotMet": "La contraseña no cumple los requisitos mínimos.",
+    "passwordsDoNotMatch": "Las contraseñas no coinciden.",
+    "passwordMinLength": "Mínimo {min} caracteres",
+    "passwordUppercase": "Una letra mayúscula",
+    "passwordLowercase": "Una letra minúscula",
+    "passwordNumber": "Un número"
+  },
+  "forgotPassword": {
+    "backToSignIn": "Iniciar sesión",
+    "sentTitle": "Revisa tu correo",
+    "sentMessage": "Si {email} tiene una cuenta, enviamos un enlace para que elijas una nueva contraseña.",
+    "title": "¿Olvidaste tu contraseña?",
+    "description": "Escribe tu correo y te enviamos un enlace para que elijas una nueva contraseña.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "sending": "Enviando…",
+    "submit": "Enviar enlace",
+    "invalidEmail": "Indica un correo electrónico válido."
+  },
+  "resetPassword": {
+    "newPasswordLabel": "Nueva contraseña",
+    "confirmNewPasswordLabel": "Confirmar nueva contraseña",
+    "saving": "Guardando…",
+    "submit": "Guardar nueva contraseña",
+    "updateError": "No se pudo actualizar la contraseña. Intenta pedir un nuevo enlace."
   }
 }

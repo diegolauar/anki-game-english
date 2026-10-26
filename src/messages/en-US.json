@@ -62,5 +62,87 @@
     "footer": {
       "audioNotice": "Voice recordings are never stored."
     }
+  },
+  "login": {
+    "ariaTitle": "Fluency Mind — Sign in or create account",
+    "heroTitle": "Speak English without fear of mistakes.",
+    "heroDescription": "Chat with the AI about whatever you like. Corrections only come at the end — and turn into flashcards for you to review.",
+    "heroMockupExplanation": "With \"yesterday\", use the Simple Past.",
+    "heroSteps": "1 · Talk   2 · Understand   3 · Review",
+    "tabsAriaLabel": "Sign in or create account",
+    "signInTab": "Sign in",
+    "signUpTab": "Create account",
+    "legalNotice": "By continuing, you agree to the Terms and Privacy Policy (LGPD). Voice recordings are never stored.",
+    "signIn": {
+      "title": "Sign in",
+      "magicLinkSubtitle": "No password. We'll send a sign-in link to your email.",
+      "passwordSubtitle": "Sign in with your email and password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sendingLink": "Sending…",
+      "sendLinkButton": "Send sign-in link",
+      "linkSentMessage": "Link sent to {email} — check your inbox.",
+      "linkErrorMessage": "Couldn't send the link. Please try again.",
+      "switchToPassword": "Sign in with email and password",
+      "passwordLabel": "Password",
+      "forgotPassword": "Forgot your password?",
+      "signingIn": "Signing in…",
+      "submit": "Sign in",
+      "wrongCredentials": "Incorrect email or password.",
+      "switchToMagicLink": "Prefer signing in without a password? Get a link by email"
+    },
+    "signUp": {
+      "title": "Create account",
+      "subtitle": "Name, email, and password — that's it.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Create account",
+      "creating": "Creating account…",
+      "tooManyAttempts": "Too many attempts. Wait a bit and try again.",
+      "genericError": "Couldn't create your account. Please try again.",
+      "almostThereTitle": "Almost there",
+      "almostThereMessage": "If {email} doesn't have an account yet, we sent a confirmation link to that address — check your inbox to activate access."
+    },
+    "google": {
+      "divider": "or",
+      "continueWith": "Continue with Google"
+    },
+    "invalidData": "Invalid data."
+  },
+  "validation": {
+    "nameRequired": "Enter your name.",
+    "nameTooLong": "Name is too long.",
+    "emailRequired": "Enter your email.",
+    "emailInvalid": "Invalid email.",
+    "passwordRequired": "Enter your password.",
+    "passwordRequirementsNotMet": "Password doesn't meet the minimum requirements.",
+    "passwordsDoNotMatch": "Passwords don't match.",
+    "passwordMinLength": "At least {min} characters",
+    "passwordUppercase": "One uppercase letter",
+    "passwordLowercase": "One lowercase letter",
+    "passwordNumber": "One number"
+  },
+  "forgotPassword": {
+    "backToSignIn": "Sign in",
+    "sentTitle": "Check your email",
+    "sentMessage": "If {email} has an account, we sent a link for you to choose a new password.",
+    "title": "Forgot your password?",
+    "description": "Enter your email and we'll send a link for you to choose a new password.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sending": "Sending…",
+    "submit": "Send link",
+    "invalidEmail": "Enter a valid email."
+  },
+  "resetPassword": {
+    "newPasswordLabel": "New password",
+    "confirmNewPasswordLabel": "Confirm new password",
+    "saving": "Saving…",
+    "submit": "Save new password",
+    "updateError": "Couldn't update the password. Try requesting a new link."
   }
 }

@@ -1,21 +1,27 @@
 import { describe, expect, it } from "vitest";
 import {
-  PASSWORD_REQUIREMENTS,
-  newPasswordSchema,
-  resetPasswordRequestSchema,
-  signInSchema,
-  signUpSchema,
+  buildNewPasswordSchema,
+  buildPasswordRequirements,
+  buildResetPasswordRequestSchema,
+  buildSignInSchema,
+  buildSignUpSchema,
 } from "@/lib/auth-validation";
 
-describe("PASSWORD_REQUIREMENTS", () => {
+// Fake tradutor: só precisa devolver uma string (os testes checam validade do
+// schema, não o texto exato da mensagem — esse fica a cargo do next-intl).
+const t = ((key: string) => key) as unknown as Parameters<typeof buildSignUpSchema>[0];
+
+describe("buildPasswordRequirements", () => {
   it("rejects a password missing any required rule", () => {
-    expect(PASSWORD_REQUIREMENTS.every((rule) => rule.test("abcdefgh"))).toBe(false); // sem maiúscula/número
-    expect(PASSWORD_REQUIREMENTS.every((rule) => rule.test("ABCDEFGH1"))).toBe(false); // sem minúscula
-    expect(PASSWORD_REQUIREMENTS.every((rule) => rule.test("Abcdefg1"))).toBe(true);
+    const requirements = buildPasswordRequirements(t);
+    expect(requirements.every((rule) => rule.test("abcdefgh"))).toBe(false); // sem maiúscula/número
+    expect(requirements.every((rule) => rule.test("ABCDEFGH1"))).toBe(false); // sem minúscula
+    expect(requirements.every((rule) => rule.test("Abcdefg1"))).toBe(true);
   });
 });
 
-describe("signUpSchema", () => {
+describe("buildSignUpSchema", () => {
+  const signUpSchema = buildSignUpSchema(t);
   const valid = {
     name: "Ana",
     email: "ana@example.com",
@@ -50,7 +56,9 @@ describe("signUpSchema", () => {
   });
 });
 
-describe("signInSchema", () => {
+describe("buildSignInSchema", () => {
+  const signInSchema = buildSignInSchema(t);
+
   it("accepts any non-empty password (strength is only enforced at sign-up)", () => {
     expect(signInSchema.safeParse({ email: "a@b.com", password: "x" }).success).toBe(true);
   });
@@ -61,14 +69,18 @@ describe("signInSchema", () => {
   });
 });
 
-describe("resetPasswordRequestSchema", () => {
+describe("buildResetPasswordRequestSchema", () => {
+  const resetPasswordRequestSchema = buildResetPasswordRequestSchema(t);
+
   it("requires a valid email", () => {
     expect(resetPasswordRequestSchema.safeParse({ email: "a@b.com" }).success).toBe(true);
     expect(resetPasswordRequestSchema.safeParse({ email: "nope" }).success).toBe(false);
   });
 });
 
-describe("newPasswordSchema", () => {
+describe("buildNewPasswordSchema", () => {
+  const newPasswordSchema = buildNewPasswordSchema(t);
+
   it("requires matching strong passwords", () => {
     expect(
       newPasswordSchema.safeParse({ password: "Abcdefg1", confirmPassword: "Abcdefg1" }).success,
