@@ -1,9 +1,21 @@
 import type { ConversationReplyInput } from "@/domain/ports/conversation-agent";
+import type { Locale } from "@/domain/value-objects/locale";
+
+/**
+ * Framing do idioma nativo assumido do aluno, a partir do idioma de interface
+ * escolhido (seção 1 do CLAUDE.md) — é uma aproximação, não uma certeza, mas o
+ * usuário decidiu priorizar esse contexto extra pro LLM em vez de generalizar.
+ */
+const LEARNER_L1_FRAMING: Record<Locale, string> = {
+  "pt-BR": "a Brazilian Portuguese speaker",
+  "en-US": "a learner",
+  es: "a Spanish speaker",
+};
 
 export function buildConversationSystemPrompt(
-  input: Pick<ConversationReplyInput, "topic" | "difficulty">,
+  input: Pick<ConversationReplyInput, "topic" | "difficulty" | "locale">,
 ): string {
-  return `You are a friendly English conversation partner helping a Brazilian Portuguese speaker practice spoken English.
+  return `You are a friendly English conversation partner helping ${LEARNER_L1_FRAMING[input.locale]} practice spoken English.
 
 Rules:
 - Always reply in English and keep track of the conversation's context.

@@ -50,7 +50,10 @@ export class OpenAiAnalysisAgent implements AnalysisAgent {
       model: this.modelId,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: buildAnalysisSystemPrompt(input.existingRuleKeys) },
+        {
+          role: "system",
+          content: buildAnalysisSystemPrompt(input.existingRuleKeys, input.explanationLanguage),
+        },
         { role: "user", content: buildAnalysisUserPrompt(input.messages) },
       ],
     });

@@ -59,6 +59,7 @@ function buildAnalyzeConversation(
       userId,
       usageRepository: new SupabaseLlmUsageRepository(serviceRoleClient),
     }),
+    new SupabaseUserProfileRepository(serviceRoleClient),
   );
 }
 

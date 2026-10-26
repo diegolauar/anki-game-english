@@ -8,6 +8,8 @@ import type { FlashcardSuggestionRepository } from "@/domain/ports/flashcard-sug
 import type { LearningPointRepository } from "@/domain/ports/learning-point-repository";
 import type { LearningPointWriter } from "@/domain/ports/learning-point-writer";
 import type { MessageRepository } from "@/domain/ports/message-repository";
+import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
+import { getUiLanguage } from "@/domain/rules/ui-language";
 
 export class AnalyzeConversation {
   constructor(
@@ -20,6 +22,7 @@ export class AnalyzeConversation {
     private readonly findingWriter: FindingWriter,
     private readonly flashcardSuggestionRepository: FlashcardSuggestionRepository,
     private readonly analysisAgent: AnalysisAgent,
+    private readonly userProfileRepository: UserProfileRepository,
   ) {}
 
   async execute(analysisId: string): Promise<void> {
@@ -35,9 +38,10 @@ export class AnalyzeConversation {
     try {
       const messages = await this.messageRepository.listByConversation(conversation.id);
       const messagesBySequence = new Map(messages.map((message) => [message.sequence, message]));
-      const existingRuleKeys = await this.learningPointRepository.listRuleKeysByUser(
-        conversation.userId,
-      );
+      const [existingRuleKeys, profile] = await Promise.all([
+        this.learningPointRepository.listRuleKeysByUser(conversation.userId),
+        this.userProfileRepository.getById(conversation.userId),
+      ]);
 
       const result = await this.analysisAgent.analyze({
         messages: messages.map((message) => ({
@@ -46,6 +50,7 @@ export class AnalyzeConversation {
           content: message.content,
         })),
         existingRuleKeys,
+        explanationLanguage: getUiLanguage(profile?.preferences ?? {}),
       });
 
       for (const findingResult of result.findings) {

@@ -203,6 +203,43 @@ describe("SendMessage", () => {
     expect(conversationAgent.calls[0].topic).toBe("Travel");
   });
 
+  it("passes the user's uiLanguage preference as the conversation agent's locale", async () => {
+    const { useCase, conversationRepository, userProfileRepository, conversationAgent } =
+      buildUseCase();
+    conversationRepository.seed(buildConversation());
+    userProfileRepository.seed({
+      id: "user-1",
+      displayName: "Ana",
+      targetLevel: "beginner",
+      preferences: { uiLanguage: "es" },
+    });
+
+    await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "I love visiting new places.",
+      inputMode: "text",
+      clientMessageId: "client-1",
+    });
+
+    expect(conversationAgent.calls[0].locale).toBe("es");
+  });
+
+  it("defaults the conversation agent's locale to pt-BR when the user has no preference set", async () => {
+    const { useCase, conversationRepository, conversationAgent } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+
+    await useCase.execute({
+      conversationId: "conversation-1",
+      userId: "user-1",
+      content: "I love visiting new places.",
+      inputMode: "text",
+      clientMessageId: "client-1",
+    });
+
+    expect(conversationAgent.calls[0].locale).toBe("pt-BR");
+  });
+
   it("stores the raw voice transcription linked to the new user message", async () => {
     const { useCase, conversationRepository, speechTranscriptionRepository } = buildUseCase();
     conversationRepository.seed(buildConversation());

@@ -11,6 +11,7 @@ import {
   FakeFlashcardRepository,
   FakeLearningPointRepository,
   FakeMessageRepository,
+  FakeUserProfileRepository,
 } from "./fakes";
 
 function buildConversation(overrides: Partial<Conversation> = {}): Conversation {
@@ -69,6 +70,7 @@ function buildUseCase() {
   const findingRepository = new FakeFindingRepository();
   const flashcardRepository = new FakeFlashcardRepository();
   const analysisAgent = new FakeAnalysisAgent();
+  const userProfileRepository = new FakeUserProfileRepository();
 
   const useCase = new AnalyzeConversation(
     analysisRepository,
@@ -80,6 +82,7 @@ function buildUseCase() {
     findingRepository,
     flashcardRepository,
     analysisAgent,
+    userProfileRepository,
   );
 
   return {
@@ -91,6 +94,7 @@ function buildUseCase() {
     findingRepository,
     flashcardRepository,
     analysisAgent,
+    userProfileRepository,
   };
 }
 
@@ -114,6 +118,34 @@ describe("AnalyzeConversation", () => {
     expect(context.learningPointRepository.learningPoints).toHaveLength(1);
     expect(context.learningPointRepository.learningPoints[0].occurrenceCount).toBe(1);
     expect(context.findingRepository.findings).toHaveLength(1);
+  });
+
+  it("passes the user's uiLanguage preference as the explanation language", async () => {
+    const context = buildUseCase();
+    context.conversationRepository.seed(buildConversation());
+    context.messageRepository.seed(buildUserMessage());
+    context.userProfileRepository.seed({
+      id: "user-1",
+      displayName: "Ana",
+      targetLevel: "beginner",
+      preferences: { uiLanguage: "en-US" },
+    });
+    const analysis = await context.analysisRepository.create("conversation-1");
+
+    await context.useCase.execute(analysis.id);
+
+    expect(context.analysisAgent.calls[0]?.explanationLanguage).toBe("en-US");
+  });
+
+  it("defaults the explanation language to pt-BR when the user has no preference set", async () => {
+    const context = buildUseCase();
+    context.conversationRepository.seed(buildConversation());
+    context.messageRepository.seed(buildUserMessage());
+    const analysis = await context.analysisRepository.create("conversation-1");
+
+    await context.useCase.execute(analysis.id);
+
+    expect(context.analysisAgent.calls[0]?.explanationLanguage).toBe("pt-BR");
   });
 
   it("reuses the same learning point and increments occurrence on a recurring rule_key", async () => {

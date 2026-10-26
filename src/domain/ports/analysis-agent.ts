@@ -1,6 +1,7 @@
 import type { AnalysisSummary } from "@/domain/entities/analysis";
 import type { FindingCategory } from "@/domain/value-objects/finding-category";
 import type { FindingKind } from "@/domain/value-objects/finding-kind";
+import type { Locale } from "@/domain/value-objects/locale";
 import type { MessageRole } from "@/domain/value-objects/message-role";
 import type { Severity } from "@/domain/value-objects/severity";
 
@@ -13,6 +14,8 @@ export interface AnalysisAgentMessage {
 export interface AnalysisAgentInput {
   messages: AnalysisAgentMessage[];
   existingRuleKeys: string[];
+  /** Idioma das explicações (seção 5.3) — segue o uiLanguage do usuário. */
+  explanationLanguage: Locale;
 }
 
 export interface AnalysisFlashcardSuggestion {

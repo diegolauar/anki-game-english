@@ -12,6 +12,7 @@ import {
   getMessagesPerMinuteLimit,
   RATE_LIMIT_WINDOW_SECONDS,
 } from "@/domain/rules/rate-limits";
+import { getUiLanguage } from "@/domain/rules/ui-language";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 
 export interface VoiceTranscriptionInput {
@@ -100,11 +101,13 @@ export class SendMessage {
 
     const topic = conversation.customTopic ?? (await this.resolveTopicTitle(conversation.topicId));
     const history = await this.messageRepository.listByConversation(input.conversationId);
+    const profile = await this.userProfileRepository.getById(input.userId);
 
     const replyContent = await this.conversationAgent.reply({
       topic,
       difficulty: conversation.difficulty,
       history: history.map((message) => ({ role: message.role, content: message.content })),
+      locale: getUiLanguage(profile?.preferences ?? {}),
     });
 
     const assistantMessage = await this.messageRepository.create({
