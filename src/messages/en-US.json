@@ -144,5 +144,37 @@
     "saving": "Saving…",
     "submit": "Save new password",
     "updateError": "Couldn't update the password. Try requesting a new link."
+  },
+  "dashboard": {
+    "weekdayInitials": ["S", "M", "T", "W", "T", "F", "S"],
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "inProgress": "In progress",
+    "minutesShort": "{minutes} min",
+    "greeting": "Hi, {name}.",
+    "streakDays": "{count, plural, one {# day} other {# days}}",
+    "todaySuggestionLabel": "Today's suggestion",
+    "defaultHeroTitle": "Ready for your first conversation?",
+    "heroLearningPointMessage": "You repeated this point {count}× in past conversations: {detail}",
+    "heroDefaultMessage": "Chat about whatever you want — corrections only show up at the end.",
+    "startConversation": "Start conversation",
+    "chooseAnotherTopic": "Choose another topic",
+    "todayReviewLabel": "Today's review",
+    "pendingXpBadge": "+10 XP",
+    "pendingCardsLabel": "pending cards",
+    "reviewedSummary": "{reviewed, plural, one {# reviewed} other {# reviewed}} · about {minutes} min left",
+    "reviewNow": "Review now",
+    "allReviewedToday": "All caught up for today",
+    "yourWeek": "Your week",
+    "recurringPointsHeading": "Recurring points",
+    "noRecurringPoints": "No recurring points yet — they show up as you practice.",
+    "topicsHeading": "Topics to talk about",
+    "recentConversationsHeading": "Recent conversations",
+    "conversationMeta": "{date} · {count, plural, one {# message} other {# messages}} · {duration}",
+    "status": {
+      "analyzed": "Analyzed · {count, plural, one {# error} other {# errors}}",
+      "analyzing": "Analyzing…",
+      "failed": "Failed · retry"
+    }
   }
 }

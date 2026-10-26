@@ -144,5 +144,37 @@
     "saving": "Guardando…",
     "submit": "Guardar nueva contraseña",
     "updateError": "No se pudo actualizar la contraseña. Intenta pedir un nuevo enlace."
+  },
+  "dashboard": {
+    "weekdayInitials": ["D", "L", "M", "M", "J", "V", "S"],
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "inProgress": "En curso",
+    "minutesShort": "{minutes} min",
+    "greeting": "Hola, {name}.",
+    "streakDays": "{count, plural, one {# día} other {# días}}",
+    "todaySuggestionLabel": "Sugerencia de hoy",
+    "defaultHeroTitle": "¿Listo para tu primera conversación?",
+    "heroLearningPointMessage": "Repetiste este punto {count}× en conversaciones anteriores: {detail}",
+    "heroDefaultMessage": "Conversa sobre lo que quieras — las correcciones aparecen solo al final.",
+    "startConversation": "Empezar conversación",
+    "chooseAnotherTopic": "Elegir otro tema",
+    "todayReviewLabel": "Repaso de hoy",
+    "pendingXpBadge": "+10 XP",
+    "pendingCardsLabel": "tarjetas pendientes",
+    "reviewedSummary": "{reviewed, plural, one {# repasada} other {# repasadas}} · unos {minutes} min restantes",
+    "reviewNow": "Repasar ahora",
+    "allReviewedToday": "Todo repasado por hoy",
+    "yourWeek": "Tu semana",
+    "recurringPointsHeading": "Puntos que se repiten",
+    "noRecurringPoints": "Todavía no hay puntos recurrentes — aparecen a medida que conversas.",
+    "topicsHeading": "Temas para conversar",
+    "recentConversationsHeading": "Conversaciones recientes",
+    "conversationMeta": "{date} · {count, plural, one {# mensaje} other {# mensajes}} · {duration}",
+    "status": {
+      "analyzed": "Analizada · {count, plural, one {# error} other {# errores}}",
+      "analyzing": "Analizando…",
+      "failed": "Falló · reintentar"
+    }
   }
 }
