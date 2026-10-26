@@ -54,6 +54,7 @@ import type {
 } from "@/domain/ports/speech-transcription-repository";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
+import type { UserProfileWriter } from "@/domain/ports/user-profile-writer";
 import type { DailyXpTotal, XpEventRepository } from "@/domain/ports/xp-event-repository";
 import type { CreateXpEventInput, XpEventWriter } from "@/domain/ports/xp-event-writer";
 import type { DailyUsage, DailyUsageRepository } from "@/domain/ports/daily-usage-repository";
@@ -184,6 +185,20 @@ export class FakeUserProfileRepository implements UserProfileRepository {
 
   seed(profile: UserProfile) {
     this.profiles.set(profile.id, profile);
+  }
+}
+
+export class FakeUserProfileWriter implements UserProfileWriter {
+  constructor(private readonly repository: FakeUserProfileRepository) {}
+
+  async updatePreferences(userId: string, patch: Record<string, unknown>): Promise<void> {
+    const existing = this.repository.profiles.get(userId);
+    if (!existing) throw new Error(`User profile not found: ${userId}`);
+
+    this.repository.profiles.set(userId, {
+      ...existing,
+      preferences: { ...existing.preferences, ...patch },
+    });
   }
 }
 

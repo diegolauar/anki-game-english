@@ -1,0 +1,66 @@
+{
+  "common": {
+    "language": "Idioma",
+    "hidePassword": "Esconder senha",
+    "showPassword": "Mostrar senha"
+  },
+  "landing": {
+    "nav": { "howItWorks": "Como funciona", "features": "Recursos" },
+    "signIn": "Entrar",
+    "startNow": "Começar agora",
+    "hero": {
+      "eyebrow": "Pra quem já estudou inglês mas trava na hora de falar",
+      "title": "Fale inglês sem medo de errar.",
+      "description": "Converse com uma IA sobre o que você gosta, no seu nível. As correções vêm só no final — com exemplos, e viram flashcards pra você não esquecer.",
+      "alreadyHaveAccount": "Já tenho conta",
+      "mockup": {
+        "correctionExplanation": "Com \"yesterday\", use o Simple Past."
+      }
+    },
+    "steps": {
+      "heading": "Como funciona",
+      "items": {
+        "converse": {
+          "title": "1 · Converse",
+          "description": "Escolha um tema e fale à vontade, em texto ou voz. A IA conversa com você — sem corrigir nada no meio do caminho."
+        },
+        "understand": {
+          "title": "2 · Entenda",
+          "description": "No final, a IA analisa a conversa inteira, destaca o que pode melhorar e explica com exemplos."
+        },
+        "review": {
+          "title": "3 · Revise",
+          "description": "Os pontos viram flashcards com repetição espaçada. O mesmo erro em conversas diferentes reforça o mesmo cartão."
+        }
+      }
+    },
+    "features": {
+      "heading": "Feito pra prática real",
+      "items": {
+        "noJudgment": {
+          "title": "Conversa sem julgamento",
+          "description": "Pratique sobre o que quiser, no seu nível. As correções nunca interrompem a conversa."
+        },
+        "textOrVoice": {
+          "title": "Texto ou voz",
+          "description": "Fale ou digite — você escolhe. A transcrição por voz preserva seus erros de propósito, pra análise ser real."
+        },
+        "explainedAnalysis": {
+          "title": "Análise que explica o porquê",
+          "description": "Cada correção vem com explicação e um exemplo, não só a frase certa."
+        },
+        "stickyProgress": {
+          "title": "Progresso que gruda",
+          "description": "Flashcards com FSRS (o mesmo algoritmo do Anki), XP e streak — pra prática virar hábito."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Pronto pra sua primeira conversa?",
+      "description": "Cadastre-se com Google ou e-mail. Sem senha, sem complicação."
+    },
+    "footer": {
+      "audioNotice": "Áudios de voz nunca são armazenados."
+    }
+  }
+}

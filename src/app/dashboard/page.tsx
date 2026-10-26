@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CircleCheck, Flame, Play, Star } from "lucide-react";
+import { LanguageSelector } from "@/components/language-selector";
 import { TopicIcon } from "@/components/topic-icon";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
 import { requireUser } from "@/infrastructure/supabase/require-user";
@@ -115,6 +116,7 @@ export default async function DashboardPage() {
             <Star className="size-3.5 fill-xp text-xp" />
             {totalXp.toLocaleString("pt-BR")} XP
           </span>
+          <LanguageSelector />
           <span className="flex size-10 items-center justify-center rounded-full bg-acc-soft text-sm font-bold text-acc-strong">
             {initial}
           </span>

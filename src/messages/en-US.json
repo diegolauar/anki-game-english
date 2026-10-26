@@ -1,0 +1,66 @@
+{
+  "common": {
+    "language": "Language",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password"
+  },
+  "landing": {
+    "nav": { "howItWorks": "How it works", "features": "Features" },
+    "signIn": "Sign in",
+    "startNow": "Start now",
+    "hero": {
+      "eyebrow": "For people who've studied English but freeze up when speaking",
+      "title": "Speak English without fear of mistakes.",
+      "description": "Chat with an AI about whatever you like, at your level. Corrections only come at the end — with examples, turned into flashcards so you don't forget.",
+      "alreadyHaveAccount": "I already have an account",
+      "mockup": {
+        "correctionExplanation": "With \"yesterday\", use the Simple Past."
+      }
+    },
+    "steps": {
+      "heading": "How it works",
+      "items": {
+        "converse": {
+          "title": "1 · Talk",
+          "description": "Pick a topic and speak freely, by text or voice. The AI chats with you — without correcting anything along the way."
+        },
+        "understand": {
+          "title": "2 · Understand",
+          "description": "At the end, the AI reviews the whole conversation, highlights what can improve, and explains with examples."
+        },
+        "review": {
+          "title": "3 · Review",
+          "description": "The points become spaced-repetition flashcards. The same mistake in different conversations reinforces the same card."
+        }
+      }
+    },
+    "features": {
+      "heading": "Built for real practice",
+      "items": {
+        "noJudgment": {
+          "title": "Judgment-free conversation",
+          "description": "Practice about anything you want, at your level. Corrections never interrupt the conversation."
+        },
+        "textOrVoice": {
+          "title": "Text or voice",
+          "description": "Speak or type — your choice. Voice transcription keeps your mistakes on purpose, so the analysis is real."
+        },
+        "explainedAnalysis": {
+          "title": "Analysis that explains why",
+          "description": "Every correction comes with an explanation and an example, not just the right sentence."
+        },
+        "stickyProgress": {
+          "title": "Progress that sticks",
+          "description": "Flashcards with FSRS (the same algorithm Anki uses), XP, and streaks — so practice becomes a habit."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Ready for your first conversation?",
+      "description": "Sign up with Google or email. No password, no hassle."
+    },
+    "footer": {
+      "audioNotice": "Voice recordings are never stored."
+    }
+  }
+}

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Figtree, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { AppChrome } from "@/components/app-chrome";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
@@ -22,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "English Quest",
+  title: "Fluency Mind",
   description: "Aprenda inglês conversando com uma IA.",
 };
 
@@ -56,11 +58,15 @@ const THEME_INIT_SCRIPT = `
 `;
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const pendingReviewCount = await getPendingReviewCount();
+  const [pendingReviewCount, locale, messages] = await Promise.all([
+    getPendingReviewCount(),
+    getLocale(),
+    getMessages(),
+  ]);
 
   return (
     <html
-      lang="pt-BR"
+      lang={locale}
       className={`${bricolage.variable} ${figtree.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -68,7 +74,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-bg text-ink">
-        <AppChrome pendingReviewCount={pendingReviewCount}>{children}</AppChrome>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AppChrome pendingReviewCount={pendingReviewCount}>{children}</AppChrome>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

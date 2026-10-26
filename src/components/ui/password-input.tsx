@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 
 export function PasswordInput({
@@ -20,6 +21,7 @@ export function PasswordInput({
   className?: string;
 }) {
   const [visible, setVisible] = useState(false);
+  const t = useTranslations("common");
 
   return (
     <div className="relative">
@@ -36,7 +38,7 @@ export function PasswordInput({
       <button
         type="button"
         onClick={() => setVisible((current) => !current)}
-        aria-label={visible ? "Esconder senha" : "Mostrar senha"}
+        aria-label={visible ? t("hidePassword") : t("showPassword")}
         className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground transition-colors hover:text-ink"
       >
         {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
