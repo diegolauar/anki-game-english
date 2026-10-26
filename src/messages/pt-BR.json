@@ -4,7 +4,9 @@
     "hidePassword": "Esconder senha",
     "showPassword": "Mostrar senha",
     "backToHome": "Início",
-    "close": "Fechar"
+    "close": "Fechar",
+    "switchToLightTheme": "Mudar para tema claro",
+    "switchToDarkTheme": "Mudar para tema escuro"
   },
   "cardType": {
     "productionLabel": "Produção",
@@ -266,6 +268,8 @@
     "invalidEmail": "Informe um e-mail válido."
   },
   "resetPassword": {
+    "title": "Nova senha",
+    "description": "Escolha uma nova senha pra sua conta.",
     "newPasswordLabel": "Nova senha",
     "confirmNewPasswordLabel": "Confirmar nova senha",
     "saving": "Salvando…",
@@ -324,7 +328,23 @@
       "xpEarned": "XP conversa concluída",
       "xpMinimum": "XP (mínimo {min} mensagens)",
       "mainPointsHeading": "Principais pontos",
-      "recommendedExpressionsHeading": "Expressões para usar na próxima"
+      "recommendedExpressionsHeading": "Expressões para usar na próxima",
+      "transcript": {
+        "heading": "Transcrição",
+        "errorLegend": "Erro",
+        "suggestionLegend": "Sugestão",
+        "clickHint": "Clique em um trecho destacado para ver a explicação.",
+        "aiLabel": "IA",
+        "youLabel": "Você",
+        "noHighlights": "Sem destaques nesta conversa — continue praticando!",
+        "exampleLabel": "Exemplo",
+        "recurrence": {
+          "frequent": "Apareceu em {count} conversas — revisão antecipada",
+          "seen": "Apareceu em {count} conversas",
+          "first": "Primeira vez que aparece"
+        },
+        "createFlashcard": "+ Criar flashcard deste trecho"
+      }
     },
     "new": {
       "title": "Nova conversa",
@@ -364,7 +384,8 @@
       "transcribing": "Transcrevendo…",
       "composerPlaceholder": "Escreva em inglês…",
       "recordAudio": "Gravar áudio",
-      "send": "Enviar"
+      "send": "Enviar",
+      "transcribeError": "Não foi possível transcrever o áudio. Tente regravar ou use o texto."
     }
   }
 }

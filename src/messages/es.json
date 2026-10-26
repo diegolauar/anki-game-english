@@ -4,7 +4,9 @@
     "hidePassword": "Ocultar contraseña",
     "showPassword": "Mostrar contraseña",
     "backToHome": "Inicio",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "switchToLightTheme": "Cambiar a tema claro",
+    "switchToDarkTheme": "Cambiar a tema oscuro"
   },
   "cardType": {
     "productionLabel": "Producción",
@@ -266,6 +268,8 @@
     "invalidEmail": "Indica un correo electrónico válido."
   },
   "resetPassword": {
+    "title": "Nueva contraseña",
+    "description": "Elige una nueva contraseña para tu cuenta.",
     "newPasswordLabel": "Nueva contraseña",
     "confirmNewPasswordLabel": "Confirmar nueva contraseña",
     "saving": "Guardando…",
@@ -324,7 +328,23 @@
       "xpEarned": "XP por terminar la conversación",
       "xpMinimum": "XP (mínimo {min} mensajes)",
       "mainPointsHeading": "Puntos principales",
-      "recommendedExpressionsHeading": "Expresiones para usar la próxima vez"
+      "recommendedExpressionsHeading": "Expresiones para usar la próxima vez",
+      "transcript": {
+        "heading": "Transcripción",
+        "errorLegend": "Error",
+        "suggestionLegend": "Sugerencia",
+        "clickHint": "Haz clic en un fragmento resaltado para ver la explicación.",
+        "aiLabel": "IA",
+        "youLabel": "Tú",
+        "noHighlights": "Sin destacados en esta conversación — ¡sigue practicando!",
+        "exampleLabel": "Ejemplo",
+        "recurrence": {
+          "frequent": "Apareció en {count} conversaciones — repaso adelantado",
+          "seen": "Apareció en {count} conversaciones",
+          "first": "Primera vez que aparece"
+        },
+        "createFlashcard": "+ Crear flashcard de este fragmento"
+      }
     },
     "new": {
       "title": "Nueva conversación",
@@ -364,7 +384,8 @@
       "transcribing": "Transcribiendo…",
       "composerPlaceholder": "Escribe en inglés…",
       "recordAudio": "Grabar audio",
-      "send": "Enviar"
+      "send": "Enviar",
+      "transcribeError": "No se pudo transcribir el audio. Intenta regrabar o usa el texto."
     }
   }
 }

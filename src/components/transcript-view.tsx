@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { History } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { MessageRole } from "@/domain/value-objects/message-role";
 
 export interface TranscriptFinding {
@@ -71,6 +72,7 @@ function renderHighlighted(
 }
 
 export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) {
+  const t = useTranslations("conversation.results.transcript");
   const firstFinding = messages.flatMap((message) => message.findings)[0] ?? null;
   const [selected, setSelected] = useState<TranscriptFinding | null>(firstFinding);
 
@@ -78,32 +80,31 @@ export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) 
     <div className="grid gap-6" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(280px,360px)" }}>
       <div>
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em]">Transcrição</h2>
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em]">{t("heading")}</h2>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="h-0.5 w-3 rounded-full bg-err" /> Erro
+              <span className="h-0.5 w-3 rounded-full bg-err" /> {t("errorLegend")}
             </span>
             <span className="flex items-center gap-1">
-              <span className="h-0.5 w-3 rounded-full border-b-2 border-dashed border-sug" /> Sugestão
+              <span className="h-0.5 w-3 rounded-full border-b-2 border-dashed border-sug" />{" "}
+              {t("suggestionLegend")}
             </span>
           </div>
         </div>
-        <p className="mt-1 mb-4 text-xs text-muted-foreground">
-          Clique em um trecho destacado para ver a explicação.
-        </p>
+        <p className="mt-1 mb-4 text-xs text-muted-foreground">{t("clickHint")}</p>
 
         <div className="flex flex-col gap-3">
           {messages.map((message) => (
             <div key={message.id}>
               {message.role === "assistant" ? (
                 <p className="text-[13px] text-muted-foreground">
-                  <span className="font-bold tracking-[.04em] uppercase">IA</span>{" "}
+                  <span className="font-bold tracking-[.04em] uppercase">{t("aiLabel")}</span>{" "}
                   {message.content}
                 </p>
               ) : (
                 <div className="rounded-control bg-surface2 p-4 text-[15.5px] leading-[1.75]">
                   <p className="mb-1 text-[11px] font-bold tracking-[.04em] text-acc uppercase">
-                    Você
+                    {t("youLabel")}
                   </p>
                   {renderHighlighted(message.content, message.findings, selected?.id ?? null, setSelected)}
                 </div>
@@ -115,9 +116,7 @@ export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) 
 
       <aside className="h-fit rounded-card border border-line bg-surface p-6" style={{ position: "sticky", top: "1.5rem" }}>
         {!selected ? (
-          <p className="text-sm text-muted-foreground">
-            Sem destaques nesta conversa — continue praticando!
-          </p>
+          <p className="text-sm text-muted-foreground">{t("noHighlights")}</p>
         ) : (
           <>
             <div className="flex items-center justify-between">
@@ -126,7 +125,7 @@ export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) 
                   selected.kind === "error" ? "bg-err-soft text-err" : "bg-sug-soft text-sug-ink"
                 }`}
               >
-                {selected.kind === "error" ? "Erro" : "Sugestão"}
+                {selected.kind === "error" ? t("errorLegend") : t("suggestionLegend")}
               </span>
               <span className="font-mono text-xs text-muted-foreground">{selected.category}</span>
             </div>
@@ -145,7 +144,7 @@ export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) 
             {selected.example && (
               <p className="mt-3 rounded-control bg-surface2 p-3 text-[13px] italic">
                 <span className="not-italic font-bold tracking-[.04em] text-muted-foreground uppercase">
-                  Exemplo
+                  {t("exampleLabel")}
                 </span>{" "}
                 {selected.example}
               </p>
@@ -154,10 +153,10 @@ export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) 
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
               <History className="size-3.5" />
               {selected.occurrenceCount && selected.occurrenceCount >= 3
-                ? `Apareceu em ${selected.occurrenceCount} conversas — revisão antecipada`
+                ? t("recurrence.frequent", { count: selected.occurrenceCount })
                 : selected.occurrenceCount && selected.occurrenceCount > 1
-                  ? `Apareceu em ${selected.occurrenceCount} conversas`
-                  : "Primeira vez que aparece"}
+                  ? t("recurrence.seen", { count: selected.occurrenceCount })
+                  : t("recurrence.first")}
             </p>
 
             <Link
@@ -166,7 +165,7 @@ export function TranscriptView({ messages }: { messages: TranscriptMessage[] }) 
               )}&back=${encodeURIComponent(selected.correction ?? selected.originalText)}`}
               className="mt-4 flex h-10 w-full items-center justify-center rounded-control border border-line text-sm font-semibold hover:border-acc hover:text-acc-strong"
             >
-              + Criar flashcard deste trecho
+              {t("createFlashcard")}
             </Link>
           </>
         )}

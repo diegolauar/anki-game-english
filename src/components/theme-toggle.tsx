@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 
 export function ThemeToggle() {
+  const t = useTranslations("common");
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+      aria-label={isDark ? t("switchToLightTheme") : t("switchToDarkTheme")}
       className="flex h-12 items-center justify-center rounded-full px-[18px] text-muted-foreground transition-colors hover:bg-surface2"
     >
       {isDark ? <Sun className="size-[22px]" /> : <Moon className="size-[22px]" />}

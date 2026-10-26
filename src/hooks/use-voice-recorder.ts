@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const MAX_DURATION_MS = 60_000;
 
@@ -16,6 +17,7 @@ interface UseVoiceRecorderOptions {
 }
 
 export function useVoiceRecorder({ onSubmit }: UseVoiceRecorderOptions) {
+  const t = useTranslations("conversation.chat");
   const [state, setState] = useState<RecorderState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
@@ -63,7 +65,7 @@ export function useVoiceRecorder({ onSubmit }: UseVoiceRecorderOptions) {
       setProvider(data.provider);
       setState("review");
     } catch {
-      setErrorMessage("Não foi possível transcrever o áudio. Tente regravar ou use o texto.");
+      setErrorMessage(t("transcribeError"));
       setState("error");
     }
   }

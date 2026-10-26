@@ -4,7 +4,9 @@
     "hidePassword": "Hide password",
     "showPassword": "Show password",
     "backToHome": "Home",
-    "close": "Close"
+    "close": "Close",
+    "switchToLightTheme": "Switch to light theme",
+    "switchToDarkTheme": "Switch to dark theme"
   },
   "cardType": {
     "productionLabel": "Production",
@@ -266,6 +268,8 @@
     "invalidEmail": "Enter a valid email."
   },
   "resetPassword": {
+    "title": "New password",
+    "description": "Choose a new password for your account.",
     "newPasswordLabel": "New password",
     "confirmNewPasswordLabel": "Confirm new password",
     "saving": "Saving…",
@@ -324,7 +328,23 @@
       "xpEarned": "XP for finishing conversation",
       "xpMinimum": "XP (minimum {min} messages)",
       "mainPointsHeading": "Main points",
-      "recommendedExpressionsHeading": "Expressions to use next time"
+      "recommendedExpressionsHeading": "Expressions to use next time",
+      "transcript": {
+        "heading": "Transcript",
+        "errorLegend": "Error",
+        "suggestionLegend": "Suggestion",
+        "clickHint": "Click a highlighted snippet to see the explanation.",
+        "aiLabel": "AI",
+        "youLabel": "You",
+        "noHighlights": "No highlights in this conversation — keep practicing!",
+        "exampleLabel": "Example",
+        "recurrence": {
+          "frequent": "Appeared in {count} conversations — review brought forward",
+          "seen": "Appeared in {count} conversations",
+          "first": "First time this appeared"
+        },
+        "createFlashcard": "+ Create flashcard from this"
+      }
     },
     "new": {
       "title": "New conversation",
@@ -364,7 +384,8 @@
       "transcribing": "Transcribing…",
       "composerPlaceholder": "Write in English…",
       "recordAudio": "Record audio",
-      "send": "Send"
+      "send": "Send",
+      "transcribeError": "Couldn't transcribe the audio. Try recording again or use text."
     }
   }
 }
