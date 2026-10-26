@@ -13,6 +13,7 @@ import type { UserProfileRepository } from "@/domain/ports/user-profile-reposito
 import type { DailyXpTotal, XpEventRepository } from "@/domain/ports/xp-event-repository";
 import type { AnalysisStatus } from "@/domain/value-objects/analysis-status";
 import type { Difficulty } from "@/domain/value-objects/difficulty";
+import type { Locale } from "@/domain/value-objects/locale";
 import { calculateStreak } from "@/domain/rules/calculate-streak";
 
 const RECENT_CONVERSATIONS_LIMIT = 5;
@@ -57,7 +58,7 @@ export class GetDashboard {
     private readonly findingRepository: FindingRepository,
   ) {}
 
-  async execute(userId: string): Promise<GetDashboardResult> {
+  async execute(userId: string, locale: Locale): Promise<GetDashboardResult> {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - (WEEKLY_XP_DAYS - 1) * 24 * 60 * 60 * 1000);
 
@@ -73,7 +74,7 @@ export class GetDashboard {
       recentConversations,
     ] = await Promise.all([
       this.userProfileRepository.getById(userId),
-      this.topicRepository.listActive(),
+      this.topicRepository.listActive(locale),
       this.cardScheduleRepository.listDueForUser(userId, now),
       this.xpEventRepository.sumByUser(userId),
       this.xpEventRepository.listActiveDateKeysByUser(userId),

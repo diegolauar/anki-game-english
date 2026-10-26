@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CircleCheck, Flame, Play, Star } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { getTypedLocale } from "@/i18n/get-locale";
 import { LanguageSelector } from "@/components/language-selector";
 import { TopicIcon } from "@/components/topic-icon";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
@@ -58,7 +59,11 @@ function formatDuration(t: Translator, startedAt: string, endedAt: string | null
 
 export default async function DashboardPage() {
   const { supabase, user } = await requireUser();
-  const [t, format] = await Promise.all([getTranslations("dashboard"), getFormatter()]);
+  const [t, format, locale] = await Promise.all([
+    getTranslations("dashboard"),
+    getFormatter(),
+    getTypedLocale(),
+  ]);
 
   const getDashboard = new GetDashboard(
     new SupabaseUserProfileRepository(supabase),
@@ -82,7 +87,7 @@ export default async function DashboardPage() {
     weeklyXp,
     topLearningPoints,
     recentConversations,
-  } = await getDashboard.execute(user.id);
+  } = await getDashboard.execute(user.id, locale);
 
   const displayName = profile?.displayName ?? user.email ?? "";
   const initial = displayName.charAt(0).toUpperCase() || "?";

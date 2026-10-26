@@ -14,6 +14,7 @@ import {
 } from "@/domain/rules/rate-limits";
 import { getUiLanguage } from "@/domain/rules/ui-language";
 import type { InputMode } from "@/domain/value-objects/input-mode";
+import type { Locale } from "@/domain/value-objects/locale";
 
 export interface VoiceTranscriptionInput {
   rawText: string;
@@ -99,15 +100,17 @@ export class SendMessage {
       return { userMessage, assistantMessage: existingAssistantMessage };
     }
 
-    const topic = conversation.customTopic ?? (await this.resolveTopicTitle(conversation.topicId));
-    const history = await this.messageRepository.listByConversation(input.conversationId);
     const profile = await this.userProfileRepository.getById(input.userId);
+    const locale = getUiLanguage(profile?.preferences ?? {});
+    const topic =
+      conversation.customTopic ?? (await this.resolveTopicTitle(conversation.topicId, locale));
+    const history = await this.messageRepository.listByConversation(input.conversationId);
 
     const replyContent = await this.conversationAgent.reply({
       topic,
       difficulty: conversation.difficulty,
       history: history.map((message) => ({ role: message.role, content: message.content })),
-      locale: getUiLanguage(profile?.preferences ?? {}),
+      locale,
     });
 
     const assistantMessage = await this.messageRepository.create({
@@ -148,9 +151,9 @@ export class SendMessage {
     }
   }
 
-  private async resolveTopicTitle(topicId: string | null): Promise<string> {
+  private async resolveTopicTitle(topicId: string | null, locale: Locale): Promise<string> {
     if (!topicId) return "general conversation";
-    const topic = await this.topicRepository.findById(topicId);
+    const topic = await this.topicRepository.findById(topicId, locale);
     return topic?.title ?? "general conversation";
   }
 }

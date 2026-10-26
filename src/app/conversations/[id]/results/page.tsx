@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { retryAnalysisAction } from "@/app/conversations/actions";
+import { getTypedLocale } from "@/i18n/get-locale";
 import { FlashcardSuggestionsPanel } from "@/components/flashcard-suggestions-panel";
 import { ResultsPolling } from "@/components/results-polling";
 import { TranscriptView, type TranscriptMessage } from "@/components/transcript-view";
@@ -24,10 +25,11 @@ export default async function ConversationResultsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [t, tCommon, tDifficulty] = await Promise.all([
+  const [t, tCommon, tDifficulty, locale] = await Promise.all([
     getTranslations("conversation"),
     getTranslations("common"),
     getTranslations("difficulty"),
+    getTypedLocale(),
   ]);
   const difficultyLabels = buildDifficultyLabels(tDifficulty);
 
@@ -43,7 +45,7 @@ export default async function ConversationResultsPage({
   const [profile, topic] = await Promise.all([
     new SupabaseUserProfileRepository(supabase).getById(user.id),
     conversation.topicId
-      ? new SupabaseTopicRepository(supabase).findById(conversation.topicId)
+      ? new SupabaseTopicRepository(supabase).findById(conversation.topicId, locale)
       : Promise.resolve(null),
   ]);
   const topicTitle = conversation.customTopic ?? topic?.title ?? t("defaultTitle");

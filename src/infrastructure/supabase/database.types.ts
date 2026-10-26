@@ -253,16 +253,44 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
-                },"topics": {
+                },"stripe_webhook_events": {
                   Row: {
-                    "category": string | null,"created_at": string,"description": string | null,"difficulty": string,"id": string,"is_active": boolean,"slug": string,"title": string
+                    "id": string,"processed_at": string,"type": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "category"?: string | null,"created_at"?: string,"description"?: string | null,"difficulty": string,"id"?: string,"is_active"?: boolean,"slug": string,"title": string
+                    "id": string,"processed_at"?: string,"type": string
                   }
                   Update: {
-                    "category"?: string | null,"created_at"?: string,"description"?: string | null,"difficulty"?: string,"id"?: string,"is_active"?: boolean,"slug"?: string,"title"?: string
+                    "id"?: string,"processed_at"?: string,"type"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"subscriptions": {
+                  Row: {
+                    "cancel_at_period_end": boolean,"created_at": string,"current_period_end": string | null,"status": string,"stripe_customer_id": string,"stripe_subscription_id": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cancel_at_period_end"?: boolean,"created_at"?: string,"current_period_end"?: string | null,"status"?: string,"stripe_customer_id": string,"stripe_subscription_id"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "cancel_at_period_end"?: boolean,"created_at"?: string,"current_period_end"?: string | null,"status"?: string,"stripe_customer_id"?: string,"stripe_subscription_id"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"topics": {
+                  Row: {
+                    "category": string | null,"created_at": string,"description": string | null,"description_en_us": string | null,"description_es": string | null,"difficulty": string,"id": string,"is_active": boolean,"slug": string,"title": string,"title_en_us": string | null,"title_es": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category"?: string | null,"created_at"?: string,"description"?: string | null,"description_en_us"?: string | null,"description_es"?: string | null,"difficulty": string,"id"?: string,"is_active"?: boolean,"slug": string,"title": string,"title_en_us"?: string | null,"title_es"?: string | null
+                  }
+                  Update: {
+                    "category"?: string | null,"created_at"?: string,"description"?: string | null,"description_en_us"?: string | null,"description_es"?: string | null,"difficulty"?: string,"id"?: string,"is_active"?: boolean,"slug"?: string,"title"?: string,"title_en_us"?: string | null,"title_es"?: string | null
                   }
                   Relationships: [
                     

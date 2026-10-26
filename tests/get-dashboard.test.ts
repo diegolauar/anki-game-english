@@ -89,7 +89,7 @@ describe("GetDashboard", () => {
       completedAt: new Date().toISOString(),
     });
 
-    const result = await deps.getDashboard.execute("user-1");
+    const result = await deps.getDashboard.execute("user-1", "pt-BR");
 
     expect(result.recentConversations).toHaveLength(1);
     expect(result.recentConversations[0]).toMatchObject({
@@ -114,7 +114,7 @@ describe("GetDashboard", () => {
       endedAt: null,
     });
 
-    const result = await deps.getDashboard.execute("user-1");
+    const result = await deps.getDashboard.execute("user-1", "pt-BR");
 
     expect(result.recentConversations[0]).toMatchObject({
       title: "Conversa",
@@ -151,7 +151,7 @@ describe("GetDashboard", () => {
       },
     ];
 
-    const result = await deps.getDashboard.execute("user-1");
+    const result = await deps.getDashboard.execute("user-1", "pt-BR");
 
     expect(result.topLearningPoints.map((point) => point.id)).toEqual(["lp-2", "lp-1"]);
   });
@@ -167,7 +167,7 @@ describe("GetDashboard", () => {
     });
     deps.xpEventRepository.events[0].createdAt = today;
 
-    const result = await deps.getDashboard.execute("user-1");
+    const result = await deps.getDashboard.execute("user-1", "pt-BR");
 
     const todayKey = today.slice(0, 10);
     expect(result.weeklyXp).toContainEqual({ dateKey: todayKey, amount: 20 });

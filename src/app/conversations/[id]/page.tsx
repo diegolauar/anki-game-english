@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ChatView } from "@/components/chat-view";
+import { getTypedLocale } from "@/i18n/get-locale";
 import { buildDifficultyLabels } from "@/lib/difficulty-labels";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
@@ -17,9 +18,10 @@ export default async function ConversationPage({
 }) {
   const { id } = await params;
   const { mode } = await searchParams;
-  const [t, tDifficulty] = await Promise.all([
+  const [t, tDifficulty, locale] = await Promise.all([
     getTranslations("conversation"),
     getTranslations("difficulty"),
+    getTypedLocale(),
   ]);
 
   const supabase = await createSupabaseServerClient();
@@ -40,7 +42,7 @@ export default async function ConversationPage({
   let topicTitle = conversation.customTopic;
   let topicSlug: string | null = null;
   if (!topicTitle && conversation.topicId) {
-    const topic = await new SupabaseTopicRepository(supabase).findById(conversation.topicId);
+    const topic = await new SupabaseTopicRepository(supabase).findById(conversation.topicId, locale);
     topicTitle = topic?.title ?? null;
     topicSlug = topic?.slug ?? null;
   }
