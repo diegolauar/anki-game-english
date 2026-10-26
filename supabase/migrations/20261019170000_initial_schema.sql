@@ -1,4 +1,4 @@
--- English Quest — initial schema (CLAUDE.md seção 4)
+-- Fluency Mind — initial schema (CLAUDE.md seção 4)
 --
 -- Convenção para RLS: tabelas que o usuário escreve diretamente (user_profiles,
 -- conversations, messages, flashcards, card_schedules, review_logs) têm policies

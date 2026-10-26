@@ -1,4 +1,4 @@
-# English Quest — status do projeto
+# Fluency Mind — status do projeto
 
 > Documento gerado para dar contexto completo a outra IA (ou a outro desenvolvedor) sobre o estado real do código. A fonte de verdade das regras de negócio e do escopo do MVP é `CLAUDE.md` (não versionado no git de propósito) — este arquivo descreve **o que já foi construído**, não o que deveria ser construído.
 

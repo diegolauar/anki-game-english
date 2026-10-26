@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-dvh flex-1 grid-cols-1 md:grid-cols-[1.1fr_1fr]">
-      <h1 className="sr-only md:hidden">English Quest — Entrar ou criar conta</h1>
+      <h1 className="sr-only md:hidden">Fluency Mind — Entrar ou criar conta</h1>
 
       <section className="relative hidden flex-col justify-between overflow-hidden bg-acc p-12 text-acc-ink md:flex lg:p-14">
         <div
@@ -33,9 +33,9 @@ export default function LoginPage() {
 
         <div className="relative flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-[11px] bg-acc-ink text-acc">
-            <span className="font-display text-lg font-extrabold">Q</span>
+            <span className="font-display text-lg font-extrabold">F</span>
           </span>
-          <span className="font-display text-lg font-bold">English Quest</span>
+          <span className="font-display text-lg font-bold">Fluency Mind</span>
         </div>
 
         <div className="relative flex flex-col gap-6">

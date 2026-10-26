@@ -35,7 +35,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* English Quest design tokens (Direção A · Roxo) */
+  /* Fluency Mind design tokens (Direção A · Roxo) */
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface2: var(--surface2);
