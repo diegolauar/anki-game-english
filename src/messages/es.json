@@ -225,6 +225,28 @@
       "rewardLabel": "Recompensa",
       "noCorrectionNotice": "La IA no corrige durante la conversación. Habla con libertad — el análisis completo llega al final.",
       "startButton": "Iniciar conversación"
+    },
+    "chat": {
+      "back": "Volver",
+      "textMode": "Texto",
+      "voiceMode": "Voz",
+      "minutesShort": "{minutes} min",
+      "xpSecured": "+{xp} XP asegurados",
+      "xpProgress": "{count}/{total} mensajes para +{xp} XP",
+      "finishConversation": "Finalizar conversación",
+      "finishConfirm": "Con menos de {min} mensajes no ganas XP. ¿Finalizar de todas formas?",
+      "noCorrectionsNotice": "Sin correcciones por ahora. Concéntrate en comunicarte.",
+      "sendError": "No se pudo enviar tu mensaje. Inténtalo de nuevo.",
+      "micDenied": "Sin acceso al micrófono. Puedes seguir escribiendo.",
+      "reviewTranscript": "Transcripción de tu voz — revísala antes de enviar.",
+      "reRecord": "Regrabar",
+      "recording": "Grabando",
+      "cancel": "Cancelar",
+      "stopRecording": "Detener grabación",
+      "transcribing": "Transcribiendo…",
+      "composerPlaceholder": "Escribe en inglés…",
+      "recordAudio": "Grabar audio",
+      "send": "Enviar"
     }
   }
 }

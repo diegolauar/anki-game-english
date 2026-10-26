@@ -10,12 +10,13 @@ import {
   Send,
   Square,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { finishConversationAction, sendMessageAction } from "@/app/conversations/actions";
 import { Banner } from "@/components/banner";
 import { TopicIcon } from "@/components/topic-icon";
 import { useVoiceRecorder } from "@/hooks/use-voice-recorder";
 import type { Message } from "@/domain/entities/message";
-import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP } from "@/domain/rules/xp-rewards";
+import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP, XP_REWARDS } from "@/domain/rules/xp-rewards";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 
 const MESSAGES_FOR_XP = MIN_USER_MESSAGES_FOR_CONVERSATION_XP;
@@ -39,6 +40,7 @@ export function ChatView({
   startedAt,
   initialMode,
 }: ChatViewProps) {
+  const t = useTranslations("conversation.chat");
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -103,7 +105,7 @@ export function ChatView({
       ]);
     } catch {
       setMessages((prev) => prev.filter((message) => message.id !== optimisticId));
-      setError("Não foi possível enviar sua mensagem. Tente novamente.");
+      setError(t("sendError"));
     } finally {
       setIsSending(false);
     }
@@ -155,7 +157,7 @@ export function ChatView({
   function handleFinishSubmit(event: FormEvent<HTMLFormElement>) {
     if (
       userMessageCount < MESSAGES_FOR_XP &&
-      !window.confirm("Com menos de 4 mensagens você não ganha XP. Finalizar mesmo assim?")
+      !window.confirm(t("finishConfirm", { min: MESSAGES_FOR_XP }))
     ) {
       event.preventDefault();
     }
@@ -168,7 +170,7 @@ export function ChatView({
           <Link
             href="/dashboard"
             className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-surface2"
-            aria-label="Voltar"
+            aria-label={t("back")}
           >
             <ArrowLeft className="size-4" />
           </Link>
@@ -176,14 +178,21 @@ export function ChatView({
           <div className="min-w-0">
             <h1 className="truncate font-display text-[17px] font-bold">{topicTitle}</h1>
             <p className="text-xs text-muted-foreground">
-              {difficultyLabel} · {initialMode === "voice" ? "Voz" : "Texto"} · {minutesElapsed} min
+              {difficultyLabel} · {initialMode === "voice" ? t("voiceMode") : t("textMode")} ·{" "}
+              {t("minutesShort", { minutes: minutesElapsed })}
             </p>
           </div>
         </div>
 
         <div className="hidden flex-col items-end gap-1 sm:flex">
           <span className="text-xs font-semibold text-muted-foreground">
-            {xpSecured ? "+20 XP garantido" : `${userMessageCount}/${MESSAGES_FOR_XP} mensagens para +20 XP`}
+            {xpSecured
+              ? t("xpSecured", { xp: XP_REWARDS.conversation_finished })
+              : t("xpProgress", {
+                  count: userMessageCount,
+                  total: MESSAGES_FOR_XP,
+                  xp: XP_REWARDS.conversation_finished,
+                })}
           </span>
           <div className="h-1.5 w-35 overflow-hidden rounded-full bg-surface2">
             <div
@@ -200,7 +209,7 @@ export function ChatView({
             className="flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold transition-colors hover:border-acc hover:text-acc-strong"
           >
             <Flag className="size-4" />
-            <span className="hidden sm:inline">Finalizar conversa</span>
+            <span className="hidden sm:inline">{t("finishConversation")}</span>
           </button>
         </form>
       </header>
@@ -208,7 +217,7 @@ export function ChatView({
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-[760px] flex-col gap-3.5 px-4 py-6">
           <p className="mx-auto rounded-full bg-acc-soft px-3.5 py-1.5 text-xs font-semibold text-acc-strong">
-            Sem correções agora. Foque em se comunicar.
+            {t("noCorrectionsNotice")}
           </p>
 
           {messages.map((message) => (
@@ -218,7 +227,7 @@ export function ChatView({
             >
               {message.role === "assistant" && (
                 <span className="mb-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-acc text-sm font-bold text-acc-ink">
-                  Q
+                  F
                 </span>
               )}
               <div
@@ -236,7 +245,7 @@ export function ChatView({
           {isSending && (
             <div className="flex items-end justify-start gap-2">
               <span className="mb-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-acc text-sm font-bold text-acc-ink">
-                Q
+                F
               </span>
               <div className="flex items-center gap-1 rounded-[20px_20px_20px_6px] border border-line bg-surface px-4 py-3">
                 <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground" />
@@ -261,20 +270,20 @@ export function ChatView({
 
           {voice.state === "denied" && (
             <Banner tone="error" className="mb-2 px-3 py-2 text-[13px]">
-              Sem acesso ao microfone. Você pode continuar digitando.
+              {t("micDenied")}
             </Banner>
           )}
 
           {voice.state === "review" && (
             <div className="mb-2 flex items-center gap-1.5 text-[13px] text-muted-foreground">
               <AudioLines className="size-4 text-acc" />
-              Transcrição da sua voz — revise antes de enviar.
+              {t("reviewTranscript")}
               <button
                 type="button"
                 onClick={voice.start}
                 className="font-semibold text-acc-strong underline-offset-2 hover:underline"
               >
-                Regravar
+                {t("reRecord")}
               </button>
             </div>
           )}
@@ -283,7 +292,7 @@ export function ChatView({
             {voice.state === "recording" ? (
               <div className="flex h-[60px] items-center gap-3 rounded-full border border-err bg-err-soft px-3">
                 <span className="size-3 shrink-0 animate-pulse rounded-full bg-err" />
-                <span className="text-sm font-semibold text-err">Gravando</span>
+                <span className="text-sm font-semibold text-err">{t("recording")}</span>
                 <div className="flex flex-1 items-center justify-center gap-0.5">
                   {Array.from({ length: 24 }).map((_, index) => (
                     <span
@@ -305,13 +314,13 @@ export function ChatView({
                   onClick={voice.cancel}
                   className="shrink-0 text-xs font-semibold text-err/80 hover:text-err"
                 >
-                  Cancelar
+                  {t("cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={voice.stopRecording}
                   className="flex size-10 shrink-0 items-center justify-center rounded-full bg-err text-white"
-                  aria-label="Parar gravação"
+                  aria-label={t("stopRecording")}
                 >
                   <Square className="size-4 fill-current" />
                 </button>
@@ -319,7 +328,7 @@ export function ChatView({
             ) : voice.state === "processing" ? (
               <div className="flex h-[60px] items-center gap-3 rounded-full border border-line bg-bg px-5">
                 <span className="size-4 animate-spin rounded-full border-2 border-acc border-t-transparent" />
-                <span className="text-sm text-muted-foreground">Transcrevendo…</span>
+                <span className="text-sm text-muted-foreground">{t("transcribing")}</span>
               </div>
             ) : (
               <div className="flex min-h-[60px] items-end gap-2 rounded-[28px] border border-line bg-bg px-2.5 py-2 pl-5 focus-within:border-acc">
@@ -332,7 +341,7 @@ export function ChatView({
                       : setInput(event.target.value)
                   }
                   onKeyDown={handleKeyDown}
-                  placeholder="Escreva em inglês…"
+                  placeholder={t("composerPlaceholder")}
                   disabled={isSending}
                   rows={1}
                   className="max-h-40 flex-1 resize-none self-center overflow-y-auto bg-transparent py-1.5 text-[16px] leading-6 outline-none placeholder:text-muted-foreground"
@@ -341,7 +350,7 @@ export function ChatView({
                   type="button"
                   disabled={isSending || voice.state === "denied"}
                   onClick={voice.start}
-                  aria-label="Gravar áudio"
+                  aria-label={t("recordAudio")}
                   className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-surface2 text-ink transition-colors hover:bg-acc-soft hover:text-acc-strong disabled:opacity-40"
                 >
                   <Mic className="size-[18px]" />
@@ -352,7 +361,7 @@ export function ChatView({
                     isSending ||
                     (voice.state === "review" ? voice.transcript.trim().length === 0 : input.trim().length === 0)
                   }
-                  aria-label="Enviar"
+                  aria-label={t("send")}
                   className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-acc text-acc-ink disabled:opacity-40"
                 >
                   <Send className="size-[18px]" />
