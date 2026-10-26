@@ -2,7 +2,16 @@
   "common": {
     "language": "Language",
     "hidePassword": "Hide password",
-    "showPassword": "Show password"
+    "showPassword": "Show password",
+    "backToHome": "Home"
+  },
+  "difficulty": {
+    "beginnerLabel": "Beginner",
+    "intermediateLabel": "Intermediate",
+    "advancedLabel": "Advanced",
+    "beginnerDescription": "Simple sentences, calm pace.",
+    "intermediateDescription": "Natural conversation with everyday vocabulary.",
+    "advancedDescription": "Idiomatic expressions and complex topics."
   },
   "landing": {
     "nav": { "howItWorks": "How it works", "features": "Features" },
@@ -175,6 +184,47 @@
       "analyzed": "Analyzed · {count, plural, one {# error} other {# errors}}",
       "analyzing": "Analyzing…",
       "failed": "Failed · retry"
+    }
+  },
+  "conversation": {
+    "defaultTitle": "Conversation",
+    "status": {
+      "completed": "Analysis complete",
+      "failed": "Analysis failed",
+      "analyzing": "Analyzing conversation"
+    },
+    "results": {
+      "analysisFailedTitle": "We couldn't analyze this conversation",
+      "unknownError": "Unknown error.",
+      "conversationSaved": "Your conversation is saved.",
+      "retry": "Try again",
+      "analyzingMessage": "Analyzing your conversation… this takes a few seconds.",
+      "greeting": "Great conversation, {name}!",
+      "yourMessages": "your messages",
+      "errorsToReview": "{count, plural, one {# error to review} other {# errors to review}}",
+      "naturalnessSuggestions": "{count, plural, one {# naturalness suggestion} other {# naturalness suggestions}}",
+      "xpEarned": "XP for finishing conversation",
+      "xpMinimum": "XP (minimum {min} messages)",
+      "mainPointsHeading": "Main points",
+      "recommendedExpressionsHeading": "Expressions to use next time"
+    },
+    "new": {
+      "title": "New conversation",
+      "topicStep": "Choose a topic",
+      "customTopicPlaceholder": "Or describe your own topic — e.g. my workout routine",
+      "levelStep": "Level",
+      "modeStep": "How do you want to reply?",
+      "textMode": "Text",
+      "textModeDescription": "Type your replies.",
+      "voiceMode": "Voice",
+      "voiceModeDescription": "Speak and review the transcript.",
+      "summary": "Summary",
+      "chooseTopicPlaceholder": "Choose a topic",
+      "levelLabel": "Level",
+      "modeLabel": "Mode",
+      "rewardLabel": "Reward",
+      "noCorrectionNotice": "The AI doesn't correct you during the conversation. Speak freely — the full analysis comes at the end.",
+      "startButton": "Start conversation"
     }
   }
 }

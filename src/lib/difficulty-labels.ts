@@ -1,13 +1,20 @@
+import type { useTranslations } from "next-intl";
 import type { Difficulty } from "@/domain/value-objects/difficulty";
 
-export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  beginner: "Iniciante",
-  intermediate: "Intermediário",
-  advanced: "Avançado",
-};
+type Translator = ReturnType<typeof useTranslations>;
 
-export const DIFFICULTY_DESCRIPTIONS: Record<Difficulty, string> = {
-  beginner: "Frases simples, ritmo calmo.",
-  intermediate: "Conversa natural com vocabulário do dia a dia.",
-  advanced: "Expressões idiomáticas e temas complexos.",
-};
+export function buildDifficultyLabels(t: Translator): Record<Difficulty, string> {
+  return {
+    beginner: t("beginnerLabel"),
+    intermediate: t("intermediateLabel"),
+    advanced: t("advancedLabel"),
+  };
+}
+
+export function buildDifficultyDescriptions(t: Translator): Record<Difficulty, string> {
+  return {
+    beginner: t("beginnerDescription"),
+    intermediate: t("intermediateDescription"),
+    advanced: t("advancedDescription"),
+  };
+}

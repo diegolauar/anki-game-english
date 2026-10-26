@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ChatView } from "@/components/chat-view";
-import { DIFFICULTY_LABELS } from "@/lib/difficulty-labels";
+import { buildDifficultyLabels } from "@/lib/difficulty-labels";
 import type { InputMode } from "@/domain/value-objects/input-mode";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
@@ -16,6 +17,10 @@ export default async function ConversationPage({
 }) {
   const { id } = await params;
   const { mode } = await searchParams;
+  const [t, tDifficulty] = await Promise.all([
+    getTranslations("conversation"),
+    getTranslations("difficulty"),
+  ]);
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -44,9 +49,9 @@ export default async function ConversationPage({
     <ChatView
       conversationId={conversation.id}
       initialMessages={messages}
-      topicTitle={topicTitle ?? "Conversa"}
+      topicTitle={topicTitle ?? t("defaultTitle")}
       topicSlug={topicSlug}
-      difficultyLabel={DIFFICULTY_LABELS[conversation.difficulty]}
+      difficultyLabel={buildDifficultyLabels(tDifficulty)[conversation.difficulty]}
       startedAt={conversation.startedAt}
       initialMode={mode === "voice" ? "voice" : ("text" as InputMode)}
     />

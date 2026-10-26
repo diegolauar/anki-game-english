@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { NewConversationForm } from "@/components/new-conversation-form";
 import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
@@ -11,6 +12,7 @@ export default async function NewConversationPage({
   searchParams: Promise<{ topicId?: string }>;
 }) {
   const { topicId: preselectedTopicId } = await searchParams;
+  const [t, tCommon] = await Promise.all([getTranslations("conversation"), getTranslations("common")]);
 
   const { supabase, user } = await requireUser();
 
@@ -26,10 +28,10 @@ export default async function NewConversationPage({
         className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-ink"
       >
         <ArrowLeft className="size-4" />
-        Início
+        {tCommon("backToHome")}
       </Link>
       <h1 className="mt-2 font-display text-[40px] leading-[1.05] font-bold tracking-[-0.03em]">
-        Nova conversa
+        {t("new.title")}
       </h1>
 
       <NewConversationForm

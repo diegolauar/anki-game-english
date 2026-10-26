@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { ArrowRight, Keyboard, Mic, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TopicIcon } from "@/components/topic-icon";
 import { startConversationAction } from "@/app/conversations/actions";
-import { DIFFICULTY_DESCRIPTIONS, DIFFICULTY_LABELS } from "@/lib/difficulty-labels";
+import { buildDifficultyDescriptions, buildDifficultyLabels } from "@/lib/difficulty-labels";
 import type { Topic } from "@/domain/entities/topic";
 import type { Difficulty } from "@/domain/value-objects/difficulty";
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
@@ -58,6 +59,11 @@ export function NewConversationForm({
   defaultDifficulty: Difficulty;
   preselectedTopicId: string | null;
 }) {
+  const t = useTranslations("conversation.new");
+  const tDifficulty = useTranslations("difficulty");
+  const difficultyLabels = buildDifficultyLabels(tDifficulty);
+  const difficultyDescriptions = buildDifficultyDescriptions(tDifficulty);
+
   const [topicId, setTopicId] = useState<string | null>(
     preselectedTopicId ?? topics[0]?.id ?? null,
   );
@@ -87,7 +93,7 @@ export function NewConversationForm({
       <div className="flex flex-col gap-8">
         <fieldset className="flex flex-col gap-3">
           <legend className="font-display text-lg font-bold">
-            <span className="text-acc">1</span>&nbsp;&nbsp;Escolha um tema
+            <span className="text-acc">1</span>&nbsp;&nbsp;{t("topicStep")}
           </legend>
           <div
             className="grid gap-2.5"
@@ -117,7 +123,7 @@ export function NewConversationForm({
             <input
               value={customTopic}
               onChange={(event) => setCustomTopic(event.target.value)}
-              placeholder="Ou descreva seu próprio tema — ex.: minha rotina de treino"
+              placeholder={t("customTopicPlaceholder")}
               className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
             />
           </label>
@@ -125,7 +131,7 @@ export function NewConversationForm({
 
         <fieldset className="flex flex-col gap-3">
           <legend className="font-display text-lg font-bold">
-            <span className="text-acc">2</span>&nbsp;&nbsp;Nível
+            <span className="text-acc">2</span>&nbsp;&nbsp;{t("levelStep")}
           </legend>
           <div className="grid gap-2.5 sm:grid-cols-3">
             {DIFFICULTIES.map((level) => (
@@ -133,8 +139,8 @@ export function NewConversationForm({
                 key={level}
                 selected={difficulty === level}
                 onClick={() => setDifficulty(level)}
-                title={DIFFICULTY_LABELS[level]}
-                description={DIFFICULTY_DESCRIPTIONS[level]}
+                title={difficultyLabels[level]}
+                description={difficultyDescriptions[level]}
               />
             ))}
           </div>
@@ -142,23 +148,23 @@ export function NewConversationForm({
 
         <fieldset className="flex flex-col gap-3">
           <legend className="font-display text-lg font-bold">
-            <span className="text-acc">3</span>&nbsp;&nbsp;Como você quer responder?
+            <span className="text-acc">3</span>&nbsp;&nbsp;{t("modeStep")}
           </legend>
           <div className="grid gap-2.5 sm:grid-cols-2">
             <SelectableCard
               selected={mode === "text"}
               onClick={() => setMode("text")}
               icon={<Keyboard className="size-5 shrink-0" />}
-              title="Texto"
-              description="Digite suas respostas."
+              title={t("textMode")}
+              description={t("textModeDescription")}
               align="items-center"
             />
             <SelectableCard
               selected={mode === "voice"}
               onClick={() => setMode("voice")}
               icon={<Mic className="size-5 shrink-0" />}
-              title="Voz"
-              description="Fale e revise a transcrição."
+              title={t("voiceMode")}
+              description={t("voiceModeDescription")}
               align="items-center"
             />
           </div>
@@ -166,34 +172,36 @@ export function NewConversationForm({
       </div>
 
       <aside className="h-fit rounded-card border border-line bg-surface p-6" style={{ position: "sticky", top: "1.5rem" }}>
-        <p className="text-xs font-bold tracking-[.06em] text-muted-foreground uppercase">Resumo</p>
+        <p className="text-xs font-bold tracking-[.06em] text-muted-foreground uppercase">
+          {t("summary")}
+        </p>
         <div className="mt-3 flex items-center gap-2.5">
           {selectedTopic && !hasCustomTopic && <TopicIcon slug={selectedTopic.slug} size="md" />}
-          <p className="text-xl font-bold">{summaryTitle ?? "Escolha um tema"}</p>
+          <p className="text-xl font-bold">{summaryTitle ?? t("chooseTopicPlaceholder")}</p>
         </div>
         <dl className="mt-4 flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
-            <dt className="text-muted-foreground">Nível</dt>
-            <dd className="font-semibold">{DIFFICULTY_LABELS[difficulty]}</dd>
+            <dt className="text-muted-foreground">{t("levelLabel")}</dt>
+            <dd className="font-semibold">{difficultyLabels[difficulty]}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted-foreground">Modo</dt>
-            <dd className="font-semibold">{mode === "text" ? "Texto" : "Voz"}</dd>
+            <dt className="text-muted-foreground">{t("modeLabel")}</dt>
+            <dd className="font-semibold">{mode === "text" ? t("textMode") : t("voiceMode")}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted-foreground">Recompensa</dt>
+            <dt className="text-muted-foreground">{t("rewardLabel")}</dt>
             <dd className="font-semibold text-xp">+20 XP</dd>
           </div>
         </dl>
         <p className="mt-4 rounded-control bg-acc-soft p-3 text-[13px] text-acc-strong">
-          A IA não corrige durante a conversa. Fale à vontade — a análise completa vem no final.
+          {t("noCorrectionNotice")}
         </p>
         <button
           type="submit"
           disabled={!canSubmit}
           className="mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-acc text-sm font-bold text-acc-ink disabled:opacity-50"
         >
-          Iniciar conversa <ArrowRight className="size-4" />
+          {t("startButton")} <ArrowRight className="size-4" />
         </button>
       </aside>
     </form>

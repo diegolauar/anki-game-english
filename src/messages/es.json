@@ -2,7 +2,16 @@
   "common": {
     "language": "Idioma",
     "hidePassword": "Ocultar contraseña",
-    "showPassword": "Mostrar contraseña"
+    "showPassword": "Mostrar contraseña",
+    "backToHome": "Inicio"
+  },
+  "difficulty": {
+    "beginnerLabel": "Principiante",
+    "intermediateLabel": "Intermedio",
+    "advancedLabel": "Avanzado",
+    "beginnerDescription": "Frases simples, ritmo tranquilo.",
+    "intermediateDescription": "Conversación natural con vocabulario cotidiano.",
+    "advancedDescription": "Expresiones idiomáticas y temas complejos."
   },
   "landing": {
     "nav": { "howItWorks": "Cómo funciona", "features": "Funciones" },
@@ -175,6 +184,47 @@
       "analyzed": "Analizada · {count, plural, one {# error} other {# errores}}",
       "analyzing": "Analizando…",
       "failed": "Falló · reintentar"
+    }
+  },
+  "conversation": {
+    "defaultTitle": "Conversación",
+    "status": {
+      "completed": "Análisis completado",
+      "failed": "Falló el análisis",
+      "analyzing": "Analizando conversación"
+    },
+    "results": {
+      "analysisFailedTitle": "No pudimos analizar esta conversación",
+      "unknownError": "Error desconocido.",
+      "conversationSaved": "Tu conversación está guardada.",
+      "retry": "Intentar de nuevo",
+      "analyzingMessage": "Analizando tu conversación… esto tarda unos segundos.",
+      "greeting": "¡Buena conversación, {name}!",
+      "yourMessages": "tus mensajes",
+      "errorsToReview": "{count, plural, one {# error para revisar} other {# errores para revisar}}",
+      "naturalnessSuggestions": "{count, plural, one {# sugerencia de naturalidad} other {# sugerencias de naturalidad}}",
+      "xpEarned": "XP por terminar la conversación",
+      "xpMinimum": "XP (mínimo {min} mensajes)",
+      "mainPointsHeading": "Puntos principales",
+      "recommendedExpressionsHeading": "Expresiones para usar la próxima vez"
+    },
+    "new": {
+      "title": "Nueva conversación",
+      "topicStep": "Elige un tema",
+      "customTopicPlaceholder": "O describe tu propio tema — ej.: mi rutina de ejercicio",
+      "levelStep": "Nivel",
+      "modeStep": "¿Cómo quieres responder?",
+      "textMode": "Texto",
+      "textModeDescription": "Escribe tus respuestas.",
+      "voiceMode": "Voz",
+      "voiceModeDescription": "Habla y revisa la transcripción.",
+      "summary": "Resumen",
+      "chooseTopicPlaceholder": "Elige un tema",
+      "levelLabel": "Nivel",
+      "modeLabel": "Modo",
+      "rewardLabel": "Recompensa",
+      "noCorrectionNotice": "La IA no corrige durante la conversación. Habla con libertad — el análisis completo llega al final.",
+      "startButton": "Iniciar conversación"
     }
   }
 }

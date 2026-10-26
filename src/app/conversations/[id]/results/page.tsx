@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { retryAnalysisAction } from "@/app/conversations/actions";
 import { FlashcardSuggestionsPanel } from "@/components/flashcard-suggestions-panel";
 import { ResultsPolling } from "@/components/results-polling";
 import { TranscriptView, type TranscriptMessage } from "@/components/transcript-view";
-import { DIFFICULTY_LABELS } from "@/lib/difficulty-labels";
+import { buildDifficultyLabels } from "@/lib/difficulty-labels";
 import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP, XP_REWARDS } from "@/domain/rules/xp-rewards";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
@@ -23,6 +24,12 @@ export default async function ConversationResultsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const [t, tCommon, tDifficulty] = await Promise.all([
+    getTranslations("conversation"),
+    getTranslations("common"),
+    getTranslations("difficulty"),
+  ]);
+  const difficultyLabels = buildDifficultyLabels(tDifficulty);
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -39,7 +46,7 @@ export default async function ConversationResultsPage({
       ? new SupabaseTopicRepository(supabase).findById(conversation.topicId)
       : Promise.resolve(null),
   ]);
-  const topicTitle = conversation.customTopic ?? topic?.title ?? "Conversa";
+  const topicTitle = conversation.customTopic ?? topic?.title ?? t("defaultTitle");
   const displayName = profile?.displayName ?? user.email ?? "";
 
   const analysis = await new SupabaseAnalysisRepository(supabase).findLatestByConversationId(id);
@@ -47,10 +54,10 @@ export default async function ConversationResultsPage({
 
   const statusLabel =
     analysis.status === "completed"
-      ? "Análise concluída"
+      ? t("status.completed")
       : analysis.status === "failed"
-        ? "Falha na análise"
-        : "Analisando conversa";
+        ? t("status.failed")
+        : t("status.analyzing");
   const resultsHeader = (
     <>
       <Link
@@ -58,10 +65,10 @@ export default async function ConversationResultsPage({
         className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-ink"
       >
         <ArrowLeft className="size-4" />
-        Início
+        {tCommon("backToHome")}
       </Link>
       <p className="mt-2 text-sm text-muted-foreground">
-        {statusLabel} · {topicTitle} · {DIFFICULTY_LABELS[conversation.difficulty]}
+        {statusLabel} · {topicTitle} · {difficultyLabels[conversation.difficulty]}
       </p>
     </>
   );
@@ -71,11 +78,9 @@ export default async function ConversationResultsPage({
       <main className="mx-auto max-w-[1120px] flex-1 px-6 pt-10 pb-[60px] sm:px-10">
         {resultsHeader}
         <div className="mt-4 rounded-card bg-err-soft p-6">
-          <h1 className="font-display text-xl font-bold text-err">
-            Não foi possível analisar esta conversa
-          </h1>
+          <h1 className="font-display text-xl font-bold text-err">{t("results.analysisFailedTitle")}</h1>
           <p className="mt-2 text-sm text-err/80">
-            {analysis.errorMessage ?? "Erro desconhecido."} Sua conversa está salva.
+            {analysis.errorMessage ?? t("results.unknownError")} {t("results.conversationSaved")}
           </p>
           <form action={retryAnalysisAction} className="mt-4">
             <input type="hidden" name="analysisId" value={analysis.id} />
@@ -83,7 +88,7 @@ export default async function ConversationResultsPage({
               type="submit"
               className="flex h-11 items-center rounded-full bg-err px-5 text-sm font-bold text-white"
             >
-              Tentar novamente
+              {t("results.retry")}
             </button>
           </form>
         </div>
@@ -98,9 +103,7 @@ export default async function ConversationResultsPage({
         {resultsHeader}
         <div className="mt-6 flex items-center gap-3 rounded-card border border-line bg-surface p-6">
           <span className="size-5 animate-spin rounded-full border-2 border-acc border-t-transparent" />
-          <p className="text-sm text-muted-foreground">
-            Analisando sua conversa… isso leva alguns segundos.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("results.analyzingMessage")}</p>
         </div>
       </main>
     );
@@ -160,27 +163,31 @@ export default async function ConversationResultsPage({
     <main className="mx-auto max-w-[1120px] flex-1 px-6 pt-10 pb-[60px] sm:px-10">
       {resultsHeader}
       <h1 className="mt-1 font-display text-[40px] leading-[1.05] font-bold tracking-[-0.03em]">
-        Boa conversa, {displayName}!
+        {t("results.greeting", { name: displayName })}
       </h1>
 
       <section
         className="mt-6 grid gap-3.5"
         style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
       >
-        <StatCard value={String(userMessageCount)} label="mensagens suas" />
+        <StatCard value={String(userMessageCount)} label={t("results.yourMessages")} />
         <StatCard
           value={String(errorCount)}
-          label={errorCount === 1 ? "erro para revisar" : "erros para revisar"}
+          label={t("results.errorsToReview", { count: errorCount })}
           className="bg-err-soft text-err"
         />
         <StatCard
           value={String(suggestionCount)}
-          label={suggestionCount === 1 ? "sugestão de naturalidade" : "sugestões de naturalidade"}
+          label={t("results.naturalnessSuggestions", { count: suggestionCount })}
           className="bg-sug-soft text-sug-ink"
         />
         <StatCard
           value={earnedConversationXp ? `+${XP_REWARDS.conversation_finished}` : "0"}
-          label={earnedConversationXp ? "XP conversa concluída" : "XP (mínimo 4 mensagens)"}
+          label={
+            earnedConversationXp
+              ? t("results.xpEarned")
+              : t("results.xpMinimum", { min: MIN_USER_MESSAGES_FOR_CONVERSATION_XP })
+          }
           className={earnedConversationXp ? "bg-acc text-acc-ink" : undefined}
         />
       </section>
@@ -191,7 +198,7 @@ export default async function ConversationResultsPage({
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
         >
           <div className="rounded-card border border-line bg-surface p-6">
-            <h2 className="font-display text-lg font-bold">Principais pontos</h2>
+            <h2 className="font-display text-lg font-bold">{t("results.mainPointsHeading")}</h2>
             <ul className="mt-2 flex flex-col gap-1.5 text-sm">
               {analysis.summary.mainPoints.map((point) => (
                 <li key={point}>{point}</li>
@@ -200,7 +207,9 @@ export default async function ConversationResultsPage({
           </div>
           {analysis.summary.recommendedExpressions.length > 0 && (
             <div className="rounded-card border border-line bg-surface p-6">
-              <h2 className="font-display text-lg font-bold">Expressões para usar na próxima</h2>
+              <h2 className="font-display text-lg font-bold">
+                {t("results.recommendedExpressionsHeading")}
+              </h2>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {analysis.summary.recommendedExpressions.map((expression) => (
                   <span
