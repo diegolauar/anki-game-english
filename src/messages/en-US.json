@@ -134,7 +134,7 @@
     "advancedDescription": "Idiomatic expressions and complex topics."
   },
   "landing": {
-    "nav": { "howItWorks": "How it works", "features": "Features" },
+    "nav": { "howItWorks": "How it works", "features": "Features", "pricing": "Pricing" },
     "signIn": "Sign in",
     "startNow": "Start now",
     "hero": {
@@ -184,12 +184,26 @@
         }
       }
     },
+    "pricing": {
+      "heading": "One plan, no catch",
+      "description": "Full access from day one. Cancel anytime, no penalty.",
+      "amount": "US$ 20",
+      "period": "/month",
+      "features": [
+        "Unlimited text and voice conversations",
+        "Detailed analysis after every conversation",
+        "Flashcards with spaced repetition (the same algorithm Anki uses)",
+        "Progress, XP, and day streaks"
+      ]
+    },
     "finalCta": {
       "title": "Ready for your first conversation?",
       "description": "Sign up with Google or email. No password, no hassle."
     },
     "footer": {
-      "audioNotice": "Voice recordings are never stored."
+      "audioNotice": "Voice recordings are never stored.",
+      "termsLink": "Terms of Use",
+      "privacyLink": "Privacy"
     }
   },
   "login": {
@@ -201,7 +215,7 @@
     "tabsAriaLabel": "Sign in or create account",
     "signInTab": "Sign in",
     "signUpTab": "Create account",
-    "legalNotice": "By continuing, you agree to the Terms and Privacy Policy (LGPD). Voice recordings are never stored.",
+    "legalNotice": "By continuing, you agree to the <terms>Terms of Use</terms> and <privacy>Privacy Policy</privacy> (LGPD). Voice recordings are never stored.",
     "signIn": {
       "title": "Sign in",
       "magicLinkSubtitle": "No password. We'll send a sign-in link to your email.",
@@ -306,6 +320,14 @@
       "analyzed": "Analyzed · {count, plural, one {# error} other {# errors}}",
       "analyzing": "Analyzing…",
       "failed": "Failed · retry"
+    },
+    "billing": {
+      "subscribeHeading": "Subscribe to the full plan",
+      "subscribeDescription": "US$20/month, cancel anytime.",
+      "subscribeCta": "Subscribe now",
+      "subscribing": "Opening checkout…",
+      "checkoutSuccess": "Payment confirmed! It may take a few seconds to show up here.",
+      "manageSubscription": "Manage subscription"
     }
   },
   "conversation": {
@@ -386,6 +408,123 @@
       "recordAudio": "Record audio",
       "send": "Send",
       "transcribeError": "Couldn't transcribe the audio. Try recording again or use text."
+    }
+  },
+  "legal": {
+    "backToLogin": "Back",
+    "terms": {
+      "title": "Terms of Use",
+      "updatedAt": "Last updated: October 30, 2026",
+      "intro": "These Terms of Use govern access to and use of Fluency Mind (\"we\", \"our\"), an app for practicing English by conversing with an artificial intelligence. By creating an account or using the service, you agree to these terms. If you don't agree, please don't use Fluency Mind.",
+      "sections": [
+        {
+          "title": "1. Who we are",
+          "body": "Fluency Mind is offered by Diego, an individual, who can be reached at diegopktd2@gmail.com for any question about these terms or about the service."
+        },
+        {
+          "title": "2. Your account",
+          "body": "To use the service you need to create an account with an email and password, or sign in with your Google account. You're responsible for keeping your password secure and for everything that happens on your account. Tell us right away if you suspect unauthorized use. You must be at least 18 years old to create an account; the service is not directed at children or teenagers."
+        },
+        {
+          "title": "3. How the service works",
+          "body": "Fluency Mind lets you chat in English with an AI agent about free or suggested topics, by text or voice. At the end of each conversation, a second AI analyzes what you wrote, highlights passages with possible errors or naturalness suggestions, explains them in Portuguese, and suggests flashcards for spaced review. The service is a practice tool and does not replace classes, certifications, or a formal proficiency assessment."
+        },
+        {
+          "title": "4. AI-generated content",
+          "body": "Responses from the conversation AI and analyses from the correction AI are generated automatically and may contain errors, inaccuracies, or suggestions that don't apply to your context. Use your own judgment. Don't treat AI-generated content as professional advice of any kind."
+        },
+        {
+          "title": "5. Subscription and payment",
+          "body": "Fluency Mind is offered as a recurring monthly subscription, billed in US dollars through Stripe, our payment processor. We don't store your card details — they're handled directly by Stripe. The subscription renews automatically until you cancel it; you can cancel anytime from the subscription area, and access stays active until the end of the period already paid for. We may change the subscription price with reasonable prior notice; the change only applies to the next billing cycle."
+        },
+        {
+          "title": "6. Acceptable use",
+          "body": "You agree not to: use the service for illegal purposes; try to access other people's accounts or data that isn't yours; reverse-engineer, scrape data in bulk, or use bots to interact with the service; send offensive, discriminatory, or illegal content in conversations; or try to overload or compromise the platform's security. We may suspend or terminate accounts that violate these rules."
+        },
+        {
+          "title": "7. Intellectual property",
+          "body": "Fluency Mind's code, design, brand, and content (such as conversation topics and interface text) belong to us. The messages you write or speak remain yours; by sending them, you grant us a license to process them in order to provide the service (generating responses, analyzing errors, creating flashcards), as described in our Privacy Policy."
+        },
+        {
+          "title": "8. Service availability",
+          "body": "We do our best to keep the service available, but we don't guarantee uninterrupted or error-free operation. We may change, suspend, or discontinue features, including during maintenance or changes to external providers (such as the AI or voice transcription provider)."
+        },
+        {
+          "title": "9. Limitation of liability",
+          "body": "Fluency Mind is provided \"as is\". To the maximum extent permitted by law, we are not liable for indirect damages, data loss, or lost profits arising from use of the service, including decisions made based on AI-generated corrections or suggestions."
+        },
+        {
+          "title": "10. Termination",
+          "body": "You can close your account whenever you want by requesting deletion at our contact email. We may suspend or terminate your access in case of a violation of these terms, a failed subscription payment, or a decision to discontinue the service, giving reasonable advance notice whenever possible."
+        },
+        {
+          "title": "11. Changes to these terms",
+          "body": "We may update these Terms of Use from time to time. Material changes will be communicated by email or a notice within the service itself. Continued use after a change means you agree to the new terms."
+        },
+        {
+          "title": "12. Governing law and contact",
+          "body": "These terms are governed by Brazilian law. Questions, requests, or complaints can be sent to diegopktd2@gmail.com."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "updatedAt": "Last updated: October 30, 2026",
+      "intro": "This Privacy Policy explains what personal data Fluency Mind collects, why we collect it, who we share it with, and what rights you have over it, in compliance with Brazil's General Data Protection Law (Law No. 13,709/2018 — LGPD).",
+      "sections": [
+        {
+          "title": "1. Who controls your data",
+          "body": "The controller of the data processed by Fluency Mind is Diego, who can be reached at diegopktd2@gmail.com for any matter related to privacy and data protection, including exercising the rights described in this policy."
+        },
+        {
+          "title": "2. What data we collect",
+          "body": "Account data: name, email, and password (or your Google account identity), used to create and secure your account.\n\nUsage data: the messages you write in your English conversations, the final text of voice messages, the flashcards you create or save, your flashcard reviews, and your progress (XP, day streak).\n\nPayment data: processed directly by Stripe; we only receive subscription confirmation and technical identifiers (such as your Stripe customer ID), never your card number.\n\nBasic technical data: session information needed to keep you securely signed in."
+        },
+        {
+          "title": "3. Special handling of voice audio",
+          "body": "When you use voice mode, the audio is recorded in your browser, sent to the transcription service, and discarded immediately after the transcript is generated. We don't store audio files on our servers. We only keep the transcribed text and the final text you actually send (which you may have edited before sending)."
+        },
+        {
+          "title": "4. What we use your data for",
+          "body": "We use your data to: run the conversation and error-analysis service; track your progress and avoid duplicate flashcards for the same type of error; process your subscription and payment; send essential communications about your account (signup confirmation, password recovery, billing notices); and improve the quality of the product."
+        },
+        {
+          "title": "5. Who we share your data with",
+          "body": "We only share data with service providers that are strictly necessary to operate Fluency Mind, acting as data processors, never for advertising purposes:\n\n• Supabase — database hosting and authentication.\n• Artificial intelligence provider (currently OpenAI) — generating conversation responses, error analysis, and voice transcription.\n• Stripe — processing subscription payments.\n\nWe don't sell your personal data and don't share it with third parties for marketing purposes."
+        },
+        {
+          "title": "6. International data transfer",
+          "body": "Some of the providers listed above process data on servers outside Brazil. In those cases, we require those providers to adopt adequate data protection safeguards, as provided for under the LGPD."
+        },
+        {
+          "title": "7. Legal basis for processing",
+          "body": "We process your data based on contract performance (providing the service you signed up for), your consent (for example, when you choose to use the microphone), and our legitimate interest in improving the product, always in a way that is proportional and doesn't harm your rights."
+        },
+        {
+          "title": "8. How long we keep your data",
+          "body": "We keep your data while your account is active. If you request account closure, we delete or anonymize your personal data, except where we need to retain some information due to a legal obligation (for example, payment tax records)."
+        },
+        {
+          "title": "9. Your rights",
+          "body": "Under the LGPD, you can request at any time, at diegopktd2@gmail.com: confirmation that we process your data; access to the data we hold about you; correction of incomplete or outdated data; anonymization, blocking, or deletion of unnecessary data; portability of your data; information about who we share your data with; and withdrawal of your consent, where applicable. We will respond to these requests within the timeframes set by law."
+        },
+        {
+          "title": "10. Security",
+          "body": "We use technical measures to protect your data, including Row Level Security on the database — ensuring each user can only access their own data — and encrypted connections between your browser and our servers."
+        },
+        {
+          "title": "11. Children and teenagers",
+          "body": "Fluency Mind is not directed at anyone under 18 and we don't knowingly collect data from children or teenagers."
+        },
+        {
+          "title": "12. Changes to this policy",
+          "body": "We may update this Privacy Policy from time to time. Material changes will be communicated by email or a notice within the service itself, with an updated date shown at the top of this document."
+        },
+        {
+          "title": "13. Contact",
+          "body": "For questions, requests, or complaints about this policy, contact us at diegopktd2@gmail.com."
+        }
+      ]
     }
   }
 }
