@@ -124,7 +124,20 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">{t("legalNotice")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t.rich("legalNotice", {
+              terms: (chunks) => (
+                <Link href="/terms" className="font-semibold text-ink hover:underline">
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link href="/privacy" className="font-semibold text-ink hover:underline">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
         </div>
       </section>
     </main>
