@@ -26,14 +26,15 @@ export default async function ConversationPage({
 
   const { supabase, user } = await requireActiveSubscription();
 
-  const conversation = await new SupabaseConversationRepository(supabase).findById(id);
+  const [conversation, messages] = await Promise.all([
+    new SupabaseConversationRepository(supabase).findById(id),
+    new SupabaseMessageRepository(supabase).listByConversation(id),
+  ]);
   if (!conversation || conversation.userId !== user.id) notFound();
 
   if (conversation.status !== "active") {
     redirect(`/conversations/${id}/results`);
   }
-
-  const messages = await new SupabaseMessageRepository(supabase).listByConversation(id);
 
   let topicTitle = conversation.customTopic;
   let topicSlug: string | null = null;
