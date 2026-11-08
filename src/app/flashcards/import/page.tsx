@@ -5,14 +5,14 @@ import { importFlashcardsAction } from "@/app/flashcards/actions";
 import { Banner } from "@/components/banner";
 import { FilePicker } from "@/components/file-picker";
 import { SubmitButton } from "@/components/submit-button";
-import { requireUser } from "@/infrastructure/supabase/require-user";
+import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 
 export default async function ImportFlashcardsPage({
   searchParams,
 }: {
   searchParams: Promise<{ created?: string; skipped?: string; error?: string }>;
 }) {
-  await requireUser();
+  await requireActiveSubscription();
 
   const { created, skipped, error } = await searchParams;
   const [t, tFlashcards] = await Promise.all([

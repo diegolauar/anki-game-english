@@ -9,7 +9,7 @@ import { ResultsPolling } from "@/components/results-polling";
 import { TranscriptView, type TranscriptMessage } from "@/components/transcript-view";
 import { buildDifficultyLabels } from "@/lib/difficulty-labels";
 import { MIN_USER_MESSAGES_FOR_CONVERSATION_XP, XP_REWARDS } from "@/domain/rules/xp-rewards";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
 import { SupabaseFindingRepository } from "@/infrastructure/supabase/finding-repository";
@@ -33,11 +33,7 @@ export default async function ConversationResultsPage({
   ]);
   const difficultyLabels = buildDifficultyLabels(tDifficulty);
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) notFound();
+  const { supabase, user } = await requireActiveSubscription();
 
   const conversation = await new SupabaseConversationRepository(supabase).findById(id);
   if (!conversation || conversation.userId !== user.id) notFound();

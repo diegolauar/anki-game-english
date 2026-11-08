@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { hasActiveAccess } from "@/domain/value-objects/subscription-status";
 import { OpenAiWhisperSpeechToText } from "@/infrastructure/stt/openai-whisper-speech-to-text";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { SupabaseSubscriptionRepository } from "@/infrastructure/supabase/subscription-repository";
 import { logError } from "@/lib/logger";
 
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
@@ -12,6 +14,11 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
+  const subscription = await new SupabaseSubscriptionRepository(supabase).getByUserId(user.id);
+  if (!subscription || !hasActiveAccess(subscription.status)) {
+    return NextResponse.json({ error: "Subscription required." }, { status: 403 });
   }
 
   const formData = await request.formData();

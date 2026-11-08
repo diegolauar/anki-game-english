@@ -4,7 +4,7 @@ import { ChatView } from "@/components/chat-view";
 import { getTypedLocale } from "@/i18n/get-locale";
 import { buildDifficultyLabels } from "@/lib/difficulty-labels";
 import type { InputMode } from "@/domain/value-objects/input-mode";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
 import { SupabaseMessageRepository } from "@/infrastructure/supabase/message-repository";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
@@ -24,11 +24,7 @@ export default async function ConversationPage({
     getTypedLocale(),
   ]);
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) notFound();
+  const { supabase, user } = await requireActiveSubscription();
 
   const conversation = await new SupabaseConversationRepository(supabase).findById(id);
   if (!conversation || conversation.userId !== user.id) notFound();

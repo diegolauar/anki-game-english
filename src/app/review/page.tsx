@@ -2,14 +2,14 @@ import { ReviewSession, type ReviewQueueItem } from "@/components/review-session
 import { calculateStreak } from "@/domain/rules/calculate-streak";
 import type { Rating } from "@/domain/value-objects/rating";
 import { RATINGS } from "@/domain/value-objects/rating";
-import { requireUser } from "@/infrastructure/supabase/require-user";
+import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
 import { SupabaseXpEventRepository } from "@/infrastructure/supabase/xp-event-repository";
 import { TsFsrsReviewScheduler } from "@/infrastructure/scheduler/ts-fsrs-review-scheduler";
 
 export default async function ReviewPage() {
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireActiveSubscription();
 
   const now = new Date();
   const dueFlashcards = await new SupabaseCardScheduleRepository(supabase).listDueForUser(

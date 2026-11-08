@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { NewConversationForm } from "@/components/new-conversation-form";
 import { getTypedLocale } from "@/i18n/get-locale";
-import { requireUser } from "@/infrastructure/supabase/require-user";
+import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 import { SupabaseTopicRepository } from "@/infrastructure/supabase/topic-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 
@@ -19,7 +19,7 @@ export default async function NewConversationPage({
     getTypedLocale(),
   ]);
 
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireActiveSubscription();
 
   const [topics, profile] = await Promise.all([
     new SupabaseTopicRepository(supabase).listActive(locale),

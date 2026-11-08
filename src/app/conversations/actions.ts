@@ -11,8 +11,7 @@ import { AnalyzeConversation } from "@/application/use-cases/analyze-conversatio
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
 import { logError } from "@/lib/logger";
 import { INPUT_MODES } from "@/domain/value-objects/input-mode";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
-import { requireUser } from "@/infrastructure/supabase/require-user";
+import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
 import type { ServiceRoleSupabaseClient } from "@/infrastructure/supabase/client-types";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
@@ -70,7 +69,7 @@ const startConversationSchema = z.object({
 });
 
 export async function startConversationAction(formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireActiveSubscription();
 
   const rawCustomTopic = formData.get("customTopic");
   const customTopic =
@@ -122,11 +121,7 @@ export async function sendMessageAction(input: {
 }): Promise<SendMessageResult> {
   const parsed = sendMessageSchema.parse(input);
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated.");
+  const { supabase, user } = await requireActiveSubscription();
 
   const useCase = new SendMessage(
     new SupabaseConversationRepository(supabase),
@@ -164,7 +159,7 @@ export async function finishConversationAction(formData: FormData) {
     conversationId: formData.get("conversationId"),
   });
 
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireActiveSubscription();
 
   const serviceRoleClient = createSupabaseServiceRoleClient();
   const finishConversation = new FinishConversation(
@@ -204,7 +199,7 @@ const retryAnalysisSchema = z.object({
 export async function retryAnalysisAction(formData: FormData) {
   const parsed = retryAnalysisSchema.parse({ analysisId: formData.get("analysisId") });
 
-  const { supabase, user } = await requireUser();
+  const { supabase, user } = await requireActiveSubscription();
 
   const analysisRepository = new SupabaseAnalysisRepository(supabase);
   const analysis = await analysisRepository.findById(parsed.analysisId);
