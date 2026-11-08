@@ -35,8 +35,12 @@ export default async function ConversationResultsPage({
 
   const { supabase, user } = await requireActiveSubscription();
 
-  const conversation = await new SupabaseConversationRepository(supabase).findById(id);
+  const [conversation, analysis] = await Promise.all([
+    new SupabaseConversationRepository(supabase).findById(id),
+    new SupabaseAnalysisRepository(supabase).findLatestByConversationId(id),
+  ]);
   if (!conversation || conversation.userId !== user.id) notFound();
+  if (!analysis) notFound();
 
   const [profile, topic] = await Promise.all([
     new SupabaseUserProfileRepository(supabase).getById(user.id),
@@ -46,9 +50,6 @@ export default async function ConversationResultsPage({
   ]);
   const topicTitle = conversation.customTopic ?? topic?.title ?? t("defaultTitle");
   const displayName = profile?.displayName ?? user.email ?? "";
-
-  const analysis = await new SupabaseAnalysisRepository(supabase).findLatestByConversationId(id);
-  if (!analysis) notFound();
 
   const statusLabel =
     analysis.status === "completed"
@@ -107,23 +108,26 @@ export default async function ConversationResultsPage({
     );
   }
 
-  const messages = await new SupabaseMessageRepository(supabase).listByConversation(id);
-  const findings = await new SupabaseFindingRepository(supabase).listByAnalysisId(analysis.id);
+  const [messages, findings] = await Promise.all([
+    new SupabaseMessageRepository(supabase).listByConversation(id),
+    new SupabaseFindingRepository(supabase).listByAnalysisId(analysis.id),
+  ]);
   const learningPointIds = [
     ...new Set(findings.map((finding) => finding.learningPointId).filter((id): id is string => id !== null)),
   ];
-  const learningPoints = await new SupabaseLearningPointRepository(supabase).listByIds(
-    learningPointIds,
-  );
+  const [learningPoints, allFlashcardsForFindings] = await Promise.all([
+    new SupabaseLearningPointRepository(supabase).listByIds(learningPointIds),
+    new SupabaseFlashcardRepository(supabase).listBySourceFindingIds(
+      findings.map((finding) => finding.id),
+    ),
+  ]);
   const occurrenceByLearningPointId = new Map(
     learningPoints.map((point) => [point.id, point.occurrenceCount]),
   );
 
-  const suggestedFlashcards = (
-    await new SupabaseFlashcardRepository(supabase).listBySourceFindingIds(
-      findings.map((finding) => finding.id),
-    )
-  ).filter((flashcard) => flashcard.status === "suggested");
+  const suggestedFlashcards = allFlashcardsForFindings.filter(
+    (flashcard) => flashcard.status === "suggested",
+  );
 
   const findingsByMessageId = new Map<string, typeof findings>();
   for (const finding of findings) {
