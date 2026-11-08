@@ -7,6 +7,7 @@ import type { LearningPoint } from "@/domain/entities/learning-point";
 import type { Message } from "@/domain/entities/message";
 import type { ReviewLog } from "@/domain/entities/review-log";
 import type { SpeechTranscription } from "@/domain/entities/speech-transcription";
+import type { Subscription } from "@/domain/entities/subscription";
 import type { Topic } from "@/domain/entities/topic";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import type { XpEvent } from "@/domain/entities/xp-event";
@@ -45,6 +46,14 @@ import type {
   LearningPointWriter,
 } from "@/domain/ports/learning-point-writer";
 import type { CreateMessageInput, MessageRepository } from "@/domain/ports/message-repository";
+import type {
+  CreateBillingPortalSessionInput,
+  CreateBillingPortalSessionResult,
+  CreateCheckoutSessionInput,
+  CreateCheckoutSessionResult,
+  PaymentProvider,
+  SubscriptionWebhookEvent,
+} from "@/domain/ports/payment-provider";
 import type { RateLimitRepository } from "@/domain/ports/rate-limit-repository";
 import type { CreateReviewLogInput, ReviewLogRepository } from "@/domain/ports/review-log-repository";
 import type { ReviewOutcome, ReviewScheduler } from "@/domain/ports/review-scheduler";
@@ -52,6 +61,12 @@ import type {
   CreateSpeechTranscriptionInput,
   SpeechTranscriptionRepository,
 } from "@/domain/ports/speech-transcription-repository";
+import type { SubscriptionRepository } from "@/domain/ports/subscription-repository";
+import type {
+  CreatePendingSubscriptionInput,
+  SubscriptionWriter,
+  UpdateSubscriptionByStripeCustomerInput,
+} from "@/domain/ports/subscription-writer";
 import type { TopicRepository } from "@/domain/ports/topic-repository";
 import type { UserProfileRepository } from "@/domain/ports/user-profile-repository";
 import type { UserProfileWriter } from "@/domain/ports/user-profile-writer";
@@ -680,5 +695,78 @@ export class FakeAnalysisAgent implements AnalysisAgent {
     this.calls.push(input);
     if (this.shouldThrow) throw this.shouldThrow;
     return this.nextResult;
+  }
+}
+
+export class FakeSubscriptionRepository implements SubscriptionRepository {
+  subscriptions: Subscription[] = [];
+
+  seed(subscription: Subscription): void {
+    this.subscriptions.push(subscription);
+  }
+
+  async getByUserId(userId: string): Promise<Subscription | null> {
+    return this.subscriptions.find((subscription) => subscription.userId === userId) ?? null;
+  }
+}
+
+export class FakeSubscriptionWriter implements SubscriptionWriter {
+  subscriptions: Subscription[] = [];
+  createPendingCalls: CreatePendingSubscriptionInput[] = [];
+
+  async createPending(input: CreatePendingSubscriptionInput): Promise<void> {
+    this.createPendingCalls.push(input);
+    if (this.subscriptions.some((subscription) => subscription.userId === input.userId)) return;
+
+    this.subscriptions.push({
+      userId: input.userId,
+      stripeCustomerId: input.stripeCustomerId,
+      stripeSubscriptionId: null,
+      status: "incomplete",
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  async updateByStripeCustomerId(input: UpdateSubscriptionByStripeCustomerInput): Promise<Subscription> {
+    const subscription = this.subscriptions.find(
+      (candidate) => candidate.stripeCustomerId === input.stripeCustomerId,
+    );
+    if (!subscription) throw new Error("Subscription not found for Stripe customer.");
+
+    subscription.stripeSubscriptionId = input.stripeSubscriptionId;
+    subscription.status = input.status;
+    subscription.currentPeriodEnd = input.currentPeriodEnd;
+    subscription.cancelAtPeriodEnd = input.cancelAtPeriodEnd;
+    subscription.updatedAt = new Date().toISOString();
+    return subscription;
+  }
+}
+
+export class FakePaymentProvider implements PaymentProvider {
+  nextCheckoutSession: CreateCheckoutSessionResult = {
+    checkoutUrl: "https://checkout.stripe.com/fake",
+    stripeCustomerId: "cus_fake",
+  };
+  checkoutCalls: CreateCheckoutSessionInput[] = [];
+  portalCalls: CreateBillingPortalSessionInput[] = [];
+
+  async createCheckoutSession(input: CreateCheckoutSessionInput): Promise<CreateCheckoutSessionResult> {
+    this.checkoutCalls.push(input);
+    return input.stripeCustomerId
+      ? { ...this.nextCheckoutSession, stripeCustomerId: input.stripeCustomerId }
+      : this.nextCheckoutSession;
+  }
+
+  async createBillingPortalSession(
+    input: CreateBillingPortalSessionInput,
+  ): Promise<CreateBillingPortalSessionResult> {
+    this.portalCalls.push(input);
+    return { portalUrl: "https://billing.stripe.com/fake" };
+  }
+
+  parseWebhookEvent(): SubscriptionWebhookEvent {
+    throw new Error("Not used in tests — construct events directly.");
   }
 }
