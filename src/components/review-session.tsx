@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { History, PartyPopper, Speech, X } from "lucide-react";
+import { ArrowLeft, History, PartyPopper, Speech, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { reviewFlashcardAction } from "@/app/flashcards/actions";
 import { buildCardTypeLabels } from "@/lib/card-type-labels";
@@ -40,6 +40,7 @@ export interface ReviewQueueItem {
 
 export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; streak: number }) {
   const t = useTranslations("review");
+  const tCommon = useTranslations("common");
   const tCardType = useTranslations("cardType");
   const cardTypeLabels = buildCardTypeLabels(tCardType);
   const [queue] = useState(items);
@@ -91,7 +92,14 @@ export function ReviewSession({ items, streak }: { items: ReviewQueueItem[]; str
       reviewedCount * XP_PER_REVIEW + (reviewedCount > 0 ? XP_DAILY_REVIEWS_COMPLETED : 0);
 
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+      <div className="relative flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+        <Link
+          href="/dashboard"
+          className="absolute top-6 left-6 inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-ink"
+        >
+          <ArrowLeft className="size-4" />
+          {tCommon("backToHome")}
+        </Link>
         <span className="flex size-24 items-center justify-center rounded-full bg-acc-soft">
           <PartyPopper className="size-10 text-acc-strong" />
         </span>
