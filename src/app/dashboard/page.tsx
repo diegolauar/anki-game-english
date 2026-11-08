@@ -1,12 +1,17 @@
 import Link from "next/link";
-import { ArrowRight, CircleCheck, Flame, Play, Star } from "lucide-react";
+import { ArrowRight, CircleCheck, CreditCard, Flame, Play, Star } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { getTypedLocale } from "@/i18n/get-locale";
 import { LanguageSelector } from "@/components/language-selector";
 import { TopicIcon } from "@/components/topic-icon";
+import { Banner } from "@/components/banner";
+import { SubmitButton } from "@/components/submit-button";
+import { manageBillingAction, startCheckoutAction } from "@/app/billing/actions";
 import { GetDashboard } from "@/application/use-cases/get-dashboard";
+import { hasActiveAccess } from "@/domain/value-objects/subscription-status";
 import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseAnalysisRepository } from "@/infrastructure/supabase/analysis-repository";
+import { SupabaseSubscriptionRepository } from "@/infrastructure/supabase/subscription-repository";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseConversationRepository } from "@/infrastructure/supabase/conversation-repository";
 import { SupabaseFindingRepository } from "@/infrastructure/supabase/finding-repository";
@@ -57,13 +62,21 @@ function formatDuration(t: Translator, startedAt: string, endedAt: string | null
   return t("minutesShort", { minutes });
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string }>;
+}) {
   const { supabase, user } = await requireUser();
+  const { checkout } = await searchParams;
   const [t, format, locale] = await Promise.all([
     getTranslations("dashboard"),
     getFormatter(),
     getTypedLocale(),
   ]);
+
+  const subscription = await new SupabaseSubscriptionRepository(supabase).getByUserId(user.id);
+  const isSubscribed = subscription ? hasActiveAccess(subscription.status) : false;
 
   const getDashboard = new GetDashboard(
     new SupabaseUserProfileRepository(supabase),
@@ -121,12 +134,48 @@ export default async function DashboardPage() {
             <Star className="size-3.5 fill-xp text-xp" />
             {format.number(totalXp)} XP
           </span>
+          {isSubscribed && (
+            <form action={manageBillingAction}>
+              <SubmitButton
+                pendingLabel=""
+                className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-surface text-muted-foreground hover:text-ink disabled:opacity-60"
+                title={t("billing.manageSubscription")}
+              >
+                <CreditCard className="size-4" />
+              </SubmitButton>
+            </form>
+          )}
           <LanguageSelector />
           <span className="flex size-10 items-center justify-center rounded-full bg-acc-soft text-sm font-bold text-acc-strong">
             {initial}
           </span>
         </div>
       </header>
+
+      {checkout === "success" && (
+        <Banner tone="success" className="mt-4">
+          {t("billing.checkoutSuccess")}
+        </Banner>
+      )}
+
+      {!isSubscribed && (
+        <section className="mt-5 flex flex-col items-start gap-3 rounded-card border border-line bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-display text-lg font-bold tracking-[-0.01em]">
+              {t("billing.subscribeHeading")}
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t("billing.subscribeDescription")}</p>
+          </div>
+          <form action={startCheckoutAction}>
+            <SubmitButton
+              pendingLabel={t("billing.subscribing")}
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-acc px-5 text-sm font-bold text-acc-ink disabled:opacity-60"
+            >
+              {t("billing.subscribeCta")}
+            </SubmitButton>
+          </form>
+        </section>
+      )}
 
       <section className="mt-7 grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))" }}>
         <div className="relative min-h-[260px] overflow-hidden rounded-card bg-acc p-8 text-acc-ink">
