@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
+  Check,
   Flame,
   Layers,
   MessagesSquare,
@@ -55,6 +56,9 @@ export default async function Home() {
             </a>
             <a href="#recursos" className="hover:text-ink">
               {t("nav.features")}
+            </a>
+            <a href="#preco" className="hover:text-ink">
+              {t("nav.pricing")}
             </a>
           </nav>
 
@@ -189,6 +193,40 @@ export default async function Home() {
         </div>
       </section>
 
+      <section id="preco" className="border-y border-line bg-surface2/60 py-16">
+        <div className="mx-auto max-w-[1120px] px-6 sm:px-10">
+          <h2 className="font-display text-[32px] font-bold tracking-[-0.02em]">
+            {t("pricing.heading")}
+          </h2>
+          <p className="mt-2 max-w-md text-muted-foreground">{t("pricing.description")}</p>
+
+          <div className="mt-8 flex max-w-sm flex-col gap-6 rounded-card border border-line bg-surface p-8">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display text-[44px] font-bold tracking-[-0.02em]">
+                {t("pricing.amount")}
+              </span>
+              <span className="text-muted-foreground">{t("pricing.period")}</span>
+            </div>
+
+            <ul className="flex flex-col gap-3">
+              {(t.raw("pricing.features") as string[]).map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5 text-sm">
+                  <Check className="mt-0.5 size-4 shrink-0 text-acc-strong" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href="/login"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-acc px-6 text-[15px] font-bold text-acc-ink"
+            >
+              {t("startNow")} <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-[1120px] px-6 pb-20 sm:px-10">
         <div className="relative overflow-hidden rounded-card bg-acc px-8 py-12 text-center text-acc-ink sm:px-14">
           <div
@@ -219,9 +257,17 @@ export default async function Home() {
             <span className="font-display font-bold text-ink">Fluency Mind</span>
           </div>
           <p>{t("footer.audioNotice")}</p>
-          <Link href="/login" className="font-semibold text-ink hover:underline">
-            {t("signIn")}
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/terms" className="font-semibold text-ink hover:underline">
+              {t("footer.termsLink")}
+            </Link>
+            <Link href="/privacy" className="font-semibold text-ink hover:underline">
+              {t("footer.privacyLink")}
+            </Link>
+            <Link href="/login" className="font-semibold text-ink hover:underline">
+              {t("signIn")}
+            </Link>
+          </div>
         </div>
       </footer>
     </main>
