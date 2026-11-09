@@ -23,13 +23,6 @@ export async function POST(request: Request) {
   }
 
   const serviceRoleClient = createSupabaseServiceRoleClient();
-  const isNewEvent = await new SupabaseStripeWebhookEventLog(serviceRoleClient).recordIfNew(
-    event.id,
-    event.type,
-  );
-  if (!isNewEvent) {
-    return NextResponse.json({ received: true });
-  }
 
   try {
     await new ApplySubscriptionWebhookEvent(new SupabaseSubscriptionWriter(serviceRoleClient)).execute(event);
@@ -37,6 +30,13 @@ export async function POST(request: Request) {
     logError("stripe_webhook_apply_failed", { eventId: event.id, eventType: event.type }, error);
     return NextResponse.json({ error: "Failed to apply event." }, { status: 500 });
   }
+
+  // Registrado só depois de aplicar com sucesso: se a primeira tentativa falhar,
+  // o evento não fica marcado como "visto" e o reenvio automático do Stripe
+  // ainda consegue reaplicá-lo. Reaplicar um evento já bem-sucedido é inofensivo
+  // (updateByStripeCustomerId sobrescreve com os mesmos dados do evento), e
+  // recordIfNew já trata a violação de unicidade sem lançar erro.
+  await new SupabaseStripeWebhookEventLog(serviceRoleClient).recordIfNew(event.id, event.type);
 
   return NextResponse.json({ received: true });
 }
