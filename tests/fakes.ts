@@ -266,7 +266,7 @@ export class FakeXpEventRepository implements XpEventRepository, XpEventWriter {
 }
 
 export class FakeDailyUsageRepository implements DailyUsageRepository {
-  usage: DailyUsage = { messageCount: 0, voiceMinutes: 0 };
+  usage: DailyUsage = { messageCount: 0, voiceMinutes: 0, conversationsFinished: 0 };
 
   async getTodayUsage(): Promise<DailyUsage> {
     return this.usage;

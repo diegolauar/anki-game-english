@@ -9,6 +9,7 @@ import { SendMessage, type SendMessageResult } from "@/application/use-cases/sen
 import { FinishConversation } from "@/application/use-cases/finish-conversation";
 import { AnalyzeConversation } from "@/application/use-cases/analyze-conversation";
 import { DIFFICULTIES } from "@/domain/value-objects/difficulty";
+import { MAX_ANALYSIS_RETRY_ATTEMPTS } from "@/domain/rules/analysis-retry-limit";
 import { logError } from "@/lib/logger";
 import { INPUT_MODES } from "@/domain/value-objects/input-mode";
 import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
@@ -167,6 +168,8 @@ export async function finishConversationAction(formData: FormData) {
     new SupabaseAnalysisWriter(serviceRoleClient),
     new SupabaseMessageRepository(supabase),
     new SupabaseXpEventWriter(serviceRoleClient),
+    new SupabaseDailyUsageRepository(supabase),
+    new SupabaseUserProfileRepository(supabase),
   );
   const { analysisId } = await finishConversation.execute({
     conversationId: parsed.conversationId,
@@ -209,6 +212,10 @@ export async function retryAnalysisAction(formData: FormData) {
     analysis.conversationId,
   );
   if (!conversation || conversation.userId !== user.id) throw new Error("Not authorized.");
+
+  if (analysis.attempts >= MAX_ANALYSIS_RETRY_ATTEMPTS) {
+    throw new Error("Too many analysis attempts for this conversation.");
+  }
 
   const serviceRoleClient = createSupabaseServiceRoleClient();
   after(async () => {

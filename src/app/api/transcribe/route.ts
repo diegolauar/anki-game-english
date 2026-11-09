@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { hasActiveAccess } from "@/domain/value-objects/subscription-status";
+import { getDailyVoiceMinutesLimit } from "@/domain/rules/daily-limits";
 import { OpenAiWhisperSpeechToText } from "@/infrastructure/stt/openai-whisper-speech-to-text";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { SupabaseDailyUsageRepository } from "@/infrastructure/supabase/daily-usage-repository";
 import { SupabaseSubscriptionRepository } from "@/infrastructure/supabase/subscription-repository";
+import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/user-profile-repository";
 import { logError } from "@/lib/logger";
 
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
@@ -19,6 +22,15 @@ export async function POST(request: Request) {
   const subscription = await new SupabaseSubscriptionRepository(supabase).getByUserId(user.id);
   if (!subscription || !hasActiveAccess(subscription.status)) {
     return NextResponse.json({ error: "Subscription required." }, { status: 403 });
+  }
+
+  const [profile, usage] = await Promise.all([
+    new SupabaseUserProfileRepository(supabase).getById(user.id),
+    new SupabaseDailyUsageRepository(supabase).getTodayUsage(user.id),
+  ]);
+  const voiceMinutesLimit = getDailyVoiceMinutesLimit(profile?.preferences ?? {});
+  if (usage.voiceMinutes >= voiceMinutesLimit) {
+    return NextResponse.json({ error: "Daily voice limit reached." }, { status: 429 });
   }
 
   const formData = await request.formData();

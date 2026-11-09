@@ -1,5 +1,6 @@
 export const DEFAULT_DAILY_MESSAGE_LIMIT = 50;
 export const DEFAULT_DAILY_VOICE_MINUTES_LIMIT = 15;
+export const DEFAULT_DAILY_ANALYSIS_LIMIT = 20;
 
 function readPositiveNumber(
   preferences: Record<string, unknown>,
@@ -20,4 +21,8 @@ export function getDailyVoiceMinutesLimit(preferences: Record<string, unknown>):
     "dailyVoiceMinutesLimit",
     DEFAULT_DAILY_VOICE_MINUTES_LIMIT,
   );
+}
+
+export function getDailyAnalysisLimit(preferences: Record<string, unknown>): number {
+  return readPositiveNumber(preferences, "dailyAnalysisLimit", DEFAULT_DAILY_ANALYSIS_LIMIT);
 }

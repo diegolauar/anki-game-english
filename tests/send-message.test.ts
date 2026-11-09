@@ -300,7 +300,7 @@ describe("SendMessage", () => {
   it("blocks a new message once the daily message limit is reached", async () => {
     const { useCase, conversationRepository, dailyUsageRepository } = buildUseCase();
     conversationRepository.seed(buildConversation());
-    dailyUsageRepository.usage = { messageCount: 50, voiceMinutes: 0 };
+    dailyUsageRepository.usage = { messageCount: 50, voiceMinutes: 0, conversationsFinished: 0 };
 
     await expect(
       useCase.execute({
@@ -324,7 +324,7 @@ describe("SendMessage", () => {
       inputMode: "text",
       clientMessageId: "client-1",
     });
-    dailyUsageRepository.usage = { messageCount: 50, voiceMinutes: 0 };
+    dailyUsageRepository.usage = { messageCount: 50, voiceMinutes: 0, conversationsFinished: 0 };
 
     const result = await useCase.execute({
       conversationId: "conversation-1",
@@ -340,7 +340,7 @@ describe("SendMessage", () => {
   it("blocks a new voice message once the daily voice minutes limit is reached", async () => {
     const { useCase, conversationRepository, dailyUsageRepository } = buildUseCase();
     conversationRepository.seed(buildConversation());
-    dailyUsageRepository.usage = { messageCount: 1, voiceMinutes: 15 };
+    dailyUsageRepository.usage = { messageCount: 1, voiceMinutes: 15, conversationsFinished: 0 };
 
     await expect(
       useCase.execute({
@@ -427,7 +427,7 @@ describe("SendMessage", () => {
       targetLevel: "beginner",
       preferences: { dailyMessageLimit: 2 },
     });
-    dailyUsageRepository.usage = { messageCount: 2, voiceMinutes: 0 };
+    dailyUsageRepository.usage = { messageCount: 2, voiceMinutes: 0, conversationsFinished: 0 };
 
     await expect(
       useCase.execute({

@@ -4,7 +4,9 @@ import type { Conversation } from "@/domain/entities/conversation";
 import {
   FakeAnalysisRepository,
   FakeConversationRepository,
+  FakeDailyUsageRepository,
   FakeMessageRepository,
+  FakeUserProfileRepository,
   FakeXpEventRepository,
 } from "./fakes";
 
@@ -27,13 +29,24 @@ function buildUseCase() {
   const analysisRepository = new FakeAnalysisRepository();
   const messageRepository = new FakeMessageRepository();
   const xpEventRepository = new FakeXpEventRepository();
+  const dailyUsageRepository = new FakeDailyUsageRepository();
+  const userProfileRepository = new FakeUserProfileRepository();
   const useCase = new FinishConversation(
     conversationRepository,
     analysisRepository,
     messageRepository,
     xpEventRepository,
+    dailyUsageRepository,
+    userProfileRepository,
   );
-  return { useCase, conversationRepository, analysisRepository, messageRepository, xpEventRepository };
+  return {
+    useCase,
+    conversationRepository,
+    analysisRepository,
+    messageRepository,
+    xpEventRepository,
+    dailyUsageRepository,
+  };
 }
 
 async function seedUserMessages(
@@ -123,5 +136,18 @@ describe("FinishConversation", () => {
     await useCase.execute({ conversationId: "conversation-1", userId: "user-1" });
 
     expect(xpEventRepository.events).toHaveLength(0);
+  });
+
+  it("throws when the user already reached the daily analysis limit", async () => {
+    const { useCase, conversationRepository, dailyUsageRepository } = buildUseCase();
+    conversationRepository.seed(buildConversation());
+    dailyUsageRepository.usage = { messageCount: 0, voiceMinutes: 0, conversationsFinished: 20 };
+
+    await expect(
+      useCase.execute({ conversationId: "conversation-1", userId: "user-1" }),
+    ).rejects.toThrow();
+
+    const conversation = await conversationRepository.findById("conversation-1");
+    expect(conversation?.status).toBe("active");
   });
 });
