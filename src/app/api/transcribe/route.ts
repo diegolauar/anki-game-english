@@ -10,6 +10,19 @@ import { logError } from "@/lib/logger";
 
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
 
+const ALLOWED_AUDIO_MIME_TYPES = new Set([
+  "audio/webm",
+  "audio/ogg",
+  "audio/wav",
+  "audio/mp4",
+  "audio/mpeg",
+]);
+
+function isAllowedAudioMimeType(mimeType: string): boolean {
+  const base = mimeType.split(";")[0].trim().toLowerCase();
+  return ALLOWED_AUDIO_MIME_TYPES.has(base);
+}
+
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
   const {
@@ -43,13 +56,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Audio file is too large." }, { status: 413 });
   }
 
+  const mimeType = audio.type || "audio/webm";
+  if (!isAllowedAudioMimeType(mimeType)) {
+    return NextResponse.json({ error: "Unsupported audio format." }, { status: 415 });
+  }
+
   const buffer = Buffer.from(await audio.arrayBuffer());
 
   try {
     const speechToText = new OpenAiWhisperSpeechToText();
     const result = await speechToText.transcribe({
       audio: buffer,
-      mimeType: audio.type || "audio/webm",
+      mimeType,
     });
 
     return NextResponse.json(result);
