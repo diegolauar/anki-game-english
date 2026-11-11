@@ -32,7 +32,7 @@ export function LanguageSelector() {
       disabled={isPending}
       onChange={handleChange}
       aria-label={t("language")}
-      className="h-12 rounded-full border border-line bg-transparent px-4 text-sm font-bold text-muted-foreground transition-colors hover:bg-surface2 disabled:opacity-60"
+      className="h-10 shrink-0 rounded-full border border-line bg-transparent px-3 text-xs font-bold text-muted-foreground transition-colors hover:bg-surface2 disabled:opacity-60 sm:h-12 sm:px-4 sm:text-sm"
     >
       {LOCALES.map((value) => (
         <option key={value} value={value}>

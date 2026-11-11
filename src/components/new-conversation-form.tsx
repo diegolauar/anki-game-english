@@ -82,8 +82,7 @@ export function NewConversationForm({
   return (
     <form
       action={startConversationAction}
-      className="mt-6 grid gap-7"
-      style={{ gridTemplateColumns: "minmax(0,1fr) minmax(260px,320px)" }}
+      className="mt-6 grid grid-cols-1 gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"
     >
       <input type="hidden" name="topicId" value={hasCustomTopic ? "" : (topicId ?? "")} />
       <input type="hidden" name="customTopic" value={hasCustomTopic ? customTopic.trim() : ""} />
@@ -171,7 +170,7 @@ export function NewConversationForm({
         </fieldset>
       </div>
 
-      <aside className="h-fit rounded-card border border-line bg-surface p-6" style={{ position: "sticky", top: "1.5rem" }}>
+      <aside className="h-fit rounded-card border border-line bg-surface p-6 lg:sticky lg:top-6">
         <p className="text-xs font-bold tracking-[.06em] text-muted-foreground uppercase">
           {t("summary")}
         </p>

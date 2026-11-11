@@ -125,12 +125,12 @@ export default async function DashboardPage({
             {t("greeting", { name: displayName })}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-2 text-sm font-bold">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-2 text-sm font-bold">
             <Flame className="size-3.5 fill-fire text-fire" />
             {t("streakDays", { count: streak })}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-2 text-sm font-bold">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-2 text-sm font-bold">
             <Star className="size-3.5 fill-xp text-xp" />
             {format.number(totalXp)} XP
           </span>
@@ -138,7 +138,7 @@ export default async function DashboardPage({
             <form action={manageBillingAction}>
               <SubmitButton
                 pendingLabel=""
-                className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-surface text-muted-foreground hover:text-ink disabled:opacity-60"
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted-foreground hover:text-ink disabled:opacity-60"
                 title={t("billing.manageSubscription")}
               >
                 <CreditCard className="size-4" />
@@ -146,7 +146,7 @@ export default async function DashboardPage({
             </form>
           )}
           <LanguageSelector />
-          <span className="flex size-10 items-center justify-center rounded-full bg-acc-soft text-sm font-bold text-acc-strong">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-acc-soft text-sm font-bold text-acc-strong">
             {initial}
           </span>
         </div>

@@ -47,7 +47,7 @@ export default async function Home() {
             <span className="flex size-9 items-center justify-center rounded-[11px] bg-acc text-acc-ink">
               <span className="font-display text-lg font-extrabold">F</span>
             </span>
-            <span className="font-display text-lg font-bold">Fluency Mind</span>
+            <span className="hidden font-display text-lg font-bold sm:inline">Fluency Mind</span>
           </div>
 
           <nav className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground sm:flex">
@@ -62,7 +62,7 @@ export default async function Home() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <LanguageSelector />
             <ThemeToggle />
             <Link
@@ -73,7 +73,7 @@ export default async function Home() {
             </Link>
             <Link
               href="/login"
-              className="inline-flex h-11 items-center gap-1.5 rounded-full bg-acc px-4 text-sm font-bold text-acc-ink sm:px-5"
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-acc px-3.5 text-sm font-bold text-acc-ink sm:h-11 sm:px-5"
             >
               {t("startNow")} <ArrowRight className="size-4" />
             </Link>

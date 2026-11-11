@@ -9,6 +9,7 @@ import {
   Mic,
   Send,
   Square,
+  X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { finishConversationAction, sendMessageAction } from "@/app/conversations/actions";
@@ -290,14 +291,14 @@ export function ChatView({
 
           <form onSubmit={handleSubmit}>
             {voice.state === "recording" ? (
-              <div className="flex h-[60px] items-center gap-3 rounded-full border border-err bg-err-soft px-3">
+              <div className="flex h-[60px] items-center gap-2 rounded-full border border-err bg-err-soft px-3 sm:gap-3">
                 <span className="size-3 shrink-0 animate-pulse rounded-full bg-err" />
-                <span className="text-sm font-semibold text-err">{t("recording")}</span>
-                <div className="flex flex-1 items-center justify-center gap-0.5">
-                  {Array.from({ length: 24 }).map((_, index) => (
+                <span className="hidden text-sm font-semibold text-err sm:inline">{t("recording")}</span>
+                <div className="flex min-w-0 flex-1 items-center justify-center gap-0.5 overflow-hidden">
+                  {Array.from({ length: 16 }).map((_, index) => (
                     <span
                       key={index}
-                      className="w-[3px] rounded-full bg-err/75"
+                      className="w-[3px] shrink-0 rounded-full bg-err/75"
                       style={{
                         height: `${8 + ((index * 37) % 16)}px`,
                         animation: "pulse 1s ease-in-out infinite",
@@ -306,15 +307,17 @@ export function ChatView({
                     />
                   ))}
                 </div>
-                <span className="font-mono text-xs text-err">
+                <span className="shrink-0 font-mono text-xs text-err">
                   0:{String(voice.elapsedSeconds).padStart(2, "0")} / 1:00
                 </span>
                 <button
                   type="button"
                   onClick={voice.cancel}
-                  className="shrink-0 text-xs font-semibold text-err/80 hover:text-err"
+                  aria-label={t("cancel")}
+                  className="flex shrink-0 items-center text-xs font-semibold text-err/80 hover:text-err"
                 >
-                  {t("cancel")}
+                  <X className="size-4 sm:hidden" />
+                  <span className="hidden sm:inline">{t("cancel")}</span>
                 </button>
                 <button
                   type="button"
@@ -344,7 +347,7 @@ export function ChatView({
                   placeholder={t("composerPlaceholder")}
                   disabled={isSending}
                   rows={1}
-                  className="max-h-40 flex-1 resize-none self-center overflow-y-auto bg-transparent py-1.5 text-[16px] leading-6 outline-none placeholder:text-muted-foreground"
+                  className="min-w-0 max-h-40 flex-1 resize-none self-center overflow-y-auto bg-transparent py-1.5 text-[16px] leading-6 outline-none placeholder:text-muted-foreground"
                 />
                 <button
                   type="button"
