@@ -51,6 +51,26 @@ describe("analysisResponseSchema + toAnalysisAgentResult", () => {
     });
   });
 
+  it("normalizes a rule_key the LLM returned outside strict snake_case instead of rejecting the whole finding", () => {
+    const raw = {
+      summary: { main_points: [], recommended_expressions: [] },
+      findings: [buildFinding({ rule_key: "Node.js Experience!" })],
+    };
+
+    const parsed = analysisResponseSchema.parse(raw);
+
+    expect(parsed.findings[0]?.rule_key).toBe("node_js_experience");
+  });
+
+  it("rejects a rule_key that normalizes to an empty string", () => {
+    const raw = {
+      summary: { main_points: [], recommended_expressions: [] },
+      findings: [buildFinding({ rule_key: "!!!" })],
+    };
+
+    expect(() => analysisResponseSchema.parse(raw)).toThrow();
+  });
+
   it("rejects a category outside the fixed list", () => {
     const raw = {
       summary: { main_points: [], recommended_expressions: [] },

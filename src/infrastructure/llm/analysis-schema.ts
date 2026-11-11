@@ -5,6 +5,16 @@ import { SEVERITIES } from "@/domain/value-objects/severity";
 
 const RULE_KEY_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*$/;
 
+/** O LLM às vezes devolve rule_key fora do snake_case estrito (maiúsculas, pontuação); normaliza em vez de descartar o finding inteiro. */
+function normalizeRuleKey(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 const flashcardSuggestionSchema = z.object({
   card_type: z.enum(["production", "cloze"]),
   front: z.string().min(1).max(500),
@@ -19,7 +29,7 @@ const findingSchema = z.object({
   kind: z.enum(FINDING_KINDS),
   severity: z.enum(SEVERITIES),
   category: z.enum(FINDING_CATEGORIES),
-  rule_key: z.string().min(1).max(100).regex(RULE_KEY_PATTERN),
+  rule_key: z.preprocess(normalizeRuleKey, z.string().min(1).max(100).regex(RULE_KEY_PATTERN)),
   correction: z.string().max(500).nullable().optional(),
   explanation: z.string().max(1000).nullable().optional(),
   example: z.string().max(500).nullable().optional(),

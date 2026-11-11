@@ -31,7 +31,7 @@ Rules:
 - Write every explanation in ${EXPLANATION_LANGUAGE_NAMES[explanationLanguage]}, 1 to 3 sentences, without stating absolute rules when the structure is valid in another context.
 - Return at most 8 findings total, and mark at most 5 of them with a flashcard_suggestion.
 - category must be exactly one of: ${FINDING_CATEGORIES.join(", ")}.
-- rule_key is a snake_case slug identifying the underlying problem, not the sentence. Reuse one of this learner's existing rule_keys whenever it applies, instead of creating a near-duplicate: ${
+- rule_key is a snake_case slug identifying the underlying problem, not the sentence: lowercase ASCII letters, digits and single underscores only, e.g. "simple_past_with_finished_time". Reuse one of this learner's existing rule_keys whenever it applies, instead of creating a near-duplicate: ${
     existingRuleKeys.length > 0 ? existingRuleKeys.join(", ") : "(none yet)"
   }.
 - start_offset/end_offset are UTF-16 string indices into the exact message content (end exclusive). original_text must equal message.slice(start_offset, end_offset) exactly.
