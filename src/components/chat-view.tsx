@@ -206,7 +206,7 @@ export function ChatView({
           <input type="hidden" name="conversationId" value={conversationId} />
           <button
             type="submit"
-            className="flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold transition-colors hover:border-acc hover:text-acc-strong"
+            className="flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold transition-all hover:border-acc hover:text-acc-strong active:scale-95"
           >
             <Flag className="size-4" />
             <span className="hidden sm:inline">{t("finishConversation")}</span>
@@ -319,7 +319,7 @@ export function ChatView({
                 <button
                   type="button"
                   onClick={voice.stopRecording}
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-err text-white"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-err text-white transition-all hover:bg-err/90 active:scale-90"
                   aria-label={t("stopRecording")}
                 >
                   <Square className="size-4 fill-current" />
@@ -351,7 +351,7 @@ export function ChatView({
                   disabled={isSending || voice.state === "denied"}
                   onClick={voice.start}
                   aria-label={t("recordAudio")}
-                  className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-surface2 text-ink transition-colors hover:bg-acc-soft hover:text-acc-strong disabled:opacity-40"
+                  className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-surface2 text-ink transition-all hover:bg-acc-soft hover:text-acc-strong active:scale-90 disabled:opacity-40 disabled:active:scale-100"
                 >
                   <Mic className="size-[18px]" />
                 </button>
@@ -362,7 +362,7 @@ export function ChatView({
                     (voice.state === "review" ? voice.transcript.trim().length === 0 : input.trim().length === 0)
                   }
                   aria-label={t("send")}
-                  className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-acc text-acc-ink disabled:opacity-40"
+                  className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-acc text-acc-ink transition-all hover:bg-acc/90 active:scale-90 disabled:opacity-40 disabled:active:scale-100"
                 >
                   <Send className="size-[18px]" />
                 </button>

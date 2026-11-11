@@ -199,7 +199,7 @@ export function NewConversationForm({
         <button
           type="submit"
           disabled={!canSubmit}
-          className="mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-acc text-sm font-bold text-acc-ink disabled:opacity-50"
+          className="mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-acc text-sm font-bold text-acc-ink transition-all hover:bg-acc/90 active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100"
         >
           {t("startButton")} <ArrowRight className="size-4" />
         </button>
