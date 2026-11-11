@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { editFlashcardAction } from "@/app/flashcards/actions";
 import { FlashcardForm } from "@/components/flashcard-form";
-import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseFlashcardRepository } from "@/infrastructure/supabase/flashcard-repository";
 
 export default async function EditFlashcardPage({
@@ -18,7 +18,7 @@ export default async function EditFlashcardPage({
     getTranslations("flashcards"),
   ]);
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
 
   const flashcard = await new SupabaseFlashcardRepository(supabase).findById(id);
   if (!flashcard || flashcard.userId !== user.id || flashcard.status === "discarded") {

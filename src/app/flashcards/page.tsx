@@ -6,7 +6,7 @@ import { FlashcardsSearchInput } from "@/components/flashcards-search-input";
 import type { CardSchedule } from "@/domain/entities/card-schedule";
 import type { Flashcard } from "@/domain/entities/flashcard";
 import { FLASHCARD_LIST_FILTERS, type FlashcardListFilter } from "@/domain/ports/card-schedule-repository";
-import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
 import { SupabaseLearningPointRepository } from "@/infrastructure/supabase/learning-point-repository";
 
@@ -48,7 +48,7 @@ export default async function FlashcardsPage({
   const page = Math.max(1, Number.parseInt(rawPage ?? "1", 10) || 1);
   const t = await getTranslations("flashcards");
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
 
   const cardScheduleRepository = new SupabaseCardScheduleRepository(supabase);
   const now = new Date();

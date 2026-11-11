@@ -14,6 +14,7 @@ import { EditFlashcard } from "@/application/use-cases/edit-flashcard";
 import { ToggleFlashcardSuspension } from "@/application/use-cases/toggle-flashcard-suspension";
 import { parseFlashcardCsv } from "@/domain/rules/parse-flashcard-csv";
 import { RATINGS } from "@/domain/value-objects/rating";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
 import { createSupabaseServiceRoleClient } from "@/infrastructure/supabase/service-role-client";
 import { SupabaseCardScheduleRepository } from "@/infrastructure/supabase/card-schedule-repository";
@@ -40,7 +41,7 @@ export async function saveFlashcardSuggestionAction(formData: FormData) {
     resultsPath: formData.get("resultsPath"),
   });
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const useCase = new SaveFlashcardSuggestion(
     flashcardRepository,
@@ -72,7 +73,7 @@ export async function saveAllFlashcardSuggestionsAction(formData: FormData) {
     resultsPath: formData.get("resultsPath"),
   });
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const saveOne = new SaveFlashcardSuggestion(
     flashcardRepository,
@@ -99,7 +100,7 @@ export async function discardFlashcardSuggestionAction(formData: FormData) {
     resultsPath: formData.get("resultsPath"),
   });
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const useCase = new DiscardFlashcardSuggestion(flashcardRepository, flashcardRepository);
 
@@ -125,7 +126,7 @@ export async function createManualFlashcardAction(formData: FormData) {
         : null,
   });
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const useCase = new CreateManualFlashcard(
     new SupabaseFlashcardRepository(supabase),
     new SupabaseCardScheduleRepository(supabase),
@@ -141,7 +142,7 @@ export async function createManualFlashcardAction(formData: FormData) {
 const MAX_FLASHCARD_IMPORT_FILE_SIZE_BYTES = 256 * 1024;
 
 export async function importFlashcardsAction(formData: FormData) {
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const t = await getTranslations("flashcards.import.errors");
 
   const file = formData.get("file");
@@ -194,7 +195,7 @@ export async function editFlashcardAction(formData: FormData) {
         : null,
   });
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const useCase = new EditFlashcard(flashcardRepository, flashcardRepository);
 
@@ -208,7 +209,7 @@ const toggleSuspensionSchema = z.object({ flashcardId: z.string().uuid() });
 export async function toggleFlashcardSuspensionAction(formData: FormData) {
   const parsed = toggleSuspensionSchema.parse({ flashcardId: formData.get("flashcardId") });
 
-  const { supabase, user } = await requireActiveSubscription();
+  const { supabase, user } = await requireUser();
   const flashcardRepository = new SupabaseFlashcardRepository(supabase);
   const useCase = new ToggleFlashcardSuspension(flashcardRepository, flashcardRepository);
 

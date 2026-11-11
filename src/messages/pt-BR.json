@@ -327,7 +327,8 @@
       "subscribeCta": "Assinar agora",
       "subscribing": "Abrindo checkout…",
       "checkoutSuccess": "Pagamento confirmado! Pode levar alguns segundos para refletir aqui.",
-      "manageSubscription": "Gerenciar assinatura"
+      "manageSubscription": "Gerenciar assinatura",
+      "subscriptionRequiredNotice": "Esse recurso exige uma assinatura ativa. Assine abaixo para continuar."
     }
   },
   "conversation": {

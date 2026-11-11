@@ -3,14 +3,14 @@ import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { createManualFlashcardAction } from "@/app/flashcards/actions";
 import { FlashcardForm } from "@/components/flashcard-form";
-import { requireActiveSubscription } from "@/infrastructure/supabase/require-active-subscription";
+import { requireUser } from "@/infrastructure/supabase/require-user";
 
 export default async function NewFlashcardPage({
   searchParams,
 }: {
   searchParams: Promise<{ front?: string; back?: string }>;
 }) {
-  await requireActiveSubscription();
+  await requireUser();
   const { front, back } = await searchParams;
   const [t, tFlashcards] = await Promise.all([
     getTranslations("flashcards.new"),

@@ -327,7 +327,8 @@
       "subscribeCta": "Suscribirme ahora",
       "subscribing": "Abriendo el checkout…",
       "checkoutSuccess": "¡Pago confirmado! Puede tardar unos segundos en reflejarse aquí.",
-      "manageSubscription": "Gestionar suscripción"
+      "manageSubscription": "Gestionar suscripción",
+      "subscriptionRequiredNotice": "Esta función requiere una suscripción activa. Suscríbete abajo para continuar."
     }
   },
   "conversation": {

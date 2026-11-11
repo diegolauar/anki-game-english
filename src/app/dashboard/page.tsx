@@ -65,10 +65,10 @@ function formatDuration(t: Translator, startedAt: string, endedAt: string | null
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; subscribe?: string }>;
 }) {
   const { supabase, user } = await requireUser();
-  const { checkout } = await searchParams;
+  const { checkout, subscribe } = await searchParams;
   const [t, format, locale] = await Promise.all([
     getTranslations("dashboard"),
     getFormatter(),
@@ -155,6 +155,12 @@ export default async function DashboardPage({
       {checkout === "success" && (
         <Banner tone="success" className="mt-4">
           {t("billing.checkoutSuccess")}
+        </Banner>
+      )}
+
+      {subscribe === "required" && !isSubscribed && (
+        <Banner tone="error" className="mt-4">
+          {t("billing.subscriptionRequiredNotice")}
         </Banner>
       )}
 

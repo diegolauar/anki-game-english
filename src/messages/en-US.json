@@ -327,7 +327,8 @@
       "subscribeCta": "Subscribe now",
       "subscribing": "Opening checkout…",
       "checkoutSuccess": "Payment confirmed! It may take a few seconds to show up here.",
-      "manageSubscription": "Manage subscription"
+      "manageSubscription": "Manage subscription",
+      "subscriptionRequiredNotice": "This feature requires an active subscription. Subscribe below to continue."
     }
   },
   "conversation": {

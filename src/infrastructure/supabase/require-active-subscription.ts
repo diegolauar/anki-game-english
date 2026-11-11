@@ -13,7 +13,7 @@ export async function requireActiveSubscription(): Promise<{
   const { supabase, user } = await requireUser();
 
   const subscription = await new SupabaseSubscriptionRepository(supabase).getByUserId(user.id);
-  if (!subscription || !hasActiveAccess(subscription.status)) redirect("/dashboard");
+  if (!subscription || !hasActiveAccess(subscription.status)) redirect("/dashboard?subscribe=required");
 
   return { supabase, user };
 }
